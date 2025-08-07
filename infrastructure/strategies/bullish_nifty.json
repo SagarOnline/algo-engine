@@ -4,48 +4,58 @@
   "exchange": "NSE",
   "timeframe": "5m",
   "capital": 100000,
-  "entry": {
+  "entry_rules": {
+    "logic": "AND",
     "conditions": [
       {
-        "indicator": "rsi",
-        "params": { "period": 14 },
-        "operator": "<",
-        "value": 30
+        "operator": ">",
+        "left": {
+          "type": "ema",
+          "params": { "period": 20, "price": "close" }
+        },
+        "right": {
+          "type": "ema",
+          "params": { "period": 50, "price": "close" }
+        }
       },
       {
-        "indicator": "sma_crossover",
-        "params": { "fast": 10, "slow": 20 },
-        "operator": "crosses_above",
-        "value": null
+        "operator": ">",
+        "left": {
+          "type": "price",
+          "params": { "price": "close" }
+        },
+        "right": {
+          "type": "ema",
+          "params": { "period": 20, "price": "close" }
+        }
       }
-    ],
-    "time_window": {
-      "start": "09:30",
-      "end": "13:30"
-    },
-    "all_conditions_required": true
+    ]
   },
-  "exit": {
+  "exit_rules": {
+    "logic": "OR",
     "conditions": [
       {
-        "indicator": "rsi",
-        "params": { "period": 14 },
-        "operator": ">",
-        "value": 60
+        "operator": "<",
+        "left": {
+          "type": "ema",
+          "params": { "period": 20, "price": "close" }
+        },
+        "right": {
+          "type": "ema",
+          "params": { "period": 50, "price": "close" }
+        }
+      },
+      {
+        "operator": "<",
+        "left": {
+          "type": "price",
+          "params": { "price": "close" }
+        },
+        "right": {
+          "type": "ema",
+          "params": { "period": 20, "price": "close" }
+        }
       }
-    ],
-    "time_window": {
-      "start": "09:30",
-      "end": "15:00"
-    },
-    "all_conditions_required": false
-  },
-  "position": {
-    "type": "long",
-    "quantity": 25
-  },
-  "risk_management": {
-    "stop_loss_percent": 1.5,
-    "take_profit_percent": 2.0
+    ]
   }
 }

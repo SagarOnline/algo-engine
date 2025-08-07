@@ -1,5 +1,5 @@
 import pytest
-from strategy.json_strategy import JsonStrategy
+from infrastructure.jsonstrategy import JsonStrategy
 from domain.strategy import RuleSet,Condition,Expression
 
 
