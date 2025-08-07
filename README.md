@@ -22,7 +22,7 @@ git clone git@github.com:SagarOnline/algo-engine.git
 cd algo-engine
 ```
 
-### 2. Clone the Repository
+### 2. Create Vitual Environment
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
