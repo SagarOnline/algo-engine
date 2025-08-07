@@ -1,71 +1,67 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union,Literal
 from dataclasses import dataclass
+from domain.market import Candle
+from typing import List,Dict
 
-@dataclass
-class Indicator:
-    name: str
-    type: str
-    params: dict
+class Expression:
+    def __init__(self, expr_type: str, params: Dict):
+        self.type = expr_type  # e.g., "ema", "price"
+        self.params = params   # e.g., {"period": 20, "price": "close"}
 
-@dataclass
+    def __repr__(self):
+        return f"Expression(type={self.type}, params={self.params})"
+
 class Condition:
-    condition: str
-    left: Union[str, float]
-    right: Union[str, float]
+    def __init__(self, operator: str, left: Expression, right: Expression):
+        self.operator = operator  # e.g., ">", "<", "=="
+        self.left = left
+        self.right = right
 
-@dataclass
-class RuleGroup:
-    logic: Literal["AND", "OR"]
-    conditions: List[Union['Condition', 'RuleGroup']]
+    def __repr__(self):
+        return (
+            f"Condition(operator={self.operator}, "
+            f"left={self.left}, right={self.right})"
+        )
+    
+class RuleSet:
+    def __init__(self, logic: str, conditions: List[Condition]):
+        self.logic = logic  # "AND" or "OR"
+        self.conditions = conditions
 
-@dataclass
-class PositionSize:
-    type: Literal["fixed", "percent"]
-    value: float
+    def __repr__(self):
+        return f"RuleSet(logic={self.logic}, conditions={self.conditions})"
+    
 
-@dataclass
-class RiskManagement:
-    capital: float
-    order_type: str
-    position_size: PositionSize
-    stop_loss_percent: float
-    take_profit_percent: float
-    trailing_stop_loss_percent: Optional[float] = None
-
-@dataclass
-class ActiveTimeWindow:
-    days: List[str]
-    start_time: str
-    end_time: str
-
-@dataclass
-class Metadata:
-    created_by: str
-    created_at: str
 
 class Strategy(ABC):
 
     @abstractmethod
-    def get_indicators(self) -> List[Indicator]:
+    def get_name(self) -> str:
         pass
 
     @abstractmethod
-    def get_entry_rules(self) -> RuleGroup:
+    def get_symbol(self) -> str:
         pass
 
     @abstractmethod
-    def get_exit_rules(self) -> RuleGroup:
+    def get_exchange(self) -> str:
         pass
 
     @abstractmethod
-    def get_risk_management(self) -> RiskManagement:
+    def get_timeframe(self) -> str:
         pass
 
     @abstractmethod
-    def get_active_time_window(self) -> Optional[ActiveTimeWindow]:
+    def get_capital(self) -> int:
         pass
 
     @abstractmethod
-    def get_metadata(self) -> Metadata:
+    def get_entry_rules(self) -> RuleSet:
         pass
+
+    @abstractmethod
+    def get_exit_rules(self) -> RuleSet:
+        pass
+
+    
