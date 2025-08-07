@@ -1,0 +1,51 @@
+{
+  "strategy_name": "bullish_nifty",
+  "symbol": "NIFTY",
+  "exchange": "NSE",
+  "timeframe": "5m",
+  "capital": 100000,
+  "entry": {
+    "conditions": [
+      {
+        "indicator": "rsi",
+        "params": { "period": 14 },
+        "operator": "<",
+        "value": 30
+      },
+      {
+        "indicator": "sma_crossover",
+        "params": { "fast": 10, "slow": 20 },
+        "operator": "crosses_above",
+        "value": null
+      }
+    ],
+    "time_window": {
+      "start": "09:30",
+      "end": "13:30"
+    },
+    "all_conditions_required": true
+  },
+  "exit": {
+    "conditions": [
+      {
+        "indicator": "rsi",
+        "params": { "period": 14 },
+        "operator": ">",
+        "value": 60
+      }
+    ],
+    "time_window": {
+      "start": "09:30",
+      "end": "15:00"
+    },
+    "all_conditions_required": false
+  },
+  "position": {
+    "type": "long",
+    "quantity": 25
+  },
+  "risk_management": {
+    "stop_loss_percent": 1.5,
+    "take_profit_percent": 2.0
+  }
+}
