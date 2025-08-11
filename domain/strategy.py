@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union,Literal
-from dataclasses import dataclass
+from domain.indicators.registry import IndicatorRegistry
 from domain.market import Candle
-from typing import List,Dict
+from typing import List,Dict,Any
 
 class Expression:
     def __init__(self, expr_type: str, params: Dict):
@@ -64,4 +64,29 @@ class Strategy(ABC):
     def get_exit_rules(self) -> RuleSet:
         pass
 
+    def should_enter_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
+        entry_rules = self.get_entry_rules()
+        logic = entry_rules.logic.upper()
+        results = [
+            self._evaluate_condition(cond, candle, historical_data)
+            for cond in entry_rules.conditions
+        ]
+        return all(results) if logic == "AND" else any(results)
+
+    def _evaluate_condition(self, condition:Condition, candle, historical_data:List[Dict[str, Any]]) -> bool:
+        left_value = self._evaluate_expression(condition.left, candle, historical_data)
+        right_value = self._evaluate_expression(condition.right, candle, historical_data)
+
+        if condition.operator == ">":
+            return left_value > right_value
+        elif condition.operator == "<":
+            return left_value < right_value
+        elif condition.operator == "==":
+            return left_value == right_value
+        else:
+            raise ValueError(f"Unsupported operator: {condition.operator}")
+
+    def _evaluate_expression(self, expression:Expression, candle, historical_data:List[Dict[str, Any]]) -> float:
+        handler = IndicatorRegistry.get(expression.type.lower())
+        return handler(candle, historical_data, expression.params)
     
