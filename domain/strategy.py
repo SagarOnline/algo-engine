@@ -72,6 +72,15 @@ class Strategy(ABC):
             for cond in entry_rules.conditions
         ]
         return all(results) if logic == "AND" else any(results)
+    
+    def should_exit_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
+        exit_rules = self.get_exit_rules()
+        logic = exit_rules.logic.upper()
+        results = [
+            self._evaluate_condition(cond, candle, historical_data)
+            for cond in exit_rules.conditions
+        ]
+        return all(results) if logic == "AND" else any(results)
 
     def _evaluate_condition(self, condition:Condition, candle, historical_data:List[Dict[str, Any]]) -> bool:
         left_value = self._evaluate_expression(condition.left, candle, historical_data)
