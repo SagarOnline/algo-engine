@@ -1,19 +1,38 @@
 import json
 from typing import Dict, Any
-from domain.strategy import Strategy
+from domain.strategy import Instrument, Position, Strategy
 from domain.strategy import RuleSet,Condition,Expression
 
 
 class JsonStrategy(Strategy):
     def __init__(self, json_data: Dict[str, Any]):
         self.strategy_name = json_data.get("strategy_name")
-        self.symbol = json_data.get("symbol")
-        self.exchange = json_data.get("exchange")
+        self._parse_underlying(json_data)
         self.timeframe = json_data.get("timeframe")
         self.capital = json_data.get("capital")
 
+        # Parse Position
+        position_data = json_data.get("position", {})
+        instrument_data = position_data.get("instrument", {})
+        instrument = Instrument(
+            type=instrument_data.get("type"),
+            exchange=instrument_data.get("exchange"),
+            expiry=instrument_data.get("expiry"),
+            expiring=instrument_data.get("expiring"),
+            atm=instrument_data.get("atm"),
+            symbol=instrument_data.get("symbol"),
+        )
+        self.position = Position(
+            action=position_data.get("action"),
+            instrument=instrument
+        )
+
         self.entry_rules = self._parse_rules(json_data.get("entry_rules", {}))
         self.exit_rules = self._parse_rules(json_data.get("exit_rules", {}))
+
+    def _parse_underlying(self, json_data):
+        self.symbol = json_data.get("symbol")
+        self.exchange = json_data.get("exchange")
 
     def _parse_expression(self, expr_data: Dict[str, Any]) -> Expression:
         expr_type = expr_data.get("type")
@@ -52,3 +71,6 @@ class JsonStrategy(Strategy):
 
     def get_exit_rules(self) -> RuleSet:
         return self.exit_rules
+    
+    def get_position(self) -> Position:
+        return self.position

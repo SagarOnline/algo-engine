@@ -4,6 +4,18 @@
   "exchange": "NSE",
   "timeframe": "5m",
   "capital": 100000,
+  "position": {
+    "action": "BUY",
+    "instrument":
+      {
+        "type": "FUTURE",
+        "expiry" : "MONTHLY",
+        "expiring":"NEXT",
+        "atm": -50,
+        "symbol":"NIFTY",
+        "exchange":"NSE"
+      }
+  },
   "entry_rules": {
     "logic": "AND",
     "conditions": [

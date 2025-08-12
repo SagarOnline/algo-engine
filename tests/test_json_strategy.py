@@ -11,6 +11,18 @@ def sample_json():
         "exchange": "NSE",
         "timeframe": "5m",
         "capital": 100000,
+        "position": {
+            "action": "BUY",
+            "instrument":
+            {
+                "type": "PE",
+                "expiry" : "MONTHLY",
+                "expiring":"NEXT",
+                "atm": -50,
+                "symbol":"NIFTY",
+                "exchange":"NSE"
+            }
+        },
         "entry_rules": {
             "logic": "AND",
             "conditions": [
@@ -77,6 +89,15 @@ def test_metadata(strategy):
     assert strategy.get_exchange() == "NSE"
     assert strategy.get_timeframe() == "5m"
     assert strategy.get_capital() == 100000
+
+def test_position(strategy):
+    assert strategy.get_position().action == "BUY"
+    assert strategy.get_position().instrument.type == "PE"
+    assert strategy.get_position().instrument.atm == -50
+    assert strategy.get_position().instrument.exchange == "NSE"
+    assert strategy.get_position().instrument.expiry == "MONTHLY"
+    assert strategy.get_position().instrument.expiring == "NEXT"
+    assert strategy.get_position().instrument.symbol == "NIFTY"
 
 def test_entry_rules(strategy):
     ruleset = strategy.get_entry_rules()

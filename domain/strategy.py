@@ -4,6 +4,28 @@ from domain.indicators.registry import IndicatorRegistry
 from domain.market import Candle
 from typing import List,Dict,Any
 
+class Instrument:
+    def __init__(self, 
+        type: Literal["FUTURE", "PE", "CE", "STOCK"],
+        exchange: Literal["NSE", "BSE"],
+        expiry: Literal["MONTHLY", "WEEKLY"],
+        expiring: Literal["CURRENT", "NEXT"], 
+        atm: Optional[int], 
+        symbol: str
+    ):
+        self.type = type
+        self.exchange = exchange
+        self.expiry = expiry
+        self.expiring = expiring
+        self.atm = atm
+        self.symbol = symbol
+
+
+class Position:
+    def __init__(self, action: Literal["BUY", "SELL"], instrument: Instrument):
+        self.action = action
+        self.instrument = instrument
+
 class Expression:
     def __init__(self, expr_type: str, params: Dict):
         self.type = expr_type  # e.g., "ema", "price"
@@ -62,6 +84,10 @@ class Strategy(ABC):
 
     @abstractmethod
     def get_exit_rules(self) -> RuleSet:
+        pass
+
+    @abstractmethod
+    def get_position(self) -> Position:
         pass
 
     def should_enter_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
