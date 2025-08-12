@@ -16,8 +16,14 @@ from domain.strategy import (
 def sample_json():
     return {
         "strategy_name": "bullish_nifty",
-        "symbol": "NIFTY",
-        "exchange": "NSE",
+        "instrument": {
+            "type": "PE",
+            "expiry": "MONTHLY",
+            "expiring": "NEXT",
+            "atm": -50,
+            "symbol": "NIFTY",
+            "exchange": "NSE"
+        },
         "timeframe": "5m",
         "capital": 100000,
         "position": {
@@ -71,11 +77,16 @@ def strategy(sample_json):
 
 def test_metadata(strategy):
     assert strategy.get_name() == "bullish_nifty"
-    assert strategy.get_symbol() == "NIFTY"
-    assert strategy.get_exchange() == "NSE"
     assert strategy.get_timeframe() == "5m"
     assert strategy.get_capital() == 100000
 
+def test_instrument(strategy):
+    assert strategy.get_instrument().type == InstrumentType.PE
+    assert strategy.get_instrument().exchange == Exchange.NSE
+    assert strategy.get_instrument().expiry == Expiry.MONTHLY
+    assert strategy.get_instrument().expiring == Expiring.NEXT
+    assert strategy.get_instrument().atm == -50
+    assert strategy.get_instrument().symbol == "NIFTY"
 
 def test_position(strategy):
     assert strategy.get_position().action == PositionAction.BUY

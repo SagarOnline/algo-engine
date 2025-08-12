@@ -87,11 +87,7 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def get_symbol(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_exchange(self) -> str:
+    def get_instrument(self) -> Instrument:
         pass
 
     @abstractmethod

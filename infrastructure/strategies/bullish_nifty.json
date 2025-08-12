@@ -1,20 +1,27 @@
 {
   "strategy_name": "bullish_nifty",
+  "instrument": {
+    "type": "FUTURE",
+    "expiry": "MONTHLY",
+    "expiring": "NEXT",
+    "atm": -50,
+    "symbol": "NIFTY",
+    "exchange": "NSE"
+  },
   "symbol": "NIFTY",
   "exchange": "NSE",
   "timeframe": "5m",
   "capital": 100000,
   "position": {
     "action": "BUY",
-    "instrument":
-      {
-        "type": "FUTURE",
-        "expiry" : "MONTHLY",
-        "expiring":"NEXT",
-        "atm": -50,
-        "symbol":"NIFTY",
-        "exchange":"NSE"
-      }
+    "instrument": {
+      "type": "FUTURE",
+      "expiry": "MONTHLY",
+      "expiring": "NEXT",
+      "atm": -50,
+      "symbol": "NIFTY",
+      "exchange": "NSE"
+    }
   },
   "entry_rules": {
     "logic": "AND",
@@ -23,22 +30,33 @@
         "operator": ">",
         "left": {
           "type": "ema",
-          "params": { "period": 20, "price": "close" }
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
         },
         "right": {
           "type": "ema",
-          "params": { "period": 50, "price": "close" }
+          "params": {
+            "period": 50,
+            "price": "close"
+          }
         }
       },
       {
         "operator": ">",
         "left": {
           "type": "price",
-          "params": { "price": "close" }
+          "params": {
+            "price": "close"
+          }
         },
         "right": {
           "type": "ema",
-          "params": { "period": 20, "price": "close" }
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
         }
       }
     ]
@@ -50,22 +68,33 @@
         "operator": "<",
         "left": {
           "type": "ema",
-          "params": { "period": 20, "price": "close" }
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
         },
         "right": {
           "type": "ema",
-          "params": { "period": 50, "price": "close" }
+          "params": {
+            "period": 50,
+            "price": "close"
+          }
         }
       },
       {
         "operator": "<",
         "left": {
           "type": "price",
-          "params": { "price": "close" }
+          "params": {
+            "price": "close"
+          }
         },
         "right": {
           "type": "ema",
-          "params": { "period": 20, "price": "close" }
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
         }
       }
     ]
