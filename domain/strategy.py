@@ -3,27 +3,51 @@ from typing import List, Optional, Union,Literal
 from domain.indicators.registry import IndicatorRegistry
 from domain.market import Candle
 from typing import List,Dict,Any
+from enum import Enum
+
+class InstrumentType(Enum):
+    FUTURE = "FUTURE"
+    PE = "PE"
+    CE = "CE"
+    STOCK = "STOCK"
+
+class Exchange(Enum):
+    NSE = "NSE"
+    BSE = "BSE"
+
+class Expiry(Enum):
+    MONTHLY = "MONTHLY"
+    WEEKLY = "WEEKLY"
+
+class Expiring(Enum):
+    CURRENT = "CURRENT"
+    NEXT = "NEXT"
+
+class PositionAction(Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+
 
 class Instrument:
     def __init__(self, 
-        type: Literal["FUTURE", "PE", "CE", "STOCK"],
-        exchange: Literal["NSE", "BSE"],
-        expiry: Literal["MONTHLY", "WEEKLY"],
-        expiring: Literal["CURRENT", "NEXT"], 
+        type: InstrumentType,
+        exchange: Exchange,
+        expiry: Expiry,
+        expiring: Expiring, 
         atm: Optional[int], 
         symbol: str
     ):
-        self.type = type
-        self.exchange = exchange
-        self.expiry = expiry
-        self.expiring = expiring
+        self.type = InstrumentType(type)
+        self.exchange = Exchange(exchange)
+        self.expiry = Expiry(expiry)
+        self.expiring = Expiring(expiring)
         self.atm = atm
         self.symbol = symbol
 
 
 class Position:
-    def __init__(self, action: Literal["BUY", "SELL"], instrument: Instrument):
-        self.action = action
+    def __init__(self, action: PositionAction, instrument: Instrument):
+        self.action = PositionAction(action)
         self.instrument = instrument
 
 class Expression:

@@ -1,6 +1,15 @@
 import pytest
 from infrastructure.jsonstrategy import JsonStrategy
-from domain.strategy import RuleSet,Condition,Expression
+from domain.strategy import (
+    RuleSet,
+    Condition,
+    Expression,
+    PositionAction,
+    InstrumentType,
+    Exchange,
+    Expiry,
+    Expiring,
+)
 
 
 @pytest.fixture
@@ -13,75 +22,52 @@ def sample_json():
         "capital": 100000,
         "position": {
             "action": "BUY",
-            "instrument":
-            {
+            "instrument": {
                 "type": "PE",
-                "expiry" : "MONTHLY",
-                "expiring":"NEXT",
+                "expiry": "MONTHLY",
+                "expiring": "NEXT",
                 "atm": -50,
-                "symbol":"NIFTY",
-                "exchange":"NSE"
-            }
+                "symbol": "NIFTY",
+                "exchange": "NSE",
+            },
         },
         "entry_rules": {
             "logic": "AND",
             "conditions": [
                 {
                     "operator": ">",
-                    "left": {
-                        "type": "ema",
-                        "params": {"period": 20, "price": "close"}
-                    },
-                    "right": {
-                        "type": "ema",
-                        "params": {"period": 50, "price": "close"}
-                    }
+                    "left": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 50, "price": "close"}},
                 },
                 {
                     "operator": ">",
-                    "left": {
-                        "type": "price",
-                        "params": {"price": "close"}
-                    },
-                    "right": {
-                        "type": "ema",
-                        "params": {"period": 20, "price": "close"}
-                    }
-                }
-            ]
+                    "left": {"type": "price", "params": {"price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                },
+            ],
         },
         "exit_rules": {
             "logic": "OR",
             "conditions": [
                 {
                     "operator": "<",
-                    "left": {
-                        "type": "ema",
-                        "params": {"period": 20, "price": "close"}
-                    },
-                    "right": {
-                        "type": "ema",
-                        "params": {"period": 50, "price": "close"}
-                    }
+                    "left": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 50, "price": "close"}},
                 },
                 {
                     "operator": "<",
-                    "left": {
-                        "type": "price",
-                        "params": {"price": "close"}
-                    },
-                    "right": {
-                        "type": "ema",
-                        "params": {"period": 20, "price": "close"}
-                    }
-                }
-            ]
-        }
+                    "left": {"type": "price", "params": {"price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                },
+            ],
+        },
     }
+
 
 @pytest.fixture
 def strategy(sample_json):
     return JsonStrategy(sample_json)
+
 
 def test_metadata(strategy):
     assert strategy.get_name() == "bullish_nifty"
@@ -90,14 +76,16 @@ def test_metadata(strategy):
     assert strategy.get_timeframe() == "5m"
     assert strategy.get_capital() == 100000
 
+
 def test_position(strategy):
-    assert strategy.get_position().action == "BUY"
-    assert strategy.get_position().instrument.type == "PE"
+    assert strategy.get_position().action == PositionAction.BUY
+    assert strategy.get_position().instrument.type == InstrumentType.PE
     assert strategy.get_position().instrument.atm == -50
-    assert strategy.get_position().instrument.exchange == "NSE"
-    assert strategy.get_position().instrument.expiry == "MONTHLY"
-    assert strategy.get_position().instrument.expiring == "NEXT"
+    assert strategy.get_position().instrument.exchange == Exchange.NSE
+    assert strategy.get_position().instrument.expiry == Expiry.MONTHLY
+    assert strategy.get_position().instrument.expiring == Expiring.NEXT
     assert strategy.get_position().instrument.symbol == "NIFTY"
+
 
 def test_entry_rules(strategy):
     ruleset = strategy.get_entry_rules()
@@ -108,6 +96,7 @@ def test_entry_rules(strategy):
         assert isinstance(cond, Condition)
         assert isinstance(cond.left, Expression)
         assert isinstance(cond.right, Expression)
+
 
 def test_exit_rules(strategy):
     ruleset = strategy.get_exit_rules()
