@@ -32,17 +32,17 @@ class Instrument:
     def __init__(self, 
         type: InstrumentType,
         exchange: Exchange,
-        expiry: Expiry,
-        expiring: Expiring, 
-        atm: Optional[int], 
-        symbol: str
+        symbol: str,
+        expiry: Optional[Expiry] = None,
+        expiring: Optional[Expiring] = None, 
+        atm: Optional[int] = None
     ):
         self.type = InstrumentType(type)
         self.exchange = Exchange(exchange)
-        self.expiry = Expiry(expiry)
-        self.expiring = Expiring(expiring)
-        self.atm = atm
         self.symbol = symbol
+        self.expiry = Expiry(expiry) if expiry else None
+        self.expiring = Expiring(expiring) if expiring else None
+        self.atm = atm
 
 
 class Position:

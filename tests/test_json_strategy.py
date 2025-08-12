@@ -22,7 +22,7 @@ def sample_json():
             "expiring": "NEXT",
             "atm": -50,
             "symbol": "NIFTY",
-            "exchange": "NSE"
+            "exchange": "NSE",
         },
         "timeframe": "5m",
         "capital": 100000,
@@ -71,14 +71,54 @@ def sample_json():
 
 
 @pytest.fixture
+def sample_json_required_only():
+    return {
+        "strategy_name": "bullish_nifty",
+        "instrument": {"type": "PE", "symbol": "NIFTY", "exchange": "NSE"},
+        "timeframe": "5m",
+        "capital": 100000,
+        "position": {
+            "action": "BUY",
+            "instrument": {"type": "PE", "symbol": "NIFTY", "exchange": "NSE"},
+        },
+        "entry_rules": {
+            "logic": "AND",
+            "conditions": [
+                {
+                    "operator": ">",
+                    "left": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 50, "price": "close"}},
+                }
+            ],
+        },
+        "exit_rules": {
+            "logic": "OR",
+            "conditions": [
+                {
+                    "operator": "<",
+                    "left": {"type": "ema", "params": {"period": 20, "price": "close"}},
+                    "right": {"type": "ema", "params": {"period": 50, "price": "close"}},
+                }
+            ],
+        },
+    }
+
+
+@pytest.fixture
 def strategy(sample_json):
     return JsonStrategy(sample_json)
+
+
+@pytest.fixture
+def strategy_required_only(sample_json_required_only):
+    return JsonStrategy(sample_json_required_only)
 
 
 def test_metadata(strategy):
     assert strategy.get_name() == "bullish_nifty"
     assert strategy.get_timeframe() == "5m"
     assert strategy.get_capital() == 100000
+
 
 def test_instrument(strategy):
     assert strategy.get_instrument().type == InstrumentType.PE
@@ -87,6 +127,16 @@ def test_instrument(strategy):
     assert strategy.get_instrument().expiring == Expiring.NEXT
     assert strategy.get_instrument().atm == -50
     assert strategy.get_instrument().symbol == "NIFTY"
+
+
+def test_instrument_required_only(strategy_required_only):
+    assert strategy_required_only.get_instrument().type == InstrumentType.PE
+    assert strategy_required_only.get_instrument().exchange == Exchange.NSE
+    assert strategy_required_only.get_instrument().symbol == "NIFTY"
+    assert strategy_required_only.get_instrument().expiry is None
+    assert strategy_required_only.get_instrument().expiring is None
+    assert strategy_required_only.get_instrument().atm is None
+
 
 def test_position(strategy):
     assert strategy.get_position().action == PositionAction.BUY
