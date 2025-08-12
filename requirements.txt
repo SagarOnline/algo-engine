@@ -17,4 +17,4 @@ pydantic
 # Optional: TA-Lib or pandas-ta for indicators
 pandas-ta-openbb
 numpy
-# ta-lib  # use this only if compiled version is available on your system
+# ta-lib  # use this only if compiled version is available on your systempandas 

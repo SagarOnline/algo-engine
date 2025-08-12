@@ -10,6 +10,7 @@ from domain.strategy import (
     Expiry,
     Expiring,
 )
+from domain.timeframe import Timeframe
 
 
 @pytest.fixture
@@ -24,7 +25,7 @@ def sample_json():
             "symbol": "NIFTY",
             "exchange": "NSE",
         },
-        "timeframe": "5m",
+        "timeframe": "5MIN",
         "capital": 100000,
         "position": {
             "action": "BUY",
@@ -75,7 +76,7 @@ def sample_json_required_only():
     return {
         "strategy_name": "bullish_nifty",
         "instrument": {"type": "PE", "symbol": "NIFTY", "exchange": "NSE"},
-        "timeframe": "5m",
+        "timeframe": "5MIN",
         "capital": 100000,
         "position": {
             "action": "BUY",
@@ -116,7 +117,7 @@ def strategy_required_only(sample_json_required_only):
 
 def test_metadata(strategy):
     assert strategy.get_name() == "bullish_nifty"
-    assert strategy.get_timeframe() == "5m"
+    assert strategy.get_timeframe() == Timeframe.FIVE_MINUTES
     assert strategy.get_capital() == 100000
 
 

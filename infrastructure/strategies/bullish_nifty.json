@@ -10,7 +10,7 @@
   },
   "symbol": "NIFTY",
   "exchange": "NSE",
-  "timeframe": "5m",
+  "timeframe": "5MIN",
   "capital": 100000,
   "position": {
     "action": "BUY",

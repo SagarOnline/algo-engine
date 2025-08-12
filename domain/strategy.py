@@ -4,6 +4,7 @@ from domain.indicators.registry import IndicatorRegistry
 from domain.market import Candle
 from typing import List,Dict,Any
 from enum import Enum
+from domain.timeframe import Timeframe
 
 class InstrumentType(Enum):
     FUTURE = "FUTURE"
@@ -91,7 +92,7 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def get_timeframe(self) -> str:
+    def get_timeframe(self) -> Timeframe:
         pass
 
     @abstractmethod

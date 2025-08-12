@@ -2,12 +2,13 @@ import json
 from typing import Dict, Any
 from domain.strategy import Instrument, Position, Strategy
 from domain.strategy import RuleSet,Condition,Expression
+from domain.timeframe import Timeframe
 
 
 class JsonStrategy(Strategy):
     def __init__(self, json_data: Dict[str, Any]):
         self.strategy_name = json_data.get("strategy_name")
-        self.timeframe = json_data.get("timeframe")
+        self.timeframe = Timeframe(json_data.get("timeframe"))
         self.capital = json_data.get("capital")
         self.instrument = self._get_parsed_instrument(json_data.get("instrument", {}))
         # Parse Position
@@ -61,7 +62,7 @@ class JsonStrategy(Strategy):
     def get_exchange(self) -> str:
         return self.exchange
 
-    def get_timeframe(self) -> str:
+    def get_timeframe(self) -> Timeframe:
         return self.timeframe
 
     def get_capital(self) -> int:
