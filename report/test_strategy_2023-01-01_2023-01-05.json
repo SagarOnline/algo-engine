@@ -1,0 +1,12 @@
+{
+    "strategy": "test_strategy",
+    "pnl": -5,
+    "trades": [
+        {
+            "entry_price": 110,
+            "entry_time": "2023-01-02 09:15:00",
+            "exit_price": 105,
+            "exit_time": "2023-01-04 09:15:00"
+        }
+    ]
+}

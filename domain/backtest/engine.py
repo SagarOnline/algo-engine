@@ -1,6 +1,8 @@
 from datetime import datetime, date
 from typing import Dict, Any, List
 import json
+import os
+from dotenv import load_dotenv
 
 from domain.strategy import Strategy
 from infrastructure.jsonstrategy import JsonStrategy
@@ -16,9 +18,7 @@ class BacktestEngine:
 
     def run(self, start_date: date, end_date: date) -> Dict[str, Any]:
         instrument = self.strategy.get_instrument()
-        timeframe_str = self.strategy.get_timeframe()
-        timeframe = Timeframe(timeframe_str)
-
+        timeframe = Timeframe(self.strategy.get_timeframe())
         required_start_date = self.strategy.get_required_history_start_date(start_date)
         historical_data = self.historical_data_repository.get_historical_data(instrument, required_start_date, end_date, timeframe)
         
@@ -53,11 +53,29 @@ class BacktestEngine:
             if "exit_price" in trade:
                 pnl += trade["exit_price"] - trade["entry_price"]
         
-        return {
+        results = {
             "strategy": self.strategy.get_name(),
             "pnl": pnl,
             "trades": trades
         }
+
+        self._save_results(results, start_date, end_date)
+
+        return results
+
+    def _save_results(self, results: Dict[str, Any], start_date: date, end_date: date):
+        load_dotenv()
+        report_dir = os.getenv("BACKTEST_REPORT_DIRECTORY", "reports")
+        os.makedirs(report_dir, exist_ok=True)
+
+        strategy_name = self.strategy.get_name()
+        start_date_str = start_date.strftime("%Y-%m-%d")
+        end_date_str = end_date.strftime("%Y-%m-%d")
+        filename = f"{strategy_name}_{start_date_str}_{end_date_str}.json"
+        
+        filepath = os.path.join(report_dir, filename)
+        with open(filepath, "w") as f:
+            json.dump(results, f, indent=4, default=str)
 
 
 def backtest(strategy_name: str, start_date: str, end_date: str) -> Dict[str, Any]:
