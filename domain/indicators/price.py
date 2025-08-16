@@ -1,5 +1,5 @@
 from typing import Dict, Any, List,Union
-from .registry import register_indicator
+from domain.indicators.registry import register_indicator
 import pandas as pd
 
 @register_indicator("price")
