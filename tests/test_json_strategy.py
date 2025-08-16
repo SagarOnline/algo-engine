@@ -25,7 +25,7 @@ def sample_json():
             "instrument_key": "NIFTY",
             "exchange": "NSE",
         },
-        "timeframe": "5MIN",
+        "timeframe": "5min",
         "capital": 100000,
         "position": {
             "action": "BUY",
@@ -76,7 +76,7 @@ def sample_json_required_only():
     return {
         "strategy_name": "bullish_nifty",
         "instrument": {"type": "PE", "instrument_key": "NIFTY", "exchange": "NSE"},
-        "timeframe": "5MIN",
+        "timeframe": "5min",
         "capital": 100000,
         "position": {
             "action": "BUY",

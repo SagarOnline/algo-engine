@@ -2,23 +2,11 @@ import pytest
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from domain.indicators.registry import register_indicator, IndicatorRegistry
+from domain.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, Position, InstrumentType, Exchange, PositionAction
+from datetime import date, timedelta
 
 # --- Mock domain classes ---
-@dataclass
-class Expression:
-    type: str
-    params: Dict[str, Any]
-
-@dataclass
-class Condition:
-    operator: str
-    left: Expression
-    right: Expression
-
-@dataclass
-class Rules:
-    logic: str
-    conditions: List[Condition]
+# Using real domain classes now for better testing
 
 # --- Mock indicators ---
 @register_indicator("ema")
@@ -33,37 +21,33 @@ def mock_price(candle: Dict[str, Any], historical_data: List[Dict[str, Any]], pa
     return candle.get(price_col, 0)
 
 # --- Dummy strategy implementation ---
-class DummyStrategy:
-    def __init__(self, entry_rules: Rules):
+class DummyStrategy(Strategy):
+    def __init__(self, entry_rules: RuleSet, exit_rules: RuleSet = None, timeframe: Timeframe = Timeframe("1d")):
         self._entry_rules = entry_rules
+        self._exit_rules = exit_rules if exit_rules else RuleSet(logic="AND", conditions=[])
+        self._timeframe = timeframe
 
-    def get_entry_rules(self) -> Rules:
+    def get_name(self) -> str:
+        return "DummyStrategy"
+
+    def get_instrument(self) -> Instrument:
+        return Instrument(type=InstrumentType.STOCK, exchange=Exchange.NSE, instrument_key="DUMMY")
+
+    def get_timeframe(self) -> Timeframe:
+        return self._timeframe
+
+    def get_capital(self) -> int:
+        return 100000
+
+    def get_entry_rules(self) -> RuleSet:
         return self._entry_rules
 
-    def should_enter_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
-        entry_rules = self.get_entry_rules()
-        logic = entry_rules.logic.upper()
-        results = [
-            self._evaluate_condition(cond, candle, historical_data)
-            for cond in entry_rules.conditions
-        ]
-        return all(results) if logic == "AND" else any(results)
+    def get_exit_rules(self) -> RuleSet:
+        return self._exit_rules
+    
+    def get_position(self) -> Position:
+        return Position(action=PositionAction.BUY, instrument=self.get_instrument())
 
-    def _evaluate_condition(self, condition: Condition, candle, historical_data: List[Dict[str, Any]]) -> bool:
-        left_value = self._evaluate_expression(condition.left, candle, historical_data)
-        right_value = self._evaluate_expression(condition.right, candle, historical_data)
-        if condition.operator == ">":
-            return left_value > right_value
-        elif condition.operator == "<":
-            return left_value < right_value
-        elif condition.operator == "==":
-            return left_value == right_value
-        else:
-            raise ValueError(f"Unsupported operator: {condition.operator}")
-
-    def _evaluate_expression(self, expression: Expression, candle, historical_data: List[Dict[str, Any]]) -> float:
-        handler = IndicatorRegistry.get(expression.type.lower())
-        return handler(candle, historical_data, expression.params)
 
 # --- Test cases ---
 def test_should_enter_trade_with_and_logic():
@@ -71,18 +55,18 @@ def test_should_enter_trade_with_and_logic():
     candle = {"close": 105}
     historical_data = []
 
-    entry_rules = Rules(
+    entry_rules = RuleSet(
         logic="AND",
         conditions=[
             Condition(
                 operator=">",
-                left=Expression(type="price", params={"price": "close"}),
-                right=Expression(type="ema", params={"period": 5})  # returns 50
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="ema", params={"period": 5})  # returns 50
             ),
             Condition(
                 operator="<",
-                left=Expression(type="price", params={"price": "close"}),
-                right=Expression(type="ema", params={"period": 20}) # returns 200
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="ema", params={"period": 20}) # returns 200
             )
         ]
     )
@@ -94,21 +78,111 @@ def test_should_enter_trade_with_or_logic():
     candle = {"close": 5}
     historical_data = []
 
-    entry_rules = Rules(
+    entry_rules = RuleSet(
         logic="OR",
         conditions=[
             Condition(
                 operator=">",
-                left=Expression(type="price", params={"price": "close"}),
-                right=Expression(type="ema", params={"period": 20}) # returns 200
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="ema", params={"period": 20}) # returns 200
             ),
             Condition(
                 operator="<",
-                left=Expression(type="price", params={"price": "close"}),
-                right=Expression(type="ema", params={"period": 1}) # returns 10
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="ema", params={"period": 1}) # returns 10
             )
         ]
     )
 
     strategy = DummyStrategy(entry_rules)
     assert strategy.should_enter_trade(candle, historical_data) is True
+
+def test_get_required_history_start_date():
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 50}),
+                right=Expression(expr_type="ema", params={"period": 20})
+            )
+        ]
+    )
+    exit_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator="<",
+                left=Expression(expr_type="ema", params={"period": 10}),
+                right=Expression(expr_type="ema", params={"period": 100})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, exit_rules, timeframe=Timeframe("1d"))
+    start_date = date(2023, 1, 1)
+    
+    # Max period is 100. 100 * 1.5 = 150 days buffer
+    expected_date = start_date - timedelta(days=150)
+    
+    assert strategy.get_required_history_start_date(start_date) == expected_date
+
+def test_get_required_history_start_date_no_period():
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="price", params={"price": "open"})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("1d"))
+    start_date = date(2023, 1, 1)
+    
+    # No period, so should return start_date
+    assert strategy.get_required_history_start_date(start_date) == start_date
+
+def test_get_required_history_start_date_hourly():
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 100}), # max period
+                right=Expression(expr_type="ema", params={"period": 20})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("60min"))
+    start_date = date(2023, 1, 1)
+    
+    # 100 candles / (375/60 candles_per_day) = 16 days needed
+    # 16 * 1.5 = 24 calendar days buffer
+    expected_date = start_date - timedelta(days=24)
+    
+    assert strategy.get_required_history_start_date(start_date) == expected_date
+
+def test_get_required_history_start_date_minute():
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 200}), # max period
+                right=Expression(expr_type="ema", params={"period": 50})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("5min"))
+    start_date = date(2023, 1, 1)
+    
+    # 200 candles / (375/5 candles_per_day) = 2.66 days -> ceil(3) = 3 days needed
+    # 3 * 1.5 = 4.5 -> ceil(5) = 5 calendar days buffer
+    expected_date = start_date - timedelta(days=5)
+    
+    assert strategy.get_required_history_start_date(start_date) == expected_date
