@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union,Literal
+from typing import List, Optional, Union, Literal, Dict, Any
+from datetime import date, timedelta
+import math
 from domain.indicators.registry import IndicatorRegistry
 from domain.market import Candle
-from typing import List,Dict,Any
 from enum import Enum
 from domain.timeframe import Timeframe
 
@@ -110,6 +111,54 @@ class Strategy(ABC):
     @abstractmethod
     def get_position(self) -> Position:
         pass
+
+    def get_required_history_start_date(self, start_date: date) -> date:
+        entry_rules = self.get_entry_rules()
+        exit_rules = self.get_exit_rules()
+
+        all_expressions = []
+        if entry_rules and entry_rules.conditions:
+            for cond in entry_rules.conditions:
+                all_expressions.append(cond.left)
+                all_expressions.append(cond.right)
+        
+        if exit_rules and exit_rules.conditions:
+            for cond in exit_rules.conditions:
+                all_expressions.append(cond.left)
+                all_expressions.append(cond.right)
+
+        max_period = 0
+        for expr in all_expressions:
+            if "period" in expr.params:
+                period = expr.params["period"]
+                if isinstance(period, int) and period > max_period:
+                    max_period = period
+        
+        if max_period == 0:
+            return start_date
+
+        timeframe = self.get_timeframe()
+        timeframe_str = timeframe.value
+
+        # Estimate calendar days needed for max_period candles
+        # This is a rough estimation and might need to be adjusted based on market specifics
+        calendar_days_buffer_multiplier = 1.5 # Buffer for weekends and holidays, 7/5 is 1.4, 1.5 is safer
+
+        if timeframe_str.endswith('d'):
+            days_needed = max_period
+        elif timeframe_str.endswith('w'):
+            days_needed = max_period * 7
+        elif timeframe_str.endswith('min'):
+            minutes = int(timeframe_str[:-3])
+            # Assuming 375 trading minutes a day
+            candles_per_day = 375 / minutes
+            days_needed = math.ceil(max_period / candles_per_day)
+        else:
+            days_needed = 0 # Should not happen for valid timeframes
+
+        calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier)
+        
+        return start_date - timedelta(days=calendar_days_needed)
 
     def should_enter_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
         entry_rules = self.get_entry_rules()

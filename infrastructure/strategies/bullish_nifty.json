@@ -8,7 +8,7 @@
     "instrument_key": "NIFTY",
     "exchange": "NSE"
   },
-  "timeframe": "5MIN",
+  "timeframe": "5min",
   "capital": 100000,
   "position": {
     "action": "BUY",
