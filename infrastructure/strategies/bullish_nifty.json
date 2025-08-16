@@ -5,11 +5,9 @@
     "expiry": "MONTHLY",
     "expiring": "NEXT",
     "atm": -50,
-    "symbol": "NIFTY",
+    "instrument_key": "NIFTY",
     "exchange": "NSE"
   },
-  "symbol": "NIFTY",
-  "exchange": "NSE",
   "timeframe": "5MIN",
   "capital": 100000,
   "position": {
@@ -19,7 +17,7 @@
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,
-      "symbol": "NIFTY",
+      "instrument_key": "NIFTY",
       "exchange": "NSE"
     }
   },

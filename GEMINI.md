@@ -24,10 +24,13 @@ The core of the engine is built around the `Strategy` abstract base class. This 
 This component deals with defining the strategy and which can allow defining the strategy based on technical indicators ,price, date, etc. 
 
 ### Backtesting Engine
-The Engine allows backtesting the strategy on historical data. The engine also generates the peroformance report of the strategy. 
+The Engine allows backtesting the strategy on historical data. The engine also generates the peroformance report of the strategy. Currently the backtesting engine reads the historical data from parquet files,however in future, it will be updated to get historical data from timeseries database.  For the Parquet implementation, files are read from the directory specified by the HISTORICAL_DATA_DIRECTORY environment variable. The directory structure follows the format {timeframe}/{instrument_key}/{year}/{month}, and files are named as yyyy-mm-dd.parquet. 
 
 ### Execution Engine
 The Execution Engine allows executing the strategy on live data in live market. 
 
 ### REST Interface
 The Engine also exposes the REST interface for interacting with Algo Engine
+
+## Instructions
+Please do not use emojies in code.
