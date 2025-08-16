@@ -33,14 +33,14 @@ class Instrument:
     def __init__(self, 
         type: InstrumentType,
         exchange: Exchange,
-        symbol: str,
+        instrument_key: str,
         expiry: Optional[Expiry] = None,
         expiring: Optional[Expiring] = None, 
         atm: Optional[int] = None
     ):
         self.type = InstrumentType(type)
         self.exchange = Exchange(exchange)
-        self.symbol = symbol
+        self.instrument_key = instrument_key
         self.expiry = Expiry(expiry) if expiry else None
         self.expiring = Expiring(expiring) if expiring else None
         self.atm = atm

@@ -1,8 +1,9 @@
+import os
+from datetime import date, timedelta
 import pandas as pd
 from typing import List, Dict, Any
 from domain.backtest.historical_data_repository import HistoricalDataRepository
 from domain.strategy import Instrument
-from datetime import date
 from domain.timeframe import Timeframe
 
 class ParquetHistoricalDataRepository(HistoricalDataRepository):
@@ -10,10 +11,20 @@ class ParquetHistoricalDataRepository(HistoricalDataRepository):
         self.data_path = data_path
 
     def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> List[Dict[str, Any]]:
-        file_path = f"{self.data_path}/{instrument.symbol}/{timeframe.value}.parquet"
-        df = pd.read_parquet(file_path)
+        dfs = []
+        current_date = start_date
+        while current_date <= end_date:
+            file_path = f"{self.data_path}/{timeframe.value}/{instrument.instrument_key}/{current_date.year}/{current_date.month:02d}/{current_date.strftime('%Y-%m-%d')}.parquet"
+            if os.path.exists(file_path):
+                dfs.append(pd.read_parquet(file_path))
+            current_date += timedelta(days=1)
 
-        # Filter the DataFrame based on the date range
+        if not dfs:
+            return []
+
+        df = pd.concat(dfs, ignore_index=True)
+
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df[(df['timestamp'].dt.date >= start_date) & (df['timestamp'].dt.date <= end_date)]
         
         return df.to_dict('records')

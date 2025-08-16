@@ -22,7 +22,7 @@ def sample_json():
             "expiry": "MONTHLY",
             "expiring": "NEXT",
             "atm": -50,
-            "symbol": "NIFTY",
+            "instrument_key": "NIFTY",
             "exchange": "NSE",
         },
         "timeframe": "5MIN",
@@ -34,7 +34,7 @@ def sample_json():
                 "expiry": "MONTHLY",
                 "expiring": "NEXT",
                 "atm": -50,
-                "symbol": "NIFTY",
+                "instrument_key": "NIFTY",
                 "exchange": "NSE",
             },
         },
@@ -75,12 +75,12 @@ def sample_json():
 def sample_json_required_only():
     return {
         "strategy_name": "bullish_nifty",
-        "instrument": {"type": "PE", "symbol": "NIFTY", "exchange": "NSE"},
+        "instrument": {"type": "PE", "instrument_key": "NIFTY", "exchange": "NSE"},
         "timeframe": "5MIN",
         "capital": 100000,
         "position": {
             "action": "BUY",
-            "instrument": {"type": "PE", "symbol": "NIFTY", "exchange": "NSE"},
+            "instrument": {"type": "PE", "instrument_key": "NIFTY", "exchange": "NSE"},
         },
         "entry_rules": {
             "logic": "AND",
@@ -127,13 +127,13 @@ def test_instrument(strategy):
     assert strategy.get_instrument().expiry == Expiry.MONTHLY
     assert strategy.get_instrument().expiring == Expiring.NEXT
     assert strategy.get_instrument().atm == -50
-    assert strategy.get_instrument().symbol == "NIFTY"
+    assert strategy.get_instrument().instrument_key == "NIFTY"
 
 
 def test_instrument_required_only(strategy_required_only):
     assert strategy_required_only.get_instrument().type == InstrumentType.PE
     assert strategy_required_only.get_instrument().exchange == Exchange.NSE
-    assert strategy_required_only.get_instrument().symbol == "NIFTY"
+    assert strategy_required_only.get_instrument().instrument_key == "NIFTY"
     assert strategy_required_only.get_instrument().expiry is None
     assert strategy_required_only.get_instrument().expiring is None
     assert strategy_required_only.get_instrument().atm is None
@@ -146,7 +146,7 @@ def test_position(strategy):
     assert strategy.get_position().instrument.exchange == Exchange.NSE
     assert strategy.get_position().instrument.expiry == Expiry.MONTHLY
     assert strategy.get_position().instrument.expiring == Expiring.NEXT
-    assert strategy.get_position().instrument.symbol == "NIFTY"
+    assert strategy.get_position().instrument.instrument_key == "NIFTY"
 
 
 def test_entry_rules(strategy):

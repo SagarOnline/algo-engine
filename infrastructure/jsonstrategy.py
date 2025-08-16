@@ -32,7 +32,7 @@ class JsonStrategy(Strategy):
             expiry=instrument_data.get("expiry"),
             expiring=instrument_data.get("expiring"),
             atm=instrument_data.get("atm"),
-            symbol=instrument_data.get("symbol"),
+            instrument_key=instrument_data.get("instrument_key"),
         )
         return instrument
 
@@ -56,11 +56,7 @@ class JsonStrategy(Strategy):
     def get_name(self) -> str:
         return self.strategy_name
 
-    def get_symbol(self) -> str:
-        return self.symbol
-
-    def get_exchange(self) -> str:
-        return self.exchange
+    
 
     def get_timeframe(self) -> Timeframe:
         return self.timeframe
