@@ -19,7 +19,8 @@ class BacktestEngine:
         timeframe_str = self.strategy.get_timeframe()
         timeframe = Timeframe(timeframe_str)
 
-        historical_data = self.historical_data_repository.get_historical_data(instrument, start_date, end_date, timeframe)
+        required_start_date = self.strategy.get_required_history_start_date(start_date)
+        historical_data = self.historical_data_repository.get_historical_data(instrument, required_start_date, end_date, timeframe)
         
         trades = []
         in_trade = False
@@ -28,6 +29,10 @@ class BacktestEngine:
             current_candle = historical_data[i]
             previous_candles = historical_data[:i]
             
+            # Ensure we only start trading from the requested start_date
+            if current_candle['timestamp'].date() < start_date:
+                continue
+
             if not in_trade:
                 if self.strategy.should_enter_trade(current_candle, previous_candles):
                     # Enter trade
