@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from datetime import date
 from domain.strategy import Instrument
 from domain.timeframe import Timeframe
@@ -6,6 +7,7 @@ from infrastructure.parquet_historical_data_repository import ParquetHistoricalD
 
 
 def main():
+    load_dotenv()
     """
     This function contains the main logic of the program.
     """
@@ -14,10 +16,10 @@ def main():
 
     repo = ParquetHistoricalDataRepository(data_path=data_path)
 
-    instrument = Instrument(instrument_key="NIFTY 50", exchange="NSE", type="STOCK")
-    start_date = date(2024, 1, 1)
-    end_date = date(2024, 1, 5)
-    timeframe = Timeframe.MINUTE
+    instrument = Instrument(instrument_key="NSE_INDEX_NIFTY 50", exchange="NSE", type="STOCK")
+    start_date = date(2025, 1, 1)
+    end_date = date(2025, 1, 5)
+    timeframe = Timeframe.FIFTEEN_MINUTES
 
     historical_data = repo.get_historical_data(instrument, start_date, end_date, timeframe)
 
