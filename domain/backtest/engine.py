@@ -74,7 +74,7 @@ def backtest(strategy_name: str, start_date: str, end_date: str) -> Dict[str, An
     Runs a backtest for a given strategy.
     """
     # Load strategy
-    strategy_path = f"infrastructure/strategies/{strategy_name}.json"
+    strategy_path = f"strategies/{strategy_name}.json"
     with open(strategy_path) as f:
         strategy_data = json.load(f)
     strategy = JsonStrategy(strategy_data)

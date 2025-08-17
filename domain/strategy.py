@@ -193,5 +193,5 @@ class Strategy(ABC):
 
     def _evaluate_expression(self, expression:Expression, candle, historical_data:List[Dict[str, Any]]) -> float:
         handler = IndicatorRegistry.get(expression.type.lower())
-        return handler(candle, historical_data, expression.params)
+        return handler(historical_data, expression.params)
     
