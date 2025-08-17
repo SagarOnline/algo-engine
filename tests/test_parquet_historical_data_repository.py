@@ -11,8 +11,8 @@ from infrastructure.parquet_historical_data_repository import ParquetHistoricalD
 class TestParquetHistoricalDataRepository(unittest.TestCase):
     def setUp(self):
         self.test_data_path = "tests/temp_data"
-        os.makedirs(self.test_data_path, exist_ok=True)
-        self.repository = ParquetHistoricalDataRepository(data_path=self.test_data_path)
+        os.environ["HISTORICAL_DATA_DIRECTORY"] = self.test_data_path
+        self.repository = ParquetHistoricalDataRepository()
         self.instrument = Instrument(
             type=InstrumentType.STOCK,
             exchange=Exchange.NSE,
@@ -25,6 +25,7 @@ class TestParquetHistoricalDataRepository(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.test_data_path)
+        
 
     def create_dummy_data(self):
         dates = [date(2023, 1, 1), date(2023, 1, 2), date(2023, 1, 3)]

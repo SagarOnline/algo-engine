@@ -20,15 +20,14 @@ from domain.market import Market
 
 
 class BacktestEngine:
-    def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, report_repository: BacktestReportRepository):
-        self.strategy = strategy
+    def __init__(self, historical_data_repository: HistoricalDataRepository, report_repository: BacktestReportRepository):
         self.historical_data_repository = historical_data_repository
         self.report_repository = report_repository
 
-    def run(self, start_date: date, end_date: date) -> BacktestReport:
-        instrument = self.strategy.get_instrument()
-        timeframe = Timeframe(self.strategy.get_timeframe())
-        required_start_date = self.strategy.get_required_history_start_date(start_date)
+    def run(self, strategy: Strategy, start_date: date, end_date: date) -> BacktestReport:
+        instrument = strategy.get_instrument()
+        timeframe = Timeframe(strategy.get_timeframe())
+        required_start_date = strategy.get_required_history_start_date(start_date)
         historical_data = self.historical_data_repository.get_historical_data(instrument, required_start_date, end_date, timeframe)
         
         trades: List[Trade] = []
@@ -45,13 +44,13 @@ class BacktestEngine:
                 continue
 
             if not in_trade:
-                if self.strategy.should_enter_trade(current_candle, previous_candles):
+                if strategy.should_enter_trade(current_candle, previous_candles):
                     # Enter trade
                     entry_price = current_candle["close"]
                     entry_time = current_candle["timestamp"]
                     in_trade = True
             else:
-                if self.strategy.should_exit_trade(current_candle, previous_candles):
+                if strategy.should_exit_trade(current_candle, previous_candles):
                     # Exit trade
                     exit_price = current_candle["close"]
                     exit_time = current_candle["timestamp"]
@@ -63,34 +62,7 @@ class BacktestEngine:
         for trade in trades:
             pnl += trade.profit()
         
-        report = BacktestReport(self.strategy.get_name(), pnl, trades)
+        report = BacktestReport(strategy.get_name(), pnl, trades)
         self.report_repository.save(report)
 
         return report
-
-
-def backtest(strategy_name: str, start_date: str, end_date: str) -> Dict[str, Any]:
-    """
-    Runs a backtest for a given strategy.
-    """
-    # Load strategy
-    strategy_path = f"strategies/{strategy_name}.json"
-    with open(strategy_path) as f:
-        strategy_data = json.load(f)
-    strategy = JsonStrategy(strategy_data)
-    
-    # Initialize historical data repository
-    historical_data_repository = ParquetHistoricalDataRepository()
-
-    # Initialize report repository
-    report_repository = JsonBacktestReportRepository()
-
-    # Initialize and run backtest engine
-    engine = BacktestEngine(strategy, historical_data_repository, report_repository)
-    
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
-    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
-    
-    report = engine.run(start_date_obj, end_date_obj)
-    
-    return report.to_dict()

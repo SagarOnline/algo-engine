@@ -52,8 +52,8 @@ def mock_report_repository():
 
 
 @pytest.fixture
-def backtest_engine(mock_strategy, mock_historical_data_repository, mock_report_repository):
-    return BacktestEngine(mock_strategy, mock_historical_data_repository, mock_report_repository)
+def backtest_engine(mock_historical_data_repository, mock_report_repository):
+    return BacktestEngine(mock_historical_data_repository, mock_report_repository)
 
 
 def generate_candle(timestamp_str: str, close_price: float) -> Dict[str, Any]:
@@ -61,11 +61,11 @@ def generate_candle(timestamp_str: str, close_price: float) -> Dict[str, Any]:
 
 
 
-def test_run_with_no_data(backtest_engine: BacktestEngine):
+def test_run_with_no_data(mock_strategy: Strategy, backtest_engine: BacktestEngine):
     start_date = date(2023, 1, 1)
     end_date = date(2023, 1, 31)
     
-    report = backtest_engine.run(start_date, end_date)
+    report = backtest_engine.run(mock_strategy, start_date, end_date)
     
     assert report.pnl == 0
     assert len(report.trades) == 0
@@ -89,7 +89,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     mock_strategy.should_enter_trade.side_effect = [True, False, False, False]
     mock_strategy.should_exit_trade.side_effect = [False, True, False]
 
-    report = backtest_engine.run(start_date, end_date)
+    report = backtest_engine.run(mock_strategy, start_date, end_date)
     
     assert len(report.trades) == 1
     trade = report.trades[0]
@@ -118,7 +118,7 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     mock_strategy.should_enter_trade.side_effect = [True, False] # Corresponds to 3rd and 4th candle
     mock_strategy.should_exit_trade.side_effect = [True]
 
-    report = backtest_engine.run(start_date, end_date)
+    report = backtest_engine.run(mock_strategy, start_date, end_date)
     
     # Check that get_historical_data was called with the earlier date
     mock_historical_data_repository.get_historical_data.assert_called_with(
