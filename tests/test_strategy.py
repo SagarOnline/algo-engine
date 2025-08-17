@@ -10,15 +10,21 @@ from datetime import date, timedelta
 
 # --- Mock indicators ---
 @register_indicator("ema")
-def mock_ema(candle: Dict[str, Any], historical_data: List[Dict[str, Any]], params: Dict[str, Any]) -> float:
+def mock_ema(historical_data: List[Dict[str, Any]], params: Dict[str, Any]) -> float:
     period = params.get("period", 20)
     # Just return period * 10 for testing
     return period * 10
 
 @register_indicator("price")
-def mock_price(candle: Dict[str, Any], historical_data: List[Dict[str, Any]], params: Dict[str, Any]) -> float:
+def mock_price(historical_data: List[Dict[str, Any]], params: Dict[str, Any]) -> float:
     price_col = params.get("price", "close")
-    return candle.get(price_col, 0)
+    return historical_data[0].get(price_col, 0)
+
+@register_indicator("number")
+def mock_price(historical_data: List[Dict[str, Any]], params: Dict[str, Any]) -> float:
+    value = params.get("value", 0)
+    return value
+
 
 # --- Dummy strategy implementation ---
 class DummyStrategy(Strategy):
@@ -53,7 +59,7 @@ class DummyStrategy(Strategy):
 def test_should_enter_trade_with_and_logic():
     # price = 105, ema20 = 200
     candle = {"close": 105}
-    historical_data = []
+    historical_data = [candle]
 
     entry_rules = RuleSet(
         logic="AND",
@@ -61,12 +67,12 @@ def test_should_enter_trade_with_and_logic():
             Condition(
                 operator=">",
                 left=Expression(expr_type="price", params={"price": "close"}),
-                right=Expression(expr_type="ema", params={"period": 5})  # returns 50
+                right=Expression(expr_type="number", params={"value": 50})  # returns 50
             ),
             Condition(
                 operator="<",
                 left=Expression(expr_type="price", params={"price": "close"}),
-                right=Expression(expr_type="ema", params={"period": 20}) # returns 200
+                right=Expression(expr_type="number", params={"value": 200}) # returns 200
             )
         ]
     )
@@ -76,7 +82,7 @@ def test_should_enter_trade_with_and_logic():
 
 def test_should_enter_trade_with_or_logic():
     candle = {"close": 5}
-    historical_data = []
+    historical_data = [candle]
 
     entry_rules = RuleSet(
         logic="OR",
@@ -84,12 +90,12 @@ def test_should_enter_trade_with_or_logic():
             Condition(
                 operator=">",
                 left=Expression(expr_type="price", params={"price": "close"}),
-                right=Expression(expr_type="ema", params={"period": 20}) # returns 200
+                right=Expression(expr_type="number", params={"value": 200}) # returns 200
             ),
             Condition(
                 operator="<",
                 left=Expression(expr_type="price", params={"price": "close"}),
-                right=Expression(expr_type="ema", params={"period": 1}) # returns 10
+                right=Expression(expr_type="number", params={"value": 10}) # returns 10
             )
         ]
     )

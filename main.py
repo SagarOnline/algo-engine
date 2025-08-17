@@ -27,13 +27,13 @@ def main():
     report_repository = JsonBacktestReportRepository()
 
     # Initialize and run backtest engine
-    engine = BacktestEngine(strategy, historical_data_repository, report_repository)
+    engine = BacktestEngine(historical_data_repository, report_repository)
     start_date = "2025-08-01"
     end_date = "2025-08-14"
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
     end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
     
-    report = engine.run(start_date_obj, end_date_obj)
+    report = engine.run(strategy, start_date_obj, end_date_obj)
 
 
 if __name__ == "__main__":
