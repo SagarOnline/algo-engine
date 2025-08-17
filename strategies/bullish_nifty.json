@@ -5,10 +5,10 @@
     "expiry": "MONTHLY",
     "expiring": "NEXT",
     "atm": -50,
-    "instrument_key": "NIFTY",
+    "instrument_key": "NSE_INDEX|NIFTY 50",
     "exchange": "NSE"
   },
-  "timeframe": "5min",
+  "timeframe": "15min",
   "capital": 100000,
   "position": {
     "action": "BUY",
@@ -17,7 +17,7 @@
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,
-      "instrument_key": "NIFTY",
+      "instrument_key": "NSE_INDEX|NIFTY 50",
       "exchange": "NSE"
     }
   },
