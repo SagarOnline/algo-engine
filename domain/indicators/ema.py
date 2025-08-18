@@ -10,10 +10,13 @@ def indicator_ema(historical_data: Union[List[Dict[str, Any]], pd.DataFrame], pa
     if not isinstance(historical_data, pd.DataFrame):
         historical_data = pd.DataFrame(historical_data)
 
+    if historical_data.empty:
+        raise RuntimeError("historical_data is empty in ema indicator")
+    
     period = params.get("period", 20)
     price_col = params.get("price", "close")
 
     # TA-Lib expects a NumPy array
-    ema_series = talib.EMA(historical_data[price_col].values, timeperiod=period)
+    ema_series = talib.EMA(historical_data[price_col].astype(float).values, timeperiod=period)
 
     return float(ema_series[-1])  # last EMA value

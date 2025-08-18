@@ -181,7 +181,10 @@ class Strategy(ABC):
     def _evaluate_condition(self, condition:Condition, candle, historical_data:List[Dict[str, Any]]) -> bool:
         left_value = self._evaluate_expression(condition.left, candle, historical_data)
         right_value = self._evaluate_expression(condition.right, candle, historical_data)
-
+        
+        if math.isnan(left_value) or math.isnan(right_value):
+            return False
+        
         if condition.operator == ">":
             return left_value > right_value
         elif condition.operator == "<":
