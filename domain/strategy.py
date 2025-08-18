@@ -60,6 +60,10 @@ class Expression:
     def __repr__(self):
         return f"Expression(type={self.type}, params={self.params})"
 
+    def evaluate(self, historical_data:List[Dict[str, Any]]) -> float:
+        handler = IndicatorRegistry.get(self.type.lower())
+        return handler(historical_data, self.params)
+
 class Condition:
     def __init__(self, operator: str, left: Expression, right: Expression):
         self.operator = operator  # e.g., ">", "<", "=="
@@ -71,6 +75,21 @@ class Condition:
             f"Condition(operator={self.operator}, "
             f"left={self.left}, right={self.right})"
         )
+
+    def is_satisfied(self, historical_data:List[Dict[str, Any]]) -> bool:
+        left_value = self.left.evaluate(historical_data)
+        right_value = self.right.evaluate(historical_data)
+        import math
+        if math.isnan(left_value) or math.isnan(right_value):
+            return False
+        if self.operator == ">":
+            return left_value > right_value
+        elif self.operator == "<":
+            return left_value < right_value
+        elif self.operator == "==":
+            return left_value == right_value
+        else:
+            raise ValueError(f"Unsupported operator: {self.operator}")
     
 class RuleSet:
     def __init__(self, logic: str, conditions: List[Condition]):
@@ -164,7 +183,7 @@ class Strategy(ABC):
         entry_rules = self.get_entry_rules()
         logic = entry_rules.logic.upper()
         results = [
-            self._evaluate_condition(cond, historical_data[-1], historical_data)
+            cond.is_satisfied(historical_data)
             for cond in entry_rules.conditions
         ]
         return all(results) if logic == "AND" else any(results)
@@ -173,28 +192,10 @@ class Strategy(ABC):
         exit_rules = self.get_exit_rules()
         logic = exit_rules.logic.upper()
         results = [
-            self._evaluate_condition(cond, historical_data[-1], historical_data)
+            cond.is_satisfied(historical_data)
             for cond in exit_rules.conditions
         ]
         return all(results) if logic == "AND" else any(results)
 
-    def _evaluate_condition(self, condition:Condition, candle, historical_data:List[Dict[str, Any]]) -> bool:
-        left_value = self._evaluate_expression(condition.left, candle, historical_data)
-        right_value = self._evaluate_expression(condition.right, candle, historical_data)
-        
-        if math.isnan(left_value) or math.isnan(right_value):
-            return False
-        
-        if condition.operator == ">":
-            return left_value > right_value
-        elif condition.operator == "<":
-            return left_value < right_value
-        elif condition.operator == "==":
-            return left_value == right_value
-        else:
-            raise ValueError(f"Unsupported operator: {condition.operator}")
-
-    def _evaluate_expression(self, expression:Expression, candle, historical_data:List[Dict[str, Any]]) -> float:
-        handler = IndicatorRegistry.get(expression.type.lower())
-        return handler(historical_data, expression.params)
+    # _evaluate_expression moved to Condition
     
