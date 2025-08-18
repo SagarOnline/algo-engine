@@ -78,7 +78,7 @@ def test_should_enter_trade_with_and_logic():
     )
 
     strategy = DummyStrategy(entry_rules)
-    assert strategy.should_enter_trade(candle, historical_data) is True
+    assert strategy.should_enter_trade(historical_data) is True
 
 def test_should_enter_trade_with_or_logic():
     candle = {"close": 5}
@@ -101,7 +101,7 @@ def test_should_enter_trade_with_or_logic():
     )
 
     strategy = DummyStrategy(entry_rules)
-    assert strategy.should_enter_trade(candle, historical_data) is True
+    assert strategy.should_enter_trade(historical_data) is True
 
 def test_get_required_history_start_date():
     entry_rules = RuleSet(
