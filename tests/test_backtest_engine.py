@@ -86,7 +86,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     mock_historical_data_repository.get_historical_data.return_value = historical_data
     
     # Enter on the second candle, exit on the fourth
-    mock_strategy.should_enter_trade.side_effect = [True, False, False, False]
+    mock_strategy.should_enter_trade.side_effect = [False, True, False, False, False]
     mock_strategy.should_exit_trade.side_effect = [False, True, False]
 
     report = backtest_engine.run(mock_strategy, start_date, end_date)
@@ -134,6 +134,6 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     
     # The first call to should_enter_trade corresponds to the candle on 2023-01-03
     # as the loop inside `run` starts trading after `start_date`
-    first_call_args = mock_strategy.should_enter_trade.call_args_list[0]
-    assert first_call_args[0][0]['timestamp'].date() == date(2023, 1, 3)
+    first_call_args = mock_strategy.should_enter_trade.call_args_list[0][0][0]
+    assert first_call_args[len(first_call_args)-1]['timestamp'].date() == date(2023, 1, 3)
     

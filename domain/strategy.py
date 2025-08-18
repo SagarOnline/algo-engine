@@ -160,20 +160,20 @@ class Strategy(ABC):
         
         return start_date - timedelta(days=calendar_days_needed)
 
-    def should_enter_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
+    def should_enter_trade(self, historical_data: List[Dict[str, Any]]) -> bool:
         entry_rules = self.get_entry_rules()
         logic = entry_rules.logic.upper()
         results = [
-            self._evaluate_condition(cond, candle, historical_data)
+            self._evaluate_condition(cond, historical_data[-1], historical_data)
             for cond in entry_rules.conditions
         ]
         return all(results) if logic == "AND" else any(results)
-    
-    def should_exit_trade(self, candle: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> bool:
+
+    def should_exit_trade(self, historical_data: List[Dict[str, Any]]) -> bool:
         exit_rules = self.get_exit_rules()
         logic = exit_rules.logic.upper()
         results = [
-            self._evaluate_condition(cond, candle, historical_data)
+            self._evaluate_condition(cond, historical_data[-1], historical_data)
             for cond in exit_rules.conditions
         ]
         return all(results) if logic == "AND" else any(results)
