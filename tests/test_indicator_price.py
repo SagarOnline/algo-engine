@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+from domain.indicators.exceptions import InvalidStrategyConfiguration
 from domain.indicators.registry import register_indicator
 from domain.indicators.price import indicator_price  # replace with actual module path
 
@@ -21,7 +22,7 @@ def test_indicator_price_with_dataframe():
     assert result == 108.0
 
 
-def test_indicator_price_with_dataframe_default_param():
+def test_indicator_price_with_no_price_param():
     df = pd.DataFrame(
         [
             {"open": 200, "high": 210, "low": 195, "close": 205},
@@ -29,9 +30,8 @@ def test_indicator_price_with_dataframe_default_param():
         ]
     )
     # no "price" key → should default to "close"
-    result = indicator_price(df, {})
-
-    assert result == 208.0
+    with pytest.raises(InvalidStrategyConfiguration):
+        indicator_price(df, {})
 
 
 def test_indicator_price_with_list_of_dicts():
