@@ -242,3 +242,41 @@ def test_condition_is_satisfied_nan():
         right=Expression("number", {"value": 1})
     )
     assert cond.is_satisfied([{"close": 1}]) is False
+    
+def make_condition_true():
+    return Condition(
+        operator="==",
+        left=Expression("number", {"value": 1}),
+        right=Expression("number", {"value": 1})
+    )
+
+def make_condition_false():
+    return Condition(
+        operator="==",
+        left=Expression("number", {"value": 1}),
+        right=Expression("number", {"value": 2})
+    )
+    
+def test_ruleset_apply_on_and():
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[make_condition_true(), make_condition_true()]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is True
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[make_condition_true(), make_condition_false()]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is False
+
+def test_ruleset_apply_on_or():
+    ruleset = RuleSet(
+        logic="OR",
+        conditions=[make_condition_true(), make_condition_false()]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is True
+    ruleset = RuleSet(
+        logic="OR",
+        conditions=[make_condition_false(), make_condition_false()]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is False

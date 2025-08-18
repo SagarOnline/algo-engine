@@ -98,6 +98,11 @@ class RuleSet:
 
     def __repr__(self):
         return f"RuleSet(logic={self.logic}, conditions={self.conditions})"
+
+    def apply_on(self, historical_data:List[Dict[str, Any]]) -> bool:
+        logic = self.logic.upper()
+        results = [cond.is_satisfied(historical_data) for cond in self.conditions]
+        return all(results) if logic == "AND" else any(results)
     
 
 
@@ -181,21 +186,11 @@ class Strategy(ABC):
 
     def should_enter_trade(self, historical_data: List[Dict[str, Any]]) -> bool:
         entry_rules = self.get_entry_rules()
-        logic = entry_rules.logic.upper()
-        results = [
-            cond.is_satisfied(historical_data)
-            for cond in entry_rules.conditions
-        ]
-        return all(results) if logic == "AND" else any(results)
+        return entry_rules.apply_on(historical_data)
 
     def should_exit_trade(self, historical_data: List[Dict[str, Any]]) -> bool:
         exit_rules = self.get_exit_rules()
-        logic = exit_rules.logic.upper()
-        results = [
-            cond.is_satisfied(historical_data)
-            for cond in exit_rules.conditions
-        ]
-        return all(results) if logic == "AND" else any(results)
+        return exit_rules.apply_on(historical_data)
 
     # _evaluate_expression moved to Condition
     
