@@ -33,6 +33,11 @@ def test_indicator_price_with_no_price_param():
     with pytest.raises(InvalidStrategyConfiguration):
         indicator_price(df, {})
 
+def test_indicator_price_with_no_historical_data():
+    df = pd.DataFrame([])
+    params = {"price": "close"}
+    with pytest.raises(RuntimeError, match="historical_data is empty in price indicator"):
+        indicator_price(df, params)
 
 def test_indicator_price_with_list_of_dicts():
     data = [
