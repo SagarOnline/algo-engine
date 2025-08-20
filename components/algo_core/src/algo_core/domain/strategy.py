@@ -92,6 +92,15 @@ class Condition:
             raise ValueError(f"Unsupported operator: {self.operator}")
     
 class RuleSet:
+    def get_maximum_period_value(self) -> int:
+        max_period = 0
+        for cond in self.conditions:
+            for expr in [cond.left, cond.right]:
+                if "period" in expr.params:
+                    period = expr.params["period"]
+                    if isinstance(period, int) and period > max_period:
+                        max_period = period
+        return max_period
     def __init__(self, logic: str, conditions: List[Condition]):
         self.logic = logic  # "AND" or "OR"
         self.conditions = conditions
@@ -140,24 +149,10 @@ class Strategy(ABC):
         entry_rules = self.get_entry_rules()
         exit_rules = self.get_exit_rules()
 
-        all_expressions = []
-        if entry_rules and entry_rules.conditions:
-            for cond in entry_rules.conditions:
-                all_expressions.append(cond.left)
-                all_expressions.append(cond.right)
-        
-        if exit_rules and exit_rules.conditions:
-            for cond in exit_rules.conditions:
-                all_expressions.append(cond.left)
-                all_expressions.append(cond.right)
+        entry_max = entry_rules.get_maximum_period_value() if entry_rules else 0
+        exit_max = exit_rules.get_maximum_period_value() if exit_rules else 0
+        max_period = max(entry_max, exit_max)
 
-        max_period = 0
-        for expr in all_expressions:
-            if "period" in expr.params:
-                period = expr.params["period"]
-                if isinstance(period, int) and period > max_period:
-                    max_period = period
-        
         if max_period == 0:
             return start_date
 
@@ -181,7 +176,6 @@ class Strategy(ABC):
             days_needed = 0 # Should not happen for valid timeframes
 
         calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier)
-        
         return start_date - timedelta(days=calendar_days_needed)
 
     def should_enter_trade(self, historical_data: List[Dict[str, Any]]) -> bool:

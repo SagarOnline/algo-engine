@@ -315,3 +315,39 @@ def test_apply_on_or_all_false():
         conditions=[make_condition(1, "==", 2), make_condition(2, "<", 1)]
     )
     assert ruleset.apply_on([{"close": 1}]) is False
+
+def test_ruleset_get_maximum_period_value():
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression("ema", {"period": 10}),
+                right=Expression("ema", {"period": 20})
+            ),
+            Condition(
+                operator="<",
+                left=Expression("ema", {"period": 50}),
+                right=Expression("ema", {"period": 5})
+            ),
+            Condition(
+                operator="==",
+                left=Expression("number", {"value": 1}),
+                right=Expression("number", {"value": 2})
+            )
+        ]
+    )
+    assert ruleset.get_maximum_period_value() == 50
+
+def test_ruleset_get_maximum_period_value_none():
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression("number", {"value": 1}),
+                right=Expression("number", {"value": 2})
+            )
+        ]
+    )
+    assert ruleset.get_maximum_period_value() == 0
