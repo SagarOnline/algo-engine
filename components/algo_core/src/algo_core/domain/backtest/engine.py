@@ -13,10 +13,10 @@ from algo_core.domain.timeframe import Timeframe
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
 from algo_core.infrastructure.json_backtest_report_repository import JsonBacktestReportRepository
 
-from algo_core.domain.backtest.report import BacktestReport
+from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
 from algo_core.domain.market import Market
-from algo_core.domain.backtest.backtest_run import BacktestRun
+from algo_core.domain.backtest.backtest_run import BackTest
 
 
 class BacktestEngine:
@@ -24,10 +24,10 @@ class BacktestEngine:
         self.historical_data_repository = historical_data_repository
         self.report_repository = report_repository
 
-    def run(self, strategy: Strategy, start_date: date, end_date: date) -> BacktestReport:
+    def start(self, strategy: Strategy, start_date: date, end_date: date) -> BackTestReport:
         historical_data = self._get_historical_data(strategy, start_date, end_date)
-        backtest_run = BacktestRun(strategy, historical_data, start_date)
-        report = backtest_run.start()
+        backtest = BackTest(strategy, historical_data, start_date)
+        report = backtest.run()
         self.report_repository.save(report)
         return report
 

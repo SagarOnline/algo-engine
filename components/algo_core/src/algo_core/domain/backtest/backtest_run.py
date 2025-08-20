@@ -1,17 +1,17 @@
 from datetime import date
 from typing import List
 from algo_core.domain.strategy import Strategy
-from algo_core.domain.backtest.report import BacktestReport
+from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
 
-class BacktestRun:
+class BackTest:
 
     def __init__(self, strategy: Strategy, historical_data: List[dict], start_date: date):
         self.strategy = strategy
         self.historical_data = historical_data
         self.start_date = start_date
 
-    def start(self) -> BacktestReport:
+    def run(self) -> BackTestReport:
         instrument = self.strategy.get_instrument()
         trades = []
         in_trade = False
@@ -35,4 +35,4 @@ class BacktestRun:
         pnl = 0
         for trade in trades:
             pnl += trade.profit()
-        return BacktestReport(self.strategy.get_name(), pnl, trades)
+        return BackTestReport(self.strategy.get_name(), pnl, trades)
