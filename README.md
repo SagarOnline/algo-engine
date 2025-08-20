@@ -22,10 +22,22 @@ git clone git@github.com:SagarOnline/algo-engine.git
 cd algo-engine
 ```
 
-### 2. Create Vitual Environment
+### 3. Create Vitual Environment
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+```
+
+### 2. Create Environment File
+```bash
+python - <<EOF
+content = """HISTORICAL_DATA_DIRECTORY=<historical-data-directory-path-on-local-machine>
+BACKTEST_REPORT_DIRECTORY=<-report-direcotry-path-on-local-machine>
+"""
+with open(".env", "w") as f:
+    f.write(content)
+EOF
+
 ```
 
 ### 3. Install Dependencies
@@ -37,6 +49,11 @@ python -m pip install -r requirements.txt
 ### 4. Running Unit Tests
 ```bash
 python -m pytest
+```
+
+### 4. Running The Application
+```bash
+python main.py
 ```
 
 

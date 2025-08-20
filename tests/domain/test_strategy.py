@@ -280,3 +280,38 @@ def test_ruleset_apply_on_or():
         conditions=[make_condition_false(), make_condition_false()]
     )
     assert ruleset.apply_on([{"close": 1}]) is False
+
+def make_condition(val_left, op, val_right):
+    return Condition(
+        operator=op,
+        left=Expression("number", {"value": val_left}),
+        right=Expression("number", {"value": val_right})
+    )
+
+def test_apply_on_and_all_true():
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[make_condition(1, "==", 1), make_condition(2, ">", 1)]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is True
+
+def test_apply_on_and_one_false():
+    ruleset = RuleSet(
+        logic="AND",
+        conditions=[make_condition(1, "==", 1), make_condition(2, "<", 1)]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is False
+
+def test_apply_on_or_one_true():
+    ruleset = RuleSet(
+        logic="OR",
+        conditions=[make_condition(1, "==", 2), make_condition(2, ">", 1)]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is True
+
+def test_apply_on_or_all_false():
+    ruleset = RuleSet(
+        logic="OR",
+        conditions=[make_condition(1, "==", 2), make_condition(2, "<", 1)]
+    )
+    assert ruleset.apply_on([{"close": 1}]) is False
