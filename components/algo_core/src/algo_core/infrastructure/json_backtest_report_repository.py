@@ -9,7 +9,7 @@ from algo_core.domain.backtest.report import BacktestReport
 
 class JsonBacktestReportRepository(BacktestReportRepository):
     def __init__(self, report_directory: str = "report"):
-        self.report_directory = os.getenv("REPORT_DIRECTORY", report_directory)
+        self.report_directory = os.getenv("BACKTEST_REPORT_DIRECTORY", report_directory)
 
     def save(self, report: BacktestReport) -> None:
         os.makedirs(self.report_directory, exist_ok=True)
