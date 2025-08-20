@@ -21,3 +21,4 @@ class JsonBacktestReportRepository(BacktestReportRepository):
 
         with open(report_filepath, "w") as f:
             json.dump(report.to_dict(), f, indent=4, default=str)
+            print(f"Report saved to {report_filepath}")
