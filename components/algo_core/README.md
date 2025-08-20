@@ -8,7 +8,7 @@ It provides functionality for both **backtesting** strategies using historical d
 ## 📌 Overview
 
 - **Backtesting**  
-  Uses the historical market data provided by the [`historical-data`](../historical-data/README.md) component to simulate strategies, analyze performance, and optimize trading rules.
+  Uses the historical market data provided by the [`historical-data`](../historical_data/README.md) component to simulate strategies, analyze performance, and optimize trading rules.
 
 - **Live Trading**  
   Connects to brokers such as **Upstox** and **Zerodha** to:
@@ -35,7 +35,7 @@ It provides functionality for both **backtesting** strategies using historical d
 
 ### Prerequisites
 - Python 3.9+  
-- [`historical-data`](../historical-data/README.md) component set up for backtesting.  
+- [`historical-data`](../historical_data/README.md) component set up for backtesting.  
 - Broker account (Upstox / Zerodha) with API credentials for live trading.
 
 ### Installation
