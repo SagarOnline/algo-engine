@@ -66,7 +66,7 @@ python -m pytest
 
 ### 4. Running The Application
 ```bash
-python main.py
+python src/algo-core/main.py
 ```
 
 
