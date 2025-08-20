@@ -14,12 +14,17 @@ An extensible and testable **algorithmic trading engine** designed to **run and 
 
 ---
 
-## ⚙️ Getting Started
+## 🚀 Components
+
+- algo-core : This is core component of algo engine.
+
+---
+## ⚙️ algo-core
 
 ### 1. Clone the Repository
 ```bash
 git clone git@github.com:SagarOnline/algo-engine.git
-cd algo-engine
+cd algo-engine/components/algo-core
 ```
 
 ### 3. Create Vitual Environment
@@ -33,6 +38,7 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 python - <<EOF
 content = """HISTORICAL_DATA_DIRECTORY=<historical-data-directory-path-on-local-machine>
 BACKTEST_REPORT_DIRECTORY=<-report-direcotry-path-on-local-machine>
+STRATEGIES_CONFIG_DIRECTORY=..\..\strategies
 """
 with open(".env", "w") as f:
     f.write(content)
@@ -40,9 +46,16 @@ EOF
 
 ```
 
+
 ### 3. Install Dependencies
+#### For production (runtime) dependencies:
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install .
+```
+
+#### For development (dev/test) dependencies:
+```bash
+python -m pip install -e .[dev]
 ```
 
 
