@@ -16,6 +16,7 @@ from algo_core.infrastructure.json_backtest_report_repository import JsonBacktes
 from algo_core.domain.backtest.report import BacktestReport
 from algo_core.domain.trade import Trade
 from algo_core.domain.market import Market
+from algo_core.domain.backtest.backtest_run import BacktestRun
 
 
 class BacktestEngine:
@@ -24,42 +25,15 @@ class BacktestEngine:
         self.report_repository = report_repository
 
     def run(self, strategy: Strategy, start_date: date, end_date: date) -> BacktestReport:
+        historical_data = self._get_historical_data(strategy, start_date, end_date)
+        backtest_run = BacktestRun(strategy, historical_data, start_date)
+        report = backtest_run.start()
+        self.report_repository.save(report)
+        return report
+
+    def _get_historical_data(self, strategy, start_date, end_date):
         instrument = strategy.get_instrument()
         timeframe = Timeframe(strategy.get_timeframe())
         required_start_date = strategy.get_required_history_start_date(start_date)
         historical_data = self.historical_data_repository.get_historical_data(instrument, required_start_date, end_date, timeframe)
-        
-        trades: List[Trade] = []
-        in_trade = False
-        entry_price = 0.0
-        entry_time = None
-        
-        for i in range(0, len(historical_data)):
-            previous_candles = historical_data[:i+1]
-            # Ensure we only start trading from the requested start_date
-            if previous_candles[i]['timestamp'].date() < start_date:
-                continue
-
-            if not in_trade:
-                if strategy.should_enter_trade(previous_candles):
-                    # Enter trade
-                    entry_price = previous_candles[i]["close"]
-                    entry_time = previous_candles[i]["timestamp"]
-                    in_trade = True
-            else:
-                if strategy.should_exit_trade(previous_candles):
-                    # Exit trade
-                    exit_price = previous_candles[i]["close"]
-                    exit_time = previous_candles[i]["timestamp"]
-                    trades.append(Trade(instrument, entry_time, entry_price, exit_time, exit_price))
-                    in_trade = False
-        
-        # Calculate results
-        pnl = 0
-        for trade in trades:
-            pnl += trade.profit()
-        
-        report = BacktestReport(strategy.get_name(), pnl, trades)
-        self.report_repository.save(report)
-
-        return report
+        return historical_data
