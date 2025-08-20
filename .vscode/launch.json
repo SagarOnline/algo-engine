@@ -12,6 +12,18 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}/components/algo_core/src"
       }
+    },
+    {
+      "name": "Python: Debug historical_data main.py",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/components/historical_data/src/historical_data/main.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/components/historical_data",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/components/historical_data/src"
+      }
     }
   ]
 }

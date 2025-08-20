@@ -1,0 +1,7 @@
+{
+  "from_date": "2025-01-01",
+  "instruments": [
+    "NSE_INDEX|Nifty 50"
+  ],
+  "timeframes": ["5min", "15min"]
+}

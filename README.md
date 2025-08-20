@@ -16,57 +16,16 @@ An extensible and testable **algorithmic trading engine** designed to **run and 
 
 ## 🚀 Components
 
-- algo-core : This is core component of algo engine.
+- [Algo Core Component](./components/algo_core/README.md) : It provides functionality for both **backtesting** strategies using historical data and **executing live trades** through broker integrations.
+- [Historical Data Component](./components/historical_data/README.md) : It is responsible for fetching, managing, and storing historical market data for various instruments. This data is a critical dependency for the **algo-core** component, which uses it to perform **backtesting** and validate algorithmic trading strategies before live execution.  
 
 ---
-## ⚙️ algo-core
+## ⚙️ Getting Started
 
 ### 1. Clone the Repository
 ```bash
 git clone git@github.com:SagarOnline/algo-engine.git
-cd algo-engine/components/algo-core
 ```
 
-### 3. Create Vitual Environment
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-```
-
-### 2. Create Environment File
-```bash
-python - <<EOF
-content = """HISTORICAL_DATA_DIRECTORY=<historical-data-directory-path-on-local-machine>
-BACKTEST_REPORT_DIRECTORY=<-report-direcotry-path-on-local-machine>
-STRATEGIES_CONFIG_DIRECTORY=..\..\strategies
-"""
-with open(".env", "w") as f:
-    f.write(content)
-EOF
-
-```
-
-
-### 3. Install Dependencies
-#### For production (runtime) dependencies:
-```bash
-python -m pip install .
-```
-
-#### For development (dev/test) dependencies:
-```bash
-python -m pip install -e .[dev]
-```
-
-
-### 4. Running Unit Tests
-```bash
-python -m pytest
-```
-
-### 4. Running The Application
-```bash
-python src/algo-core/main.py
-```
-
-
+### 3. Navigate to Components
+Refer to the README.md file of that component for installation and setup details.
