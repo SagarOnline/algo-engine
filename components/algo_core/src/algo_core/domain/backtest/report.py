@@ -2,7 +2,7 @@ from typing import List
 from algo_core.domain.trade import Trade
 
 
-class BacktestReport:
+class BackTestReport:
     def __init__(self, strategy_name: str, pnl: float, trades: List[Trade]):
         self.strategy_name = strategy_name
         self.pnl = pnl

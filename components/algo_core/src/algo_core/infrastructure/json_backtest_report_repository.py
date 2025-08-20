@@ -4,14 +4,14 @@ from typing import Dict, Any
 from datetime import date
 
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
-from algo_core.domain.backtest.report import BacktestReport
+from algo_core.domain.backtest.report import BackTestReport
 
 
 class JsonBacktestReportRepository(BacktestReportRepository):
     def __init__(self, report_directory: str = "report"):
         self.report_directory = os.getenv("BACKTEST_REPORT_DIRECTORY", report_directory)
 
-    def save(self, report: BacktestReport) -> None:
+    def save(self, report: BackTestReport) -> None:
         os.makedirs(self.report_directory, exist_ok=True)
         # The report object does not have start and end dates.
         # This is a temporary solution.

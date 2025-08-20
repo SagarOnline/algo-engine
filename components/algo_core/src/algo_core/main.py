@@ -36,7 +36,7 @@ def main():
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-        report = engine.run(strategy, start_date_obj, end_date_obj)
+        engine.start(strategy, start_date_obj, end_date_obj)
     except InvalidStrategyConfiguration as e:
         print(f"InvalidStrategyConfiguration: {e}")
 
