@@ -3,7 +3,7 @@ from typing import List
 from algo_core.domain.strategy import Strategy
 from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
-from algo_core.src.algo_core.domain.backtest.historical_data import HistoricalData
+from algo_core.domain.backtest.historical_data import HistoricalData
 
 class BackTest:
 

@@ -17,7 +17,7 @@ from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
 from algo_core.domain.market import Market
 from algo_core.domain.backtest.backtest_run import BackTest
-from algo_core.src.algo_core.domain.backtest.historical_data import HistoricalData
+from algo_core.domain.backtest.historical_data import HistoricalData
 
 
 class BacktestEngine:
