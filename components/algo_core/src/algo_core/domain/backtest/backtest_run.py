@@ -3,12 +3,14 @@ from typing import List
 from algo_core.domain.strategy import Strategy
 from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
+from algo_core.domain.backtest.historical_data import HistoricalData
 
 class BackTest:
 
-    def __init__(self, strategy: Strategy, historical_data: List[dict], start_date: date):
+    def __init__(self, strategy: Strategy, underlying_instrument_hd: HistoricalData, position_instrument_hd: HistoricalData = None, start_date: date):
         self.strategy = strategy
-        self.historical_data = historical_data
+        self.underlying_instrument_hd = underlying_instrument_hd
+        self.position_instrument_hd = position_instrument_hd if position_instrument_hd is not None else underlying_instrument_hd
         self.start_date = start_date
 
     def run(self) -> BackTestReport:
@@ -17,19 +19,32 @@ class BackTest:
         in_trade = False
         entry_price = 0.0
         entry_time = None
-        for i in range(0, len(self.historical_data)):
-            previous_candles = self.historical_data[:i+1]
-            if previous_candles[i]['timestamp'].date() < self.start_date:
+        for i in range(0, len(self.underlying_instrument_hd.data)):
+            previous_candles = self.underlying_instrument_hd.data[:i+1]
+            candle = self.underlying_instrument_hd.data[i]
+            if candle['timestamp'].date() < self.start_date:
                 continue
+            # Use hd for entry/exit logic, but use position_instrument_hd for execution
             if not in_trade:
                 if self.strategy.should_enter_trade(previous_candles):
-                    entry_price = previous_candles[i]["close"]
-                    entry_time = previous_candles[i]["timestamp"]
+                    # Find execution candle in position_instrument_hd by timestamp
+                    exec_candle = self.position_instrument_hd.getCandleBy(
+                        candle['timestamp'].isoformat() if hasattr(candle['timestamp'], 'isoformat') else str(candle['timestamp'])
+                    )
+                    if exec_candle is None:
+                        raise ValueError(f"No execution candle found for entry at timestamp {candle['timestamp']}")
+                    entry_price = exec_candle["close"]
+                    entry_time = exec_candle["timestamp"]
                     in_trade = True
             else:
                 if self.strategy.should_exit_trade(previous_candles):
-                    exit_price = previous_candles[i]["close"]
-                    exit_time = previous_candles[i]["timestamp"]
+                    exec_candle = self.position_instrument_hd.getCandleBy(
+                        candle['timestamp'].isoformat() if hasattr(candle['timestamp'], 'isoformat') else str(candle['timestamp'])
+                    )
+                    if exec_candle is None:
+                        raise ValueError(f"No execution candle found for exit at timestamp {candle['timestamp']}")
+                    exit_price = exec_candle["close"]
+                    exit_time = exec_candle["timestamp"]
                     trades.append(Trade(instrument, entry_time, entry_price, exit_time, exit_price))
                     in_trade = False
         pnl = 0

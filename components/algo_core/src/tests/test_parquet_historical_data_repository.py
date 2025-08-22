@@ -52,12 +52,9 @@ class TestParquetHistoricalDataRepository(unittest.TestCase):
         start_date = date(2023, 1, 1)
         end_date = date(2023, 1, 2)
         
-        data = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
-        
-        self.assertEqual(len(data), 4) # 2 records per file * 2 files
-        
-        timestamps = [pd.to_datetime(d['timestamp']) for d in data]
-        
+        hd = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
+        self.assertEqual(len(hd.data), 4) # 2 records per file * 2 files
+        timestamps = [pd.to_datetime(d['timestamp']) for d in hd.data]
         self.assertTrue(all(start_date <= ts.date() <= end_date for ts in timestamps))
         self.assertTrue(any(ts.date() == date(2023, 1, 1) for ts in timestamps))
         self.assertTrue(any(ts.date() == date(2023, 1, 2) for ts in timestamps))
@@ -67,18 +64,16 @@ class TestParquetHistoricalDataRepository(unittest.TestCase):
         start_date = date(2024, 1, 1)
         end_date = date(2024, 1, 2)
         
-        data = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
-        
-        self.assertEqual(len(data), 0)
+        hd = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
+        self.assertEqual(len(hd.data), 0)
 
     def test_get_historical_data_single_day(self):
         start_date = date(2023, 1, 1)
         end_date = date(2023, 1, 1)
         
-        data = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
-        
-        self.assertEqual(len(data), 2)
-        timestamps = [pd.to_datetime(d['timestamp']) for d in data]
+        hd = self.repository.get_historical_data(self.instrument, start_date, end_date, self.timeframe)
+        self.assertEqual(len(hd.data), 2)
+        timestamps = [pd.to_datetime(d['timestamp']) for d in hd.data]
         self.assertTrue(all(ts.date() == date(2023, 1, 1) for ts in timestamps))
 
 if __name__ == '__main__':
