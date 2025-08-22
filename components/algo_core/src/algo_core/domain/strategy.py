@@ -46,6 +46,18 @@ class Instrument:
         self.expiring = Expiring(expiring) if expiring else None
         self.atm = atm
 
+    def __eq__(self, other):
+        if not isinstance(other, Instrument):
+            return False
+        return (
+            self.type == other.type and
+            self.exchange == other.exchange and
+            self.instrument_key == other.instrument_key and
+            self.expiry == other.expiry and
+            self.expiring == other.expiring and
+            self.atm == other.atm
+        )
+
 
 class Position:
     def __init__(self, action: PositionAction, instrument: Instrument):
@@ -187,4 +199,4 @@ class Strategy(ABC):
         return exit_rules.apply_on(historical_data)
 
     # _evaluate_expression moved to Condition
-    
+
