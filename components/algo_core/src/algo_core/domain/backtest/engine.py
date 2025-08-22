@@ -22,7 +22,7 @@ class BacktestEngine:
     def start(self, strategy: Strategy, start_date: date, end_date: date) -> BackTestReport:
         underlying_instrument_hd = self._get_underlying_historical_data(strategy, start_date, end_date)
         position_instrument_hd = self._get_position_historical_data(strategy, start_date, end_date)
-        backtest = BackTest(strategy, underlying_instrument_hd, start_date, position_instrument_hd)
+        backtest = BackTest(strategy, underlying_instrument_hd, position_instrument_hd, start_date)
         report = backtest.run()
         self.report_repository.save(report)
         return report

@@ -7,7 +7,7 @@ from algo_core.domain.backtest.historical_data import HistoricalData
 
 class BackTest:
 
-    def __init__(self, strategy: Strategy, underlying_instrument_hd: HistoricalData, start_date: date, position_instrument_hd: HistoricalData = None):
+    def __init__(self, strategy: Strategy, underlying_instrument_hd: HistoricalData, position_instrument_hd: HistoricalData = None, start_date: date):
         self.strategy = strategy
         self.underlying_instrument_hd = underlying_instrument_hd
         self.position_instrument_hd = position_instrument_hd if position_instrument_hd is not None else underlying_instrument_hd
