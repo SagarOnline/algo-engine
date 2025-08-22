@@ -1,17 +1,11 @@
-from datetime import datetime, date
-from typing import Dict, Any, List
-import json
-import os
+from datetime import date
 from dotenv import load_dotenv
 
 from algo_core.domain.strategy import Strategy
-from algo_core.infrastructure.jsonstrategy import JsonStrategy
 from algo_core.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo_core.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
 from algo_core.domain.timeframe import Timeframe
 
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
-from algo_core.infrastructure.json_backtest_report_repository import JsonBacktestReportRepository
 
 from algo_core.domain.backtest.report import BackTestReport
 from algo_core.domain.trade import Trade
