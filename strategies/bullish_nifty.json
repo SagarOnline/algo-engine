@@ -17,7 +17,7 @@
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,
-      "instrument_key": "NSE_INDEX|NIFTY 50",
+      "instrument_key": "NSE_FO|64103",
       "exchange": "NSE"
     }
   },

@@ -1,7 +1,8 @@
 {
-  "from_date": "2025-01-01",
+  "from_date": "2025-07-01",
   "instruments": [
-    "NSE_INDEX|Nifty 50"
+    "NSE_INDEX|Nifty 50",
+    "NSE_FO|64103"
   ],
   "timeframes": ["5min", "15min"]
 }
