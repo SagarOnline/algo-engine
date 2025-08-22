@@ -25,8 +25,8 @@ class BacktestEngine:
         self.report_repository = report_repository
 
     def start(self, strategy: Strategy, start_date: date, end_date: date) -> BackTestReport:
-        historical_data = self._get_historical_data(strategy, start_date, end_date)
-        backtest = BackTest(strategy, historical_data, start_date)
+        historical_data_obj = self._get_historical_data(strategy, start_date, end_date)
+        backtest = BackTest(strategy, historical_data_obj.data, start_date)
         report = backtest.run()
         self.report_repository.save(report)
         return report

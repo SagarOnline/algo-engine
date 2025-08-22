@@ -2,6 +2,7 @@ import os
 from datetime import date, timedelta
 import pandas as pd
 from typing import List, Dict, Any
+from algo_core.domain.backtest.historical_data import HistoricalData
 from algo_core.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo_core.domain.strategy import Instrument
 from algo_core.domain.timeframe import Timeframe
@@ -10,7 +11,7 @@ class ParquetHistoricalDataRepository(HistoricalDataRepository):
     def __init__(self, data_path: str = "data"):
         self.data_path = os.getenv("HISTORICAL_DATA_DIRECTORY", data_path)
 
-    def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> List[Dict[str, Any]]:
+    def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> HistoricalData:
         dfs = []
         current_date = start_date
         while current_date <= end_date:
@@ -25,11 +26,10 @@ class ParquetHistoricalDataRepository(HistoricalDataRepository):
             current_date += timedelta(days=1)
 
         if not dfs:
-            return []
+            return HistoricalData([])
 
         df = pd.concat(dfs, ignore_index=True)
 
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df[(df['timestamp'].dt.date >= start_date) & (df['timestamp'].dt.date <= end_date)]
-        
-        return df.to_dict('records')
+        return HistoricalData(df.to_dict('records'))

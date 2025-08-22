@@ -38,8 +38,9 @@ def mock_strategy_for_respect_start_date():
 
 @pytest.fixture
 def mock_historical_data_repository():
+    from algo_core.domain.backtest.historical_data import HistoricalData
     repo = Mock(spec=HistoricalDataRepository)
-    repo.get_historical_data.return_value = []
+    repo.get_historical_data.return_value = HistoricalData([])
     return repo
 
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
@@ -76,6 +77,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     start_date = date(2023, 1, 1)
     end_date = date(2023, 1, 5)
     
+    from algo_core.domain.backtest.historical_data import HistoricalData
     historical_data = [
         generate_candle("2023-01-01T09:15:00", 100),
         generate_candle("2023-01-02T09:15:00", 110), # Entry signal
@@ -83,7 +85,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
         generate_candle("2023-01-04T09:15:00", 105), # Exit signal
         generate_candle("2023-01-05T09:15:00", 115),
     ]
-    mock_historical_data_repository.get_historical_data.return_value = historical_data
+    mock_historical_data_repository.get_historical_data.return_value = HistoricalData(historical_data)
     
     # Enter on the second candle, exit on the fourth
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False, False]
@@ -106,13 +108,14 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     required_start_date = date(2023, 1, 1)
     mock_strategy.get_required_history_start_date.return_value = required_start_date
 
+    from algo_core.domain.backtest.historical_data import HistoricalData
     historical_data = [
         generate_candle("2023-01-01T09:15:00", 100), # Should be ignored for trading
         generate_candle("2023-01-02T09:15:00", 110), # Should be ignored for trading
         generate_candle("2023-01-03T09:15:00", 120), # Entry signal
         generate_candle("2023-01-04T09:15:00", 130), # Exit signal
     ]
-    mock_historical_data_repository.get_historical_data.return_value = historical_data
+    mock_historical_data_repository.get_historical_data.return_value = HistoricalData(historical_data)
     
     # Only generate entry signal on 2023-01-03
     mock_strategy.should_enter_trade.side_effect = [True, False] # Corresponds to 3rd and 4th candle

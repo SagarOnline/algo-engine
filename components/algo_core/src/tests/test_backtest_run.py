@@ -54,6 +54,7 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     mock_strategy.should_enter_trade.side_effect = [False, False, True, False]
     mock_strategy.should_exit_trade.side_effect = [True]
     backtest = BackTest(mock_strategy, historical_data, date(2023, 1, 1))
+    # No changes needed, BackTest still expects a list of dicts for historical_data argument.
     report = backtest.run()
     assert len(report.trades) == 1
     trade = report.trades[0]
