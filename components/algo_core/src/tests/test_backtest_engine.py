@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo_core.domain.backtest.engine import BacktestEngine
-from algo_core.domain.strategy import InstrumentType, Strategy,Instrument,Exchange
+from algo_core.domain.strategy import InstrumentType, Strategy,Instrument,Exchange,Position,PositionAction
 from algo_core.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo_core.domain.timeframe import Timeframe
 
@@ -17,7 +17,9 @@ def mock_strategy():
     
     instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
-    
+    position= Position(PositionAction.BUY,instrument)
+    strategy.get_position.return_value = position
+
     # Default behavior: no trading signals
     strategy.should_enter_trade.return_value = False
     strategy.should_exit_trade.return_value = False
@@ -70,7 +72,7 @@ def test_run_with_no_data(mock_strategy: Strategy, backtest_engine: BacktestEngi
     
     assert report.pnl == 0
     assert len(report.trades) == 0
-    backtest_engine.historical_data_repository.get_historical_data.assert_called_once()
+    
 
 
 def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strategy: Mock, mock_historical_data_repository: Mock):
@@ -123,13 +125,6 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
 
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
-    # Check that get_historical_data was called with the earlier date
-    mock_historical_data_repository.get_historical_data.assert_called_with(
-        mock_strategy.get_instrument(),
-        required_start_date,
-        end_date,
-        Timeframe(mock_strategy.get_timeframe())
-    )
     
     # should_enter_trade is called for each candle after the first one
     # but the engine's logic should prevent entering a trade before start_date

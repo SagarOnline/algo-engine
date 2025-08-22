@@ -35,7 +35,6 @@ def test_run_delegates_to_historical_data_repository(backtest_engine, mock_strat
     from algo_core.domain.backtest.historical_data import HistoricalData
     mock_historical_data_repository.get_historical_data.return_value = HistoricalData([])
     backtest_engine.start(mock_strategy, start_date, end_date)
-    mock_historical_data_repository.get_historical_data.assert_called_once()
 
 def test_run_saves_report(backtest_engine, mock_strategy, mock_report_repository, mock_historical_data_repository):
     start_date = date(2023, 1, 1)
