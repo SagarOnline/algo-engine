@@ -5,6 +5,7 @@ from algo_core.domain.strategy import Strategy
 from algo_core.domain.backtest.report import BackTestReport
 
 from algo_core.domain.backtest.backtest_run import BackTest
+from algo_core.src.algo_core.domain.backtest.historical_data import HistoricalData
 
 def generate_candle(timestamp_str: str, close_price: float):
     return {"timestamp": datetime.fromisoformat(timestamp_str), "close": close_price}
@@ -20,12 +21,12 @@ def mock_strategy():
 
 @pytest.fixture
 def historical_data():
-    return [
+    return HistoricalData([
         generate_candle("2023-01-01T09:15:00", 100),
         generate_candle("2023-01-02T09:15:00", 110),
         generate_candle("2023-01-03T09:15:00", 120),
         generate_candle("2023-01-04T09:15:00", 130),
-    ]
+    ])
 
 def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_data):
     mock_strategy.should_enter_trade.return_value = False
