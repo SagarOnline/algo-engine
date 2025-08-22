@@ -21,7 +21,7 @@ The **historical-data** component is part of the **Algo Engine** project. It is 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.9+  
+- Python 3.11+  
 - [pip](https://pip.pypa.io/en/stable/)  
 - Virtual environment (recommended)  
 

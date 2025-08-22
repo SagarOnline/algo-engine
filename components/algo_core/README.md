@@ -34,7 +34,7 @@ It provides functionality for both **backtesting** strategies using historical d
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.9+  
+- Python 3.11+  
 - [`historical-data`](../historical_data/README.md) component set up for backtesting.  
 - Broker account (Upstox / Zerodha) with API credentials for live trading.
 
@@ -55,9 +55,9 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 Create Environment File (for developement)
 ```bash
 python - <<EOF
-content = """HISTORICAL_DATA_DIRECTORY=<historical-data-directory-path-on-local-machine>
-BACKTEST_REPORT_DIRECTORY=<-report-direcotry-path-on-local-machine>
-STRATEGIES_CONFIG_DIRECTORY=..\..\strategies
+content = """HISTORICAL_DATA_DIRECTORY=../../data
+BACKTEST_REPORT_DIRECTORY=../../report
+STRATEGIES_CONFIG_DIRECTORY=../../strategies
 """
 with open(".env", "w") as f:
     f.write(content)
@@ -86,5 +86,5 @@ python -m pytest
 Run Test Strategy
 
 ```bash
-python src/algo-core/main.py
+python .\src\algo_core\main.py
 ```
