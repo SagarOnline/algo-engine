@@ -65,7 +65,7 @@ python -m pip install -e .[dev]
 Run application to fetch historical data
 
 ```bash
-python src/algo-core/main.py
+python .\src\historical_data\main.py
 ```
 
 ---
