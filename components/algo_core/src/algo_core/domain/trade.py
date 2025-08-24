@@ -2,6 +2,7 @@ from datetime import datetime
 from algo_core.domain.strategy import Instrument
 
 class Trade:
+
     def __init__(self, instrument: Instrument, entry_time: datetime, entry_price: float, exit_time: datetime, exit_price: float):
         self.instrument = instrument
         self.entry_time = entry_time
@@ -17,5 +18,16 @@ class Trade:
             return 0.0
         return ((self.exit_price - self.entry_price) / self.entry_price) * 100
 
+    def to_dict(self):
+        return {
+            "instrument": self.instrument.__dict__ if hasattr(self.instrument, "__dict__") else str(self.instrument),
+            "entry_time": self.entry_time,
+            "entry_price": self.entry_price,
+            "exit_time": self.exit_time,
+            "exit_price": self.exit_price,
+            "profit": self.profit(),
+            "profit_percentage": self.profit_percentage(),
+        }
+        
     def __repr__(self):
         return f"Trade(instrument={self.instrument}, entry_time={self.entry_time}, entry_price={self.entry_price}, exit_time={self.exit_time}, exit_price={self.exit_price})"

@@ -26,11 +26,21 @@ class BackTestReport:
 
     def to_dict(self):
         return {
-            "strategy": self.strategy_name,
-            "pnl": self.pnl,
-            "trades": [trade.__dict__ for trade in self.trades],
-            "start_date": self.start_date,
-            "end_date": self.end_date
+            "trades": [trade.to_dict for trade in self.trades],
+            "summary": {
+                "strategy": self.strategy_name,
+                "start_date": self.start_date,
+                "end_date": self.end_date,
+                "total_pnl_points": self.total_pnl_points(),
+                "total_pnl_percentage": self.total_pnl_percentage(),
+                "winning_trades_count": self.winning_trades_count(),
+                "losing_trades_count": self.losing_trades_count(),
+                "total_trades_count": self.total_trades_count(),
+                "winning_streak": self.winning_streak(),
+                "losing_streak": self.losing_streak(),
+                "max_gain": self.max_gain(),
+                "max_loss": self.max_loss(),
+            }
         }
 
     # Profit and Loss in points
