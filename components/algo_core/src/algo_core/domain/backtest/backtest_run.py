@@ -49,4 +49,9 @@ class BackTest:
         pnl = 0
         for trade in trades:
             pnl += trade.profit()
-        return BackTestReport(self.strategy.get_name(), pnl, trades)
+        # Determine end_date from last candle in underlying_instrument_hd.data
+        end_date = None
+        if self.underlying_instrument_hd.data:
+            last_candle = self.underlying_instrument_hd.data[-1]
+            end_date = last_candle.get('timestamp', None)
+        return BackTestReport(self.strategy.get_name(), pnl, trades, start_date=self.start_date, end_date=end_date)
