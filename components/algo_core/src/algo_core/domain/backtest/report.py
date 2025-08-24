@@ -32,21 +32,6 @@ class BackTestReport:
             "start_date": self.start_date,
             "end_date": self.end_date
         }
-    
-    # Positions & Instruments details
-    def positions(self) -> List[Dict]:
-        return [
-            {
-                "instrument": trade.instrument.__dict__,
-                "entry_time": trade.entry_time,
-                "entry_price": trade.entry_price,
-                "exit_time": trade.exit_time,
-                "exit_price": trade.exit_price,
-                "profit_points": trade.profit(),
-                "profit_pct": (trade.profit() / trade.entry_price) * 100 if trade.entry_price else 0
-            }
-            for trade in self.trades
-        ]
 
     # Profit and Loss in points
     def total_pnl_points(self) -> float:

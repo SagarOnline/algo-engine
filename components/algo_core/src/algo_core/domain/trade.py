@@ -11,6 +11,11 @@ class Trade:
 
     def profit(self) -> float:
         return self.exit_price - self.entry_price
+    
+    def profit_percentage(self) -> float:
+        if self.entry_price == 0:
+            return 0.0
+        return ((self.exit_price - self.entry_price) / self.entry_price) * 100
 
     def __repr__(self):
         return f"Trade(instrument={self.instrument}, entry_time={self.entry_time}, entry_price={self.entry_price}, exit_time={self.exit_time}, exit_price={self.exit_price})"
