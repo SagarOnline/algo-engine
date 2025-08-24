@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
-from algo_core.domain.strategy import Strategy
+from algo_core.domain.strategy import Exchange, Instrument, InstrumentType, Strategy
 from algo_core.domain.backtest.report import BackTestReport
 
 from algo_core.domain.backtest.backtest_run import BackTest
@@ -15,7 +15,8 @@ def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "1d"
-    strategy.get_instrument.return_value = "instrument"
+    instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
+    strategy.get_instrument.return_value = instrument
     strategy.get_required_history_start_date.return_value = date(2023, 1, 1)
     return strategy
 
@@ -36,6 +37,20 @@ def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_da
     assert isinstance(report, BackTestReport)
     assert report.pnl == 0
     assert len(report.trades) == 0
+    assert report.start_date == date(2023, 1, 1)
+    assert report.end_date == historical_data.data[-1]["timestamp"]
+
+    # Additional BackTestReport method checks for empty trades
+    assert report.positions() == []
+    assert report.total_pnl_points() == 0
+    assert report.total_pnl_percentage() == 0
+    assert report.winning_trades_count() == 0
+    assert report.losing_trades_count() == 0
+    assert report.total_trades_count() == 0
+    assert report.winning_streak() == 0
+    assert report.losing_streak() == 0
+    assert report.max_gain() == 0
+    assert report.max_loss() == 0
 
 def test_start_returns_correct_report_for_single_trade(mock_strategy, historical_data):
     # Enter on 2nd candle, exit on 4th
@@ -48,6 +63,26 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     assert trade.entry_price == 110
     assert trade.exit_price == 120
     assert report.pnl == 10
+    assert report.start_date == date(2023, 1, 1)
+    assert report.end_date == historical_data.data[-1]["timestamp"]
+
+    # Additional BackTestReport method checks
+    positions = report.positions()
+    assert isinstance(positions, list)
+    assert positions[0]["entry_price"] == 110
+    assert positions[0]["exit_price"] == 120
+    assert positions[0]["profit_points"] == 10
+    assert positions[0]["profit_pct"] == pytest.approx(10/110*100)
+
+    assert report.total_pnl_points() == 10
+    assert report.total_pnl_percentage() == pytest.approx(10/110*100)
+    assert report.winning_trades_count() == 1
+    assert report.losing_trades_count() == 0
+    assert report.total_trades_count() == 1
+    assert report.winning_streak() == 1
+    assert report.losing_streak() == 0
+    assert report.max_gain() == 10
+    assert report.max_loss() == 10
 
 def test_start_respects_start_date(mock_strategy, historical_data):
     # Only allow trades after 2023-01-03
@@ -58,6 +93,8 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     # No changes needed, BackTest still expects a list of dicts for historical_data argument.
     report = backtest.run()
     assert len(report.trades) == 1
+    assert report.start_date == date(2023, 1, 1)
+    assert report.end_date == historical_data.data[-1]["timestamp"]
     trade = report.trades[0]
     assert trade.entry_price == 120
     assert trade.exit_price == 130
@@ -92,6 +129,24 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     assert trade.entry_price == 210  # from position_hd at 9:30
     assert trade.exit_price == 230   # from position_hd at 10:00
     assert report.pnl == 20
+
+    # Additional BackTestReport method checks
+    positions = report.positions()
+    assert isinstance(positions, list)
+    assert positions[0]["entry_price"] == 210
+    assert positions[0]["exit_price"] == 230
+    assert positions[0]["profit_points"] == 20
+    assert positions[0]["profit_pct"] == pytest.approx(20/210*100)
+
+    assert report.total_pnl_points() == 20
+    assert report.total_pnl_percentage() == pytest.approx(20/210*100)
+    assert report.winning_trades_count() == 1
+    assert report.losing_trades_count() == 0
+    assert report.total_trades_count() == 1
+    assert report.winning_streak() == 1
+    assert report.losing_streak() == 0
+    assert report.max_gain() == 20
+    assert report.max_loss() == 20
 
 def test_run_with_missing_exec_candle_raises_error(mock_strategy):
     # Underlying instrument (for signals)
