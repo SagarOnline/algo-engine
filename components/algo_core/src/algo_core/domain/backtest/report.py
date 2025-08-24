@@ -3,6 +3,20 @@ from algo_core.domain.trade import Trade
 
 
 class BackTestReport:
+    def __repr__(self):
+        return (
+            f"<BackTestReport strategy='{self.strategy_name}', "
+            f"pnl={self.pnl}, trades={len(self.trades)}, "
+            f"start_date={self.start_date}, end_date={self.end_date}, "
+            f"total_pnl_points={self.total_pnl_points()}, "
+            f"total_pnl_percentage={self.total_pnl_percentage():.2f}, "
+            f"winning_trades={self.winning_trades_count()}, "
+            f"losing_trades={self.losing_trades_count()}, "
+            f"total_trades={self.total_trades_count()}, "
+            f"winning_streak={self.winning_streak()}, "
+            f"losing_streak={self.losing_streak()}, "
+            f"max_gain={self.max_gain()}, max_loss={self.max_loss()}>"
+        )
     def __init__(self, strategy_name: str, pnl: float, trades: List[Trade], start_date=None, end_date=None):
         self.strategy_name = strategy_name
         self.pnl = pnl
@@ -12,27 +26,22 @@ class BackTestReport:
 
     def to_dict(self):
         return {
-            "strategy": self.strategy_name,
-            "pnl": self.pnl,
-            "trades": [trade.__dict__ for trade in self.trades],
-            "start_date": self.start_date,
-            "end_date": self.end_date
-        }
-    
-    # Positions & Instruments details
-    def positions(self) -> List[Dict]:
-        return [
-            {
-                "instrument": trade.instrument.__dict__,
-                "entry_time": trade.entry_time,
-                "entry_price": trade.entry_price,
-                "exit_time": trade.exit_time,
-                "exit_price": trade.exit_price,
-                "profit_points": trade.profit(),
-                "profit_pct": (trade.profit() / trade.entry_price) * 100 if trade.entry_price else 0
+            "trades": [trade.to_dict for trade in self.trades],
+            "summary": {
+                "strategy": self.strategy_name,
+                "start_date": self.start_date,
+                "end_date": self.end_date,
+                "total_pnl_points": self.total_pnl_points(),
+                "total_pnl_percentage": self.total_pnl_percentage(),
+                "winning_trades_count": self.winning_trades_count(),
+                "losing_trades_count": self.losing_trades_count(),
+                "total_trades_count": self.total_trades_count(),
+                "winning_streak": self.winning_streak(),
+                "losing_streak": self.losing_streak(),
+                "max_gain": self.max_gain(),
+                "max_loss": self.max_loss(),
             }
-            for trade in self.trades
-        ]
+        }
 
     # Profit and Loss in points
     def total_pnl_points(self) -> float:

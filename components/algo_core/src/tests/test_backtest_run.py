@@ -41,7 +41,6 @@ def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_da
     assert report.end_date == historical_data.data[-1]["timestamp"]
 
     # Additional BackTestReport method checks for empty trades
-    assert report.positions() == []
     assert report.total_pnl_points() == 0
     assert report.total_pnl_percentage() == 0
     assert report.winning_trades_count() == 0
@@ -67,13 +66,6 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     assert report.end_date == historical_data.data[-1]["timestamp"]
 
     # Additional BackTestReport method checks
-    positions = report.positions()
-    assert isinstance(positions, list)
-    assert positions[0]["entry_price"] == 110
-    assert positions[0]["exit_price"] == 120
-    assert positions[0]["profit_points"] == 10
-    assert positions[0]["profit_pct"] == pytest.approx(10/110*100)
-
     assert report.total_pnl_points() == 10
     assert report.total_pnl_percentage() == pytest.approx(10/110*100)
     assert report.winning_trades_count() == 1
@@ -131,13 +123,6 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     assert report.pnl == 20
 
     # Additional BackTestReport method checks
-    positions = report.positions()
-    assert isinstance(positions, list)
-    assert positions[0]["entry_price"] == 210
-    assert positions[0]["exit_price"] == 230
-    assert positions[0]["profit_points"] == 20
-    assert positions[0]["profit_pct"] == pytest.approx(20/210*100)
-
     assert report.total_pnl_points() == 20
     assert report.total_pnl_percentage() == pytest.approx(20/210*100)
     assert report.winning_trades_count() == 1

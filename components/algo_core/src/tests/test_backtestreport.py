@@ -30,16 +30,6 @@ def sample_trades():
         DummyTrade(instr, datetime(2023,1,5,9,15), 115, datetime(2023,1,5,10,0), 130),  # win
     ]
 
-def test_positions(sample_trades):
-    report = BackTestReport('strat', 0, sample_trades)
-    pos = report.positions()
-    assert len(pos) == 5
-    assert pos[0]['entry_price'] == 100
-    assert pos[0]['exit_price'] == 110
-    assert pos[0]['profit_points'] == 10
-    assert pos[1]['profit_points'] == -5
-    assert pos[2]['profit_pct'] == pytest.approx((15/105)*100)
-
 def test_total_pnl_points(sample_trades):
     report = BackTestReport('strat', 0, sample_trades)
     assert report.total_pnl_points() == 10 - 5 + 15 - 5 + 15
