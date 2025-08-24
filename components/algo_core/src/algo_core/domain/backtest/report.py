@@ -3,6 +3,20 @@ from algo_core.domain.trade import Trade
 
 
 class BackTestReport:
+    def __repr__(self):
+        return (
+            f"<BackTestReport strategy='{self.strategy_name}', "
+            f"pnl={self.pnl}, trades={len(self.trades)}, "
+            f"start_date={self.start_date}, end_date={self.end_date}, "
+            f"total_pnl_points={self.total_pnl_points()}, "
+            f"total_pnl_percentage={self.total_pnl_percentage():.2f}, "
+            f"winning_trades={self.winning_trades_count()}, "
+            f"losing_trades={self.losing_trades_count()}, "
+            f"total_trades={self.total_trades_count()}, "
+            f"winning_streak={self.winning_streak()}, "
+            f"losing_streak={self.losing_streak()}, "
+            f"max_gain={self.max_gain()}, max_loss={self.max_loss()}>"
+        )
     def __init__(self, strategy_name: str, pnl: float, trades: List[Trade], start_date=None, end_date=None):
         self.strategy_name = strategy_name
         self.pnl = pnl
