@@ -1,7 +1,45 @@
-from typing import List, Dict
+from algo_core.domain.strategy import Instrument
+
+from enum import Enum
+from datetime import datetime
+from typing import List
 from algo_core.domain.trade import Trade
 
+# Action enum for Transaction
+class Action(Enum):
+    BUY = "BUY"
+    SELL = "SELL"
 
+# Transaction domain class
+class Transaction:
+    def __init__(self, time: datetime, price: float, action: Action, quantity: int):
+        self.time = time
+        self.price = price
+        self.action = action
+        self.quantity = quantity
+
+    def __repr__(self):
+        return f"Transaction(time={self.time}, price={self.price}, action={self.action}, quantity={self.quantity})"
+
+# InstrumentTransactions domain class
+class TradableInstrument:
+
+    def __init__(self, instrument: Instrument):
+        self.instrument = instrument
+        self.transactions: list[Transaction] = []
+
+    def trade(self, time: datetime, price: float, action: Action, quantity: int):
+        txn = Transaction(time, price, action, quantity)
+        self.transactions.append(txn)
+        
+    def is_trade_open(self) -> bool:
+        if not self.transactions:
+            return False
+        return self.transactions[-1].action == Action.BUY
+
+    def __repr__(self):
+        return f"TradableInstrument(instrument={self.instrument}, transactions={self.transactions})"
+        
 class BackTestReport:
     def __repr__(self):
         return (
