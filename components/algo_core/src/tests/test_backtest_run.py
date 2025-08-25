@@ -32,13 +32,13 @@ def historical_data():
 def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_data):
     mock_strategy.should_enter_trade.return_value = False
     mock_strategy.should_exit_trade.return_value = False
-    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1))
+    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     report = backtest.run()
     assert isinstance(report, BackTestReport)
-    assert report.pnl == 0
-    assert len(report.trades) == 0
+    assert report.total_pnl() == 0
+    assert len(report.tradable.trades) == 0
     assert report.start_date == date(2023, 1, 1)
-    assert report.end_date == historical_data.data[-1]["timestamp"]
+    assert report.end_date == date(2023, 1, 4)
 
     # Additional BackTestReport method checks for empty trades
     assert report.total_pnl_points() == 0
@@ -55,15 +55,15 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     # Enter on 2nd candle, exit on 4th
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False]
     mock_strategy.should_exit_trade.side_effect = [True, False]
-    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1))
+    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     report = backtest.run()
-    assert len(report.trades) == 1
-    trade = report.trades[0]
+    assert len(report.tradable.trades) == 1
+    trade = report.tradable.trades[0]
     assert trade.entry_price == 110
     assert trade.exit_price == 120
-    assert report.pnl == 10
+    assert report.total_pnl() == 10
     assert report.start_date == date(2023, 1, 1)
-    assert report.end_date == historical_data.data[-1]["timestamp"]
+    assert report.end_date == date(2023, 1, 4)
 
     # Additional BackTestReport method checks
     assert report.total_pnl_points() == 10
@@ -81,16 +81,16 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     start_date = date(2023, 1, 3)
     mock_strategy.should_enter_trade.side_effect = [False, False, True, False]
     mock_strategy.should_exit_trade.side_effect = [True]
-    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1))
+    backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     # No changes needed, BackTest still expects a list of dicts for historical_data argument.
     report = backtest.run()
-    assert len(report.trades) == 1
+    assert len(report.tradable.trades) == 1
     assert report.start_date == date(2023, 1, 1)
-    assert report.end_date == historical_data.data[-1]["timestamp"]
-    trade = report.trades[0]
+    assert report.end_date == date(2023, 1, 4)
+    trade = report.tradable.trades[0]
     assert trade.entry_price == 120
     assert trade.exit_price == 130
-    assert report.pnl == 10
+    assert report.total_pnl() == 10
 
 def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy):
     # Underlying instrument (for signals)
@@ -114,13 +114,13 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     # Entry on 9:30, exit on 10:00
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False]
     mock_strategy.should_exit_trade.side_effect = [False,True]
-    backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1))
+    backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1), end_date=date(2023, 1, 1))
     report = backtest.run()
-    assert len(report.trades) == 1
-    trade = report.trades[0]
+    assert len(report.tradable.trades) == 1
+    trade = report.tradable.trades[0]
     assert trade.entry_price == 210  # from position_hd at 9:30
     assert trade.exit_price == 230   # from position_hd at 10:00
-    assert report.pnl == 20
+    assert report.total_pnl() == 20
 
     # Additional BackTestReport method checks
     assert report.total_pnl_points() == 20
@@ -149,6 +149,6 @@ def test_run_with_missing_exec_candle_raises_error(mock_strategy):
 
     mock_strategy.should_enter_trade.side_effect = [False, True]
     mock_strategy.should_exit_trade.side_effect = [False, False]
-    backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1))
+    backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1), end_date=date(2023, 1, 1))
     with pytest.raises(ValueError, match="No execution candle found for entry at timestamp 2023-01-01 09:30:00"):
         backtest.run()

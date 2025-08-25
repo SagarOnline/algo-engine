@@ -8,7 +8,7 @@ from algo_core.domain.timeframe import Timeframe
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
 
 from algo_core.domain.backtest.report import BackTestReport
-from algo_core.domain.trade import Trade
+from algo_core.domain.backtest.trade import Trade
 from algo_core.domain.market import Market
 from algo_core.domain.backtest.backtest_run import BackTest
 from algo_core.domain.backtest.historical_data import HistoricalData
@@ -22,7 +22,7 @@ class BacktestEngine:
     def start(self, strategy: Strategy, start_date: date, end_date: date) -> BackTestReport:
         underlying_instrument_hd = self._get_underlying_historical_data(strategy, start_date, end_date)
         position_instrument_hd = self._get_position_historical_data(strategy, start_date, end_date)
-        backtest = BackTest(strategy, underlying_instrument_hd, position_instrument_hd, start_date)
+        backtest = BackTest(strategy, underlying_instrument_hd, position_instrument_hd, start_date, end_date)
         report = backtest.run()
         self.report_repository.save(report)
         return report

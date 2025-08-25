@@ -69,9 +69,8 @@ def test_run_with_no_data(mock_strategy: Strategy, backtest_engine: BacktestEngi
     end_date = date(2023, 1, 31)
     
     report = backtest_engine.start(mock_strategy, start_date, end_date)
-    
-    assert report.pnl == 0
-    assert len(report.trades) == 0
+    assert report.total_pnl() == 0
+    assert len(report.tradable.trades) == 0
     
 
 
@@ -95,11 +94,11 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
 
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
-    assert len(report.trades) == 1
-    trade = report.trades[0]
+    assert len(report.tradable.trades) == 1
+    trade = report.tradable.trades[0]
     assert trade.entry_price == 110
     assert trade.exit_price == 105
-    assert report.pnl == -5
+    assert report.total_pnl() == -5
 
 
 def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy: Mock, mock_historical_data_repository: Mock):
@@ -128,7 +127,7 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     
     # should_enter_trade is called for each candle after the first one
     # but the engine's logic should prevent entering a trade before start_date
-    assert len(report.trades) == 1
+    assert len(report.tradable.trades) == 1
     
     # The first call to should_enter_trade corresponds to the candle on 2023-01-03
     # as the loop inside `run` starts trading after `start_date`
