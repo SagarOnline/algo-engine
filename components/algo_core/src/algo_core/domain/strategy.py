@@ -45,6 +45,16 @@ class Instrument:
         self.expiry = Expiry(expiry) if expiry else None
         self.expiring = Expiring(expiring) if expiring else None
         self.atm = atm
+        
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type.value,
+            "exchange": self.exchange.value,
+            "instrument_key": self.instrument_key,
+            "expiry": self.expiry.value if self.expiry else None,
+            "expiring": self.expiring.value if self.expiring else None,
+            "atm": self.atm
+        }
 
     def __eq__(self, other):
         if not isinstance(other, Instrument):

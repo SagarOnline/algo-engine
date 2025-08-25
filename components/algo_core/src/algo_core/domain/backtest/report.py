@@ -42,7 +42,6 @@ class TradableInstrument:
             # Check if this closes the position
             if last_open.action != txn.action and last_open.quantity == txn.quantity:
                 trade = Trade(
-                    instrument=self.instrument,
                     entry_time=last_open.time,
                     entry_price=last_open.price,
                     exit_time=txn.time,
@@ -69,19 +68,8 @@ class TradableInstrument:
         
 class BackTestReport:
     def __repr__(self):
-        return (
-            f"<BackTestReport strategy='{self.strategy_name}', "
-            f"trades={len(self.trades)}, "
-            f"start_date={self.start_date}, end_date={self.end_date}, "
-            f"total_pnl_points={self.total_pnl_points()}, "
-            f"total_pnl_percentage={self.total_pnl_percentage():.2f}, "
-            f"winning_trades={self.winning_trades_count()}, "
-            f"losing_trades={self.losing_trades_count()}, "
-            f"total_trades={self.total_trades_count()}, "
-            f"winning_streak={self.winning_streak()}, "
-            f"losing_streak={self.losing_streak()}, "
-            f"max_gain={self.max_gain()}, max_loss={self.max_loss()}>"
-        )
+        return self.to_dict().__repr__()
+    
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):
         self.strategy_name = strategy_name
         self.tradable = tradable
@@ -90,7 +78,10 @@ class BackTestReport:
 
     def to_dict(self):
         return {
-            "trades": [trade.to_dict for trade in self.trades],
+            "instrument":{
+                "name": self.tradable.instrument.to_dict(),
+                 "trades": [trade.to_dict() for trade in self.tradable.trades]  
+            },
             "summary": {
                 "strategy": self.strategy_name,
                 "start_date": self.start_date,
