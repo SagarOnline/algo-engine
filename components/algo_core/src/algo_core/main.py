@@ -9,15 +9,19 @@ from algo_core.infrastructure.jsonstrategy import JsonStrategy
 from algo_core.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
 from algo_core.domain.indicators.exceptions import InvalidStrategyConfiguration
 
+from algo_core.config_context import get_config
+
 
 
 def main():
     load_dotenv(find_dotenv())
+    config = get_config()
+
     """
     Runs a backtest for a given strategy.
     """
     try:
-        strategies_dir = os.getenv("STRATEGIES_CONFIG_DIRECTORY")
+        strategies_dir = config.backtest_engine.strategies_path
         strategy_path = f"{strategies_dir}/bullish_nifty.json"
         with open(strategy_path) as f:
             strategy_data = json.load(f)

@@ -5,11 +5,12 @@ from datetime import date
 
 from algo_core.domain.backtest.report_repository import BacktestReportRepository
 from algo_core.domain.backtest.report import BackTestReport
+from algo_core import config_context
 
 
 class JsonBacktestReportRepository(BacktestReportRepository):
     def __init__(self, report_directory: str = "report"):
-        self.report_directory = os.getenv("BACKTEST_REPORT_DIRECTORY", report_directory)
+        self.report_directory = config_context.get_config().backtest_engine.reports_path
 
     def save(self, report: BackTestReport) -> None:
         os.makedirs(self.report_directory, exist_ok=True)
