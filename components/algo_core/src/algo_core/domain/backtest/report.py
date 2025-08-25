@@ -1,18 +1,19 @@
-from algo_core.domain.strategy import Instrument
+from algo_core.domain.strategy import Instrument, PositionAction
 
-from enum import Enum
-from datetime import datetime
+from datetime import datetime, date
 from typing import List
-from algo_core.domain.trade import Trade
+from algo_core.domain.backtest.trade import Trade
 
-# Action enum for Transaction
-class Action(Enum):
-    BUY = "BUY"
-    SELL = "SELL"
 
 # Transaction domain class
 class Transaction:
-    def __init__(self, time: datetime, price: float, action: Action, quantity: int):
+    def get_position(self) -> float:
+        if self.action == PositionAction.BUY:
+            return self.quantity
+        elif self.action == PositionAction.SELL:
+            return -self.quantity
+        return 0.0
+    def __init__(self, time: datetime, price: float, action: PositionAction, quantity: int):
         self.time = time
         self.price = price
         self.action = action
@@ -27,15 +28,41 @@ class TradableInstrument:
     def __init__(self, instrument: Instrument):
         self.instrument = instrument
         self.transactions: list[Transaction] = []
+        self.trades: list[Trade] = []
+        self.open_positions: list[Transaction] = []   # keeps unmatched transactions
 
-    def trade(self, time: datetime, price: float, action: Action, quantity: int):
+    def execute_order(self, time: datetime, price: float, action: PositionAction, quantity: int):
         txn = Transaction(time, price, action, quantity)
         self.transactions.append(txn)
+
+        # Try to match against an open position
+        if self.open_positions:
+            last_open = self.open_positions[-1]
+
+            # Check if this closes the position
+            if last_open.action != txn.action and last_open.quantity == txn.quantity:
+                trade = Trade(
+                    instrument=self.instrument,
+                    entry_time=last_open.time,
+                    entry_price=last_open.price,
+                    exit_time=txn.time,
+                    exit_price=txn.price,
+                    quantity=txn.quantity
+                )
+                self.trades.append(trade)
+                self.open_positions.pop()  # remove the matched open txn
+                return
+
+        # If no match, treat this as a new open position
+        self.open_positions.append(txn)
         
     def is_trade_open(self) -> bool:
-        if not self.transactions:
-            return False
-        return self.transactions[-1].action == Action.BUY
+        """
+        Returns True if there are still open positions.
+        """
+        return len(self.open_positions) > 0
+    
+    
 
     def __repr__(self):
         return f"TradableInstrument(instrument={self.instrument}, transactions={self.transactions})"
@@ -44,7 +71,7 @@ class BackTestReport:
     def __repr__(self):
         return (
             f"<BackTestReport strategy='{self.strategy_name}', "
-            f"pnl={self.pnl}, trades={len(self.trades)}, "
+            f"trades={len(self.trades)}, "
             f"start_date={self.start_date}, end_date={self.end_date}, "
             f"total_pnl_points={self.total_pnl_points()}, "
             f"total_pnl_percentage={self.total_pnl_percentage():.2f}, "
@@ -55,10 +82,9 @@ class BackTestReport:
             f"losing_streak={self.losing_streak()}, "
             f"max_gain={self.max_gain()}, max_loss={self.max_loss()}>"
         )
-    def __init__(self, strategy_name: str, pnl: float, trades: List[Trade], start_date=None, end_date=None):
+    def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):
         self.strategy_name = strategy_name
-        self.pnl = pnl
-        self.trades = trades
+        self.tradable = tradable
         self.start_date = start_date
         self.end_date = end_date
 
@@ -83,31 +109,36 @@ class BackTestReport:
 
     # Profit and Loss in points
     def total_pnl_points(self) -> float:
-        return sum(trade.profit() for trade in self.trades)
+        # Treat transactions as a ledger: BUY is negative, SELL is positive
+        return sum(trade.profit_points() for trade in self.tradable.trades)
+    
+    def total_pnl(self) -> float:
+        # Treat transactions as a ledger: BUY is negative, SELL is positive
+        return sum(trade.profit() for trade in self.tradable.trades)
 
     # Profit and Loss in percentage
     def total_pnl_percentage(self) -> float:
-        total_invested = sum(trade.entry_price for trade in self.trades if trade.entry_price > 0)
+        total_invested = sum(trade.entry_price for trade in self.tradable.trades if trade.entry_price > 0)
         if total_invested == 0:
             return 0
         return (self.total_pnl_points() / total_invested) * 100
 
     # Number of Winning Trades
     def winning_trades_count(self) -> int:
-        return sum(1 for trade in self.trades if trade.profit() > 0)
+        return sum(1 for trade in self.tradable.trades if trade.profit() > 0)
 
     # Number of Losing Trades
     def losing_trades_count(self) -> int:
-        return sum(1 for trade in self.trades if trade.profit() < 0)
+        return sum(1 for trade in self.tradable.trades if trade.profit() < 0)
 
     # Total Number of Trades executed
     def total_trades_count(self) -> int:
-        return len(self.trades)
+        return len(self.tradable.trades)
 
     # Winning Streak (longest consecutive winning trades)
     def winning_streak(self) -> int:
         max_streak = streak = 0
-        for trade in self.trades:
+        for trade in self.tradable.trades:
             if trade.profit() > 0:
                 streak += 1
                 max_streak = max(max_streak, streak)
@@ -118,7 +149,7 @@ class BackTestReport:
     # Losing Streak (longest consecutive losing trades)
     def losing_streak(self) -> int:
         max_streak = streak = 0
-        for trade in self.trades:
+        for trade in self.tradable.trades:
             if trade.profit() < 0:
                 streak += 1
                 max_streak = max(max_streak, streak)
@@ -128,12 +159,12 @@ class BackTestReport:
 
     # Maximum Gain achieved in a trade
     def max_gain(self) -> float:
-        if not self.trades:
+        if not self.tradable.trades:
             return 0
-        return max(trade.profit() for trade in self.trades)
+        return max(trade.profit() for trade in self.tradable.trades)
 
     # Maximum Loss incurred in a trade
     def max_loss(self) -> float:
-        if not self.trades:
+        if not self.tradable.trades:
             return 0
-        return min(trade.profit() for trade in self.trades)
+        return min(trade.profit() for trade in self.tradable.trades)
