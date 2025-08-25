@@ -11,7 +11,7 @@ from algo_core.infrastructure.parquet_historical_data_repository import ParquetH
 class TestParquetHistoricalDataRepository(unittest.TestCase):
     def setUp(self):
         self.test_data_path = "tests/temp_data"
-        os.environ["HISTORICAL_DATA_DIRECTORY"] = self.test_data_path
+        os.environ["BACKTEST_ENGINE.HISTORICAL_DATA_PATH"] = self.test_data_path
         self.repository = ParquetHistoricalDataRepository()
         self.instrument = Instrument(
             type=InstrumentType.STOCK,

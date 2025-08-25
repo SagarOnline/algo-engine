@@ -1,0 +1,8 @@
+{
+  "backtest_engine": {
+    "historical_data_backend": "PARQUET_FILES",
+    "reports_path": "./",
+    "historical_data_path": ".",
+    "strategies_path": "./"
+  }
+}

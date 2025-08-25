@@ -6,10 +6,11 @@ from algo_core.domain.backtest.historical_data import HistoricalData
 from algo_core.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo_core.domain.strategy import Instrument
 from algo_core.domain.timeframe import Timeframe
+from algo_core import config_context
 
 class ParquetHistoricalDataRepository(HistoricalDataRepository):
     def __init__(self, data_path: str = "data"):
-        self.data_path = os.getenv("HISTORICAL_DATA_DIRECTORY", data_path)
+        self.data_path = config_context.get_config().backtest_engine.historical_data_path
 
     def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> HistoricalData:
         dfs = []
