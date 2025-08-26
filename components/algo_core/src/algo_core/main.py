@@ -23,8 +23,8 @@ def main():
     Runs a backtest for a given strategy.
     """
     try:
-        strategies_dir = config.backtest_engine.strategies_path
-        strategy_path = f"{strategies_dir}/bullish_nifty.json"
+        strategy_json_config_dir = config.backtest_engine.strategy_json_config_dir
+        strategy_path = f"{strategy_json_config_dir}/bullish_nifty.json"
         with open(strategy_path) as f:
             strategy_data = json.load(f)
         strategy = JsonStrategy(strategy_data)

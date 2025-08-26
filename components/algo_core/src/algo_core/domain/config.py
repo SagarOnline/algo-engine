@@ -40,9 +40,9 @@ class BacktestEngineConfig:
     def __init__(
         self,
         historical_data_backend: HistoricalDataBackend,
-        reports_path: str,
-        historical_data_path: str,
-        strategies_path: str,
+        reports_dir: str,
+        parquet_files_base_dir: str,
+        strategy_json_config_dir: str,
     ):
         backend = get_value(
             historical_data_backend,
@@ -52,16 +52,16 @@ class BacktestEngineConfig:
 
         self.historical_data_backend = HistoricalDataBackend[backend]
 
-        self.reports_path = get_value(
-            reports_path, "BACKTEST_ENGINE.REPORTS_PATH", os.getcwd()
+        self.reports_dir = get_value(
+            reports_dir, "BACKTEST_ENGINE.REPORTS_DIR", os.getcwd()
         )
 
-        self.historical_data_path = get_value(
-            historical_data_path, "BACKTEST_ENGINE.HISTORICAL_DATA_PATH", os.getcwd()
+        self.parquet_files_base_dir = get_value(
+            parquet_files_base_dir, "BACKTEST_ENGINE.PARQUET_FILES_BASE_DIR", os.getcwd()
         )
 
-        self.strategies_path = get_value(
-            strategies_path, "BACKTEST_ENGINE.STRATEGIES_PATH", os.getcwd()
+        self.strategy_json_config_dir = get_value(
+            strategy_json_config_dir, "BACKTEST_ENGINE.STRATEGY_JSON_CONFIG_DIR", os.getcwd()
         )
 
 
@@ -75,9 +75,9 @@ class Config:
         be = config_dict.get("backtest_engine", {})
         backtest_engine = BacktestEngineConfig(
             historical_data_backend=be.get("historical_data_backend", ""),
-            reports_path=be.get("reports_path", ""),
-            historical_data_path=be.get("historical_data_path", ""),
-            strategies_path=be.get("strategies_path", ""),
+            reports_dir=be.get("reports_dir", ""),
+            parquet_files_base_dir=be.get("parquet_files_base_dir", ""),
+            strategy_json_config_dir=be.get("strategy_json_config_dir", ""),
         )
         broker_api = config_dict.get("broker_api", {})
         broker_api_config = BrokerAPIConfig(

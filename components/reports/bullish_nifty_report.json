@@ -1,0 +1,118 @@
+{
+    "instrument": {
+        "name": {
+            "type": "FUTURE",
+            "exchange": "NSE",
+            "instrument_key": "NSE_INDEX|Nifty 50",
+            "expiry": "MONTHLY",
+            "expiring": "NEXT",
+            "atm": -50
+        },
+        "trades": [
+            {
+                "entry_time": "2025-08-11 13:45:00+05:30",
+                "entry_price": 24585.0,
+                "exit_time": "2025-08-12 11:00:00+05:30",
+                "exit_price": 24602.0,
+                "profit": 17.0,
+                "profit_percentage": 0.06914785438275371,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-12 11:30:00+05:30",
+                "entry_price": 24625.0,
+                "exit_time": "2025-08-12 12:00:00+05:30",
+                "exit_price": 24636.8,
+                "profit": 11.799999999999272,
+                "profit_percentage": 0.047918781725885366,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-12 12:15:00+05:30",
+                "entry_price": 24675.0,
+                "exit_time": "2025-08-12 13:15:00+05:30",
+                "exit_price": 24639.0,
+                "profit": -36.0,
+                "profit_percentage": -0.1458966565349544,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-12 13:45:00+05:30",
+                "entry_price": 24673.4,
+                "exit_time": "2025-08-12 14:00:00+05:30",
+                "exit_price": 24607.0,
+                "profit": -66.40000000000146,
+                "profit_percentage": -0.26911572786888494,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-13 09:15:00+05:30",
+                "entry_price": 24625.0,
+                "exit_time": "2025-08-13 11:45:00+05:30",
+                "exit_price": 24633.4,
+                "profit": 8.400000000001455,
+                "profit_percentage": 0.03411167512690946,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-13 12:00:00+05:30",
+                "entry_price": 24662.9,
+                "exit_time": "2025-08-14 11:30:00+05:30",
+                "exit_price": 24680.0,
+                "profit": 17.099999999998545,
+                "profit_percentage": 0.06933491195276527,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-14 11:45:00+05:30",
+                "entry_price": 24686.0,
+                "exit_time": "2025-08-14 12:00:00+05:30",
+                "exit_price": 24681.3,
+                "profit": -4.700000000000728,
+                "profit_percentage": -0.01903913149153661,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-14 12:15:00+05:30",
+                "entry_price": 24700.4,
+                "exit_time": "2025-08-14 13:15:00+05:30",
+                "exit_price": 24696.0,
+                "profit": -4.400000000001455,
+                "profit_percentage": -0.01781347670483658,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-14 13:30:00+05:30",
+                "entry_price": 24705.0,
+                "exit_time": "2025-08-14 14:00:00+05:30",
+                "exit_price": 24691.3,
+                "profit": -13.700000000000728,
+                "profit_percentage": -0.05545436146529337,
+                "quantity": 1
+            },
+            {
+                "entry_time": "2025-08-14 14:45:00+05:30",
+                "entry_price": 24695.2,
+                "exit_time": "2025-08-14 15:00:00+05:30",
+                "exit_price": 24685.5,
+                "profit": -9.700000000000728,
+                "profit_percentage": -0.039278888204998245,
+                "quantity": 1
+            }
+        ]
+    },
+    "summary": {
+        "strategy": "bullish_nifty",
+        "start_date": "2025-08-01",
+        "end_date": "2025-08-14",
+        "total_pnl_points": -80.60000000000582,
+        "total_pnl_percentage": -0.03268014932314619,
+        "winning_trades_count": 4,
+        "losing_trades_count": 6,
+        "total_trades_count": 10,
+        "winning_streak": 2,
+        "losing_streak": 4,
+        "max_gain": 17.099999999998545,
+        "max_loss": -66.40000000000146
+    }
+}
