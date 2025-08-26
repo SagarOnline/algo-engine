@@ -10,6 +10,8 @@ from algo_core.infrastructure.parquet_historical_data_repository import ParquetH
 from algo_core.domain.indicators.exceptions import InvalidStrategyConfiguration
 
 from algo_core.config_context import get_config
+from algo_core.domain.config import HistoricalDataBackend
+from algo_core.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 
 
 
@@ -28,8 +30,12 @@ def main():
         strategy = JsonStrategy(strategy_data)
 
         # Initialize historical data repository
-        historical_data_repository = ParquetHistoricalDataRepository()
-
+        if config.backtest_engine.historical_data_backend == HistoricalDataBackend.PARQUET_FILES:
+            historical_data_repository = ParquetHistoricalDataRepository()
+        elif config.backtest_engine.historical_data_backend == HistoricalDataBackend.UPSTOX_API:
+            historical_data_repository = UpstoxHistoricalDataRepository()
+        else:
+            raise ValueError("Unsupported historical data backend")
         # Initialize report repository
         report_repository = JsonBacktestReportRepository()
 

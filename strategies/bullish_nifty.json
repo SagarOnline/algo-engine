@@ -5,7 +5,7 @@
     "expiry": "MONTHLY",
     "expiring": "NEXT",
     "atm": -50,
-    "instrument_key": "NSE_INDEX|NIFTY 50",
+    "instrument_key": "NSE_INDEX|Nifty 50",
     "exchange": "NSE"
   },
   "timeframe": "15min",

@@ -4,5 +4,10 @@
     "reports_path": "./../reports/",
     "historical_data_path": "../../data/",
     "strategies_path": "../../strategies/"
+  },
+  "broker_api":{
+    "upstox":{
+        "access_token": ""
+    }
   }
 }

@@ -7,11 +7,13 @@ import shutil
 from algo_core.domain.strategy import Instrument, InstrumentType, Exchange
 from algo_core.domain.timeframe import Timeframe
 from algo_core.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
+from components.algo_core.src.algo_core.domain.config import HistoricalDataBackend
 
 class TestParquetHistoricalDataRepository(unittest.TestCase):
     def setUp(self):
         self.test_data_path = "tests/temp_data"
         os.environ["BACKTEST_ENGINE.HISTORICAL_DATA_PATH"] = self.test_data_path
+        os.environ["HISTORICAL_DATA_BACKEND"] = HistoricalDataBackend.PARQUET_FILES.value
         self.repository = ParquetHistoricalDataRepository()
         self.instrument = Instrument(
             type=InstrumentType.STOCK,
