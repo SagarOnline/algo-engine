@@ -45,18 +45,11 @@ def mock_historical_data_repository():
     repo.get_historical_data.return_value = HistoricalData([])
     return repo
 
-from algo_core.domain.backtest.report_repository import BacktestReportRepository
 
 
 @pytest.fixture
-def mock_report_repository():
-    repo = Mock(spec=BacktestReportRepository)
-    return repo
-
-
-@pytest.fixture
-def backtest_engine(mock_historical_data_repository, mock_report_repository):
-    return BacktestEngine(mock_historical_data_repository, mock_report_repository)
+def backtest_engine(mock_historical_data_repository):
+    return BacktestEngine(mock_historical_data_repository)
 
 
 def generate_candle(timestamp_str: str, close_price: float) -> Dict[str, Any]:
