@@ -16,7 +16,7 @@ class JsonStrategyRepository(StrategyRepository):
     def get_strategy(self, strategy_name: str) -> Strategy:
         file_path = os.path.join(self.base_dir, f"{strategy_name}.json")
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Strategy JSON file not found: {file_path}")
+            raise ValueError(f"{strategy_name} is not a valid strategy name.")
         with open(file_path, 'r') as f:
             strategy_data = json.load(f)
         strategy = JsonStrategy(strategy_data)

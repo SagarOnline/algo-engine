@@ -106,7 +106,7 @@ def test_get_strategy_success(patch_config, tmp_path):
     assert strategy.strategy_name == "bullish_nifty"
 
 
-def test_get_strategy_file_not_found(patch_config):
+def test_invalid_strategy_name(patch_config):
     repo = JsonStrategyRepository()
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(ValueError):
         repo.get_strategy("nonexistent_strategy")
