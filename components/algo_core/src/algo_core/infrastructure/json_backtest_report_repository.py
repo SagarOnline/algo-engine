@@ -10,7 +10,7 @@ from algo_core import config_context
 
 class JsonBacktestReportRepository(BacktestReportRepository):
     def __init__(self, report_directory: str = "report"):
-        self.report_directory = config_context.get_config().backtest_engine.reports_path
+        self.report_directory = config_context.get_config().backtest_engine.reports_dir
 
     def save(self, report: BackTestReport) -> None:
         os.makedirs(self.report_directory, exist_ok=True)

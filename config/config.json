@@ -1,9 +1,9 @@
 {
   "backtest_engine": {
     "historical_data_backend": "PARQUET_FILES",
-    "reports_path": "./../reports/",
-    "historical_data_path": "../../data/",
-    "strategies_path": "../../strategies/"
+    "reports_dir": "./../reports/",
+    "parque_files_base_dir": "../../data/",
+    "strategy_json_config_dir": "../../strategies/"
   },
   "broker_api":{
     "upstox":{

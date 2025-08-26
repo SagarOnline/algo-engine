@@ -10,7 +10,7 @@ from algo_core import config_context
 
 class ParquetHistoricalDataRepository(HistoricalDataRepository):
     def __init__(self, data_path: str = "data"):
-        self.data_path = config_context.get_config().backtest_engine.historical_data_path
+        self.data_path = config_context.get_config().backtest_engine.parquet_files_base_dir
 
     def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> HistoricalData:
         dfs = []
