@@ -1,5 +1,5 @@
 from flask import Flask
-from components.algo_core.src.algo_core.infrastructure.api.backtest_controller import backtest_bp
+from algo_core.infrastructure.api.backtest_controller import backtest_bp
 
 app = Flask(__name__)
 app.register_blueprint(backtest_bp)

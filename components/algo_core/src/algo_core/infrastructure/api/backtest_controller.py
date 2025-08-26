@@ -6,6 +6,8 @@ from algo_core.infrastructure.parquet_historical_data_repository import ParquetH
 from algo_core.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 from flask import Blueprint, request, jsonify
 
+from algo_core.application.run_backtest_usecase import RunBacktestInput
+
 
 backtest_bp = Blueprint('backtest', __name__)
 
@@ -31,7 +33,12 @@ def run_backtest():
             get_historical_data_repository(),
             get_strategy_repository()
         )
-        report = use_case.execute(data)
+        input_data = RunBacktestInput(
+            strategy_name=data.get("strategy_name"),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date")
+        )
+        report = use_case.execute(input_data)
         return jsonify(report), 200
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400

@@ -14,6 +14,18 @@
       }
     },
     {
+      "name": "Python: Debug Flask App",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/components/algo_core/src/algo_core/app.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/components/algo_core",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/components/algo_core/src"
+      }
+    },
+    {
       "name": "Python: Debug historical_data main.py",
       "type": "debugpy",
       "request": "launch",
