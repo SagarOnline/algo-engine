@@ -55,7 +55,7 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 Create Environment File (for developement)
 ```bash
 python - <<EOF
-content = """HISTORICAL_DATA_DIRECTORY=../../data
+ A_DIRECTORY=../../data
 BACKTEST_REPORT_DIRECTORY=../../report
 STRATEGIES_CONFIG_DIRECTORY=../../strategies
 """

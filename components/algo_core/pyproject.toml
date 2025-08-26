@@ -39,7 +39,11 @@ dependencies = [
     "types-python-dateutil==2.9.0.20250809",
     "typing-inspection==0.4.1",
     "typing_extensions==4.14.1",
-    "tzdata==2025.2"
+    "tzdata==2025.2",
+    "upstox-python-sdk==2.17.0",
+    "urllib3==2.5.0",
+    "uuid==1.30",
+    "websocket-client==1.8.0"
 ]
 
 [project.optional-dependencies]

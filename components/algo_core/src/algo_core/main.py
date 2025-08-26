@@ -11,6 +11,7 @@ from algo_core.domain.indicators.exceptions import InvalidStrategyConfiguration
 
 from algo_core.config_context import get_config
 from algo_core.domain.config import HistoricalDataBackend
+from algo_core.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 
 
 
@@ -31,6 +32,8 @@ def main():
         # Initialize historical data repository
         if config.backtest_engine.historical_data_backend == HistoricalDataBackend.PARQUET_FILES:
             historical_data_repository = ParquetHistoricalDataRepository()
+        elif config.backtest_engine.historical_data_backend == HistoricalDataBackend.UPSTOX_API:
+            historical_data_repository = UpstoxHistoricalDataRepository()
         else:
             raise ValueError("Unsupported historical data backend")
         # Initialize report repository

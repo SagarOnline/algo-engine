@@ -21,13 +21,13 @@ class UpstoxConfig:
     def __init__(
         self,
         #  api_key: str, api_secret: str, redirect_uri: str,
-        access_token: str,
+        redirect_url: str,
     ):
         # self.api_key = api_key
         # self.api_secret = api_secret
         # self.redirect_uri = redirect_uri
-        self.access_token = get_value(
-            access_token, "BROKER_API.UPSTOX.ACCESS_TOKEN", ""
+        self.redirect_url = get_value(
+            redirect_url, "BROKER_API.UPSTOX.REDIRECT_URL", ""
         )
 
 
@@ -82,7 +82,7 @@ class Config:
         broker_api = config_dict.get("broker_api", {})
         broker_api_config = BrokerAPIConfig(
             upstox_config=UpstoxConfig(
-                access_token=broker_api.get("upstox", {}).get("access_token", "")
+                redirect_url=broker_api.get("upstox", {}).get("redirect_url", "")
             )
         )
         return Config(backtest_engine=backtest_engine, broker_api=broker_api_config)
