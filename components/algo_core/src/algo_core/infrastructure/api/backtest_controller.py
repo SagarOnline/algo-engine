@@ -25,8 +25,10 @@ def get_strategy_repository():
 @backtest_bp.route('/backtest', methods=['POST'])
 def run_backtest():
     try:
-        data = request.get_json()
-        if not data:
+        if not request.is_json:
+            return jsonify({"error": "Content-Type must be application/json"}), 400
+        data = request.get_json(silent=True)
+        if data is None:
             return jsonify({'error': 'Invalid or missing JSON payload'}), 400
 
         use_case = RunBacktestUseCase(
