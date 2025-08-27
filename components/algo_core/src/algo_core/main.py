@@ -13,6 +13,8 @@ from algo_core.config_context import get_config
 from algo_core.domain.config import HistoricalDataBackend
 from algo_core.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 
+from algo_core.infrastructure.json_strategy_repository import JsonStrategyRepository
+
 
 
 def main():
@@ -36,11 +38,9 @@ def main():
             historical_data_repository = UpstoxHistoricalDataRepository()
         else:
             raise ValueError("Unsupported historical data backend")
-        # Initialize report repository
-        report_repository = JsonBacktestReportRepository()
 
         # Initialize and run backtest engine
-        engine = BacktestEngine(historical_data_repository, report_repository)
+        engine = BacktestEngine(historical_data_repository)
         start_date = "2025-08-01"
         end_date = "2025-08-14"
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()

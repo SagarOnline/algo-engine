@@ -38,6 +38,7 @@ dependencies = [
     "TA-Lib==0.6.5",
     "types-python-dateutil==2.9.0.20250809",
     "typing-inspection==0.4.1",
+    "Flask>=2.3.0",
     "typing_extensions==4.14.1",
     "tzdata==2025.2",
     "upstox-python-sdk==2.17.0",
