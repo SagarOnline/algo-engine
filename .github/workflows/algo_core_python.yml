@@ -1,10 +1,11 @@
 name: Infrastructure CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+    paths:
+      - 'components/algo_core/**'
+      - '.github/workflows/algo_core_python.yml'
 
 jobs:
   build:
