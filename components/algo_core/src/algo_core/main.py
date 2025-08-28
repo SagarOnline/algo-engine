@@ -33,7 +33,7 @@ def main():
 
         # Initialize historical data repository
         if config.backtest_engine.historical_data_backend == HistoricalDataBackend.PARQUET_FILES:
-            historical_data_repository = ParquetHistoricalDataRepository()
+            historical_data_repository = ParquetHistoricalDataRepository(config.backtest_engine.parquet_files_base_dir)
         elif config.backtest_engine.historical_data_backend == HistoricalDataBackend.UPSTOX_API:
             historical_data_repository = UpstoxHistoricalDataRepository()
         else:

@@ -16,7 +16,7 @@ def get_historical_data_repository():
     if config.backtest_engine.historical_data_backend == HistoricalDataBackend.UPSTOX_API:
         historical_data_repository = UpstoxHistoricalDataRepository()
     else:
-         historical_data_repository = ParquetHistoricalDataRepository()
+         historical_data_repository = ParquetHistoricalDataRepository(config.backtest_engine.parquet_files_base_dir)
     return historical_data_repository
 
 def get_strategy_repository():

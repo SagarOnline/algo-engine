@@ -32,9 +32,7 @@ def timeframe():
 
 @pytest.fixture
 def repository(temp_data_dir) -> ParquetHistoricalDataRepository: 
-    os.environ["BACKTEST_ENGINE.PARQUET_FILES_BASE_DIR"] = temp_data_dir
-    os.environ["HISTORICAL_DATA_BACKEND"] = HistoricalDataBackend.PARQUET_FILES.value
-    return ParquetHistoricalDataRepository()
+    return ParquetHistoricalDataRepository(temp_data_dir)
 
 def create_dummy_data(base_path, instrument, timeframe):
     dates = [date(2023, 1, 1), date(2023, 1, 2), date(2023, 1, 3)]
