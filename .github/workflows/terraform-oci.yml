@@ -1,0 +1,58 @@
+name: Terraform OCI Infrastructure
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'infra/terraform/**'
+  pull_request:
+    paths:
+      - 'infra/terraform/**'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    env:
+      OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY }}
+      OCI_USER_OCID: ${{ secrets.OCI_USER_ID }}
+      OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_BUCKET_ID: ${{ secrets.OCI_BUCKET_ID }}
+      STATEFILE_KEY: ${{ secrets.STATEFILE_KEY }}
+      OCI_KEY_FILE_CONTENT: ${{ secrets.OCI_KEY_FILE }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Write OCI Key File
+        run: |
+          echo "$OCI_KEY_FILE_CONTENT" > oci_api_key.pem
+          chmod 600 oci_api_key.pem
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.4.0
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ env.OCI_BUCKET_ID }}" \
+            -backend-config="key=${{ env.STATEFILE_KEY }}" \
+            -backend-config="tenancy_ocid=${{ env.OCI_TENANCY_OCID }}" \
+            -backend-config="user_ocid=${{ env.OCI_USER_OCID }}" \
+            -backend-config="fingerprint=${{ env.OCI_FINGERPRINT }}" \
+            -backend-config="region=$(awk -F'="' '/region/ {print $2}' terraform.auto.tfvars | tr -d '"')" \
+            -backend-config="private_key_path=oci_api_key.pem"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="terraform.auto.tfvars"
+
+      - name: Terraform Apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve -var-file="terraform.auto.tfvars"
