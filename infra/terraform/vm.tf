@@ -15,6 +15,7 @@ resource "oci_core_instance" "core_vm" {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
   shape               = local.vm.shape
+  display_name        = local.vm.display_name
 
   shape_config {
     ocpus         = local.vm.ocpus

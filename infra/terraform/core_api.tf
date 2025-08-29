@@ -14,8 +14,24 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
 
 
 # Run shell script on core_vm after creation
-resource "null_resource" "core_api_setup" {
+
+# Wait for SSH to be available on the VM
+resource "null_resource" "wait_for_ssh" {
   depends_on = [oci_core_instance.core_vm]
+  provisioner "local-exec" {
+    command = <<EOT
+      for i in {1..30}; do
+        nc -zv ${oci_core_instance.core_vm.public_ip} 22 && exit 0
+        sleep 10
+      done
+      echo "Timeout waiting for SSH on VM" >&2
+      exit 1
+    EOT
+  }
+}
+
+resource "null_resource" "core_api_setup" {
+  depends_on = [null_resource.wait_for_ssh]
   triggers = {
     setup_script = filesha1("${path.module}/scripts/core_vm_setup.sh.tpl")
   }
