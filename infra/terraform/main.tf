@@ -45,7 +45,7 @@ resource "oci_core_security_list" "all_egress" {
   }
 }
 
-# Network Security Group: allow 22 and 5000 from VCN CIDR
+# Network Security Group: allow 22 and api port from VCN CIDR
 resource "oci_core_network_security_group" "vm_nsg" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.vcn.id
@@ -66,7 +66,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
   }
 }
 
-resource "oci_core_network_security_group_security_rule" "vm_nsg_5000" {
+resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
@@ -74,8 +74,8 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_5000" {
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = 5000
-      max = 5000
+      min = local.core_api.port
+      max = local.core_api.port
     }
   }
 }
@@ -144,8 +144,23 @@ resource "null_resource" "core_vm_provision" {
     content = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {
       git_repository = local.core_api.git_repository,
       branch         = local.core_api.branch
+      core_api_port  = local.core_api.port
     })
     destination = "/tmp/core_vm_setup.sh"
+    connection {
+      type        = "ssh"
+      host        = oci_core_instance.core_vm.public_ip
+      user        = "opc"
+      private_key = file("${path.module}/${var.vm_ssh_private_key}")
+      timeout     = "2m"
+    }
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/scripts/algo-core.service.tpl", {
+      core_api_port = local.core_api.port
+    })
+    destination = "/tmp/algo-core.service"
     connection {
       type        = "ssh"
       host        = oci_core_instance.core_vm.public_ip

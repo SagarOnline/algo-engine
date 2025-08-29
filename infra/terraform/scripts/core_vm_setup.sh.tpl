@@ -10,6 +10,27 @@ get_python_version() {
     python3 --version 2>/dev/null | awk '{print $2}' | cut -d. -f1,2
 }
 
+open_firewall_port() {
+    PORT=$1
+    PROTOCOL=${2:-tcp}  # Default protocol is tcp
+
+    if [ -z "$PORT" ]; then
+        echo "Usage: open_firewall_port <port> [protocol]"
+        return 1
+    fi
+
+    # Check if port is already open
+    if sudo firewall-cmd --list-ports | grep -q "${PORT}/${PROTOCOL}"; then
+        echo "Port ${PORT}/${PROTOCOL} is already open."
+    else
+        echo "Opening port ${PORT}/${PROTOCOL} permanently..."
+        sudo firewall-cmd --permanent --add-port=${PORT}/${PROTOCOL}
+        sudo firewall-cmd --reload
+        echo "Port ${PORT}/${PROTOCOL} opened successfully."
+    fi
+}
+
+
 check_and_install_git() {
     if ! command -v git &>/dev/null; then
         echo "Git not found. Installing..."
@@ -55,17 +76,19 @@ upgrade_python_to_311() {
 
 copy_app() {
     echo "📦 Copying application files..."
-    sudo rm -rf /opt/algo-core
-    sudo mkdir -p /opt/algo-core
-    sudo cp -r algo-engine/components/algo_core/* /opt/algo-core/
-    sudo chown -R $(whoami):$(whoami) /opt/algo-core
+    APP_DIR="/opt/algo-core"
+    sudo rm -rf "$APP_DIR"
+    sudo mkdir -p "$APP_DIR"
+    sudo cp -r algo-engine/components/algo_core/* "$APP_DIR/"
+    sudo chown -R $(whoami):$(whoami) "$APP_DIR"
 }
 
 config_app() {
     echo "📦 Copying application files..."
-    sudo rm -rf /etc/algo-core
-    sudo mkdir -p /etc/algo-core
-    sudo chown -R $(whoami):$(whoami) /opt/algo-core
+    CONFIG_DIR="/etc/algo-core"
+    sudo rm -rf "$CONFIG_DIR"
+    sudo mkdir -p "$CONFIG_DIR"
+    sudo chown -R $(whoami):$(whoami) "$CONFIG_DIR"
     copy_data
     copy_strategies
     copy_config_json
@@ -115,7 +138,7 @@ EOF
 copy_service_file() {
   SERVICE_FILE="/etc/systemd/system/algo-core.service"
 
-  sudo cp  algo-engine/infra/terraform/scripts/algo-core.service $SERVICE_FILE
+  sudo cp  /tmp/algo-core.service $SERVICE_FILE
   sudo chown  root:root "$SERVICE_FILE"
   sudo chmod 644 "$SERVICE_FILE"
   echo "✅ Service file created at $SERVICE_FILE"
@@ -140,14 +163,6 @@ deploy_app() {
     echo "✅ core_api deployment complete."
 }
 
-start_app() {
-    cd /opt/algo-core
-    echo "🚀 Starting core API service..."
-    # Assuming a systemd service file named algo-core.service is set up
-    env CONFIG_JSON_PATH=/etc/algo-core/config.json \
-    waitress-serve --host=0.0.0.0 --port=5000 src.algo_core.app:app
-}
-
 # Function to deploy core API
 setup_core_api() {
     echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
@@ -165,3 +180,4 @@ setup_core_api() {
 upgrade_python_to_311
 check_and_install_git
 setup_core_api
+open_firewall_port ${core_api_port}
