@@ -5,7 +5,9 @@ on:
     branches: [ main ]
     paths:
       - 'infra/terraform/**'
-  pull_request:
+  pull_request_target:
+    branches:
+      - main
     paths:
       - 'infra/terraform/**'
 
@@ -21,9 +23,9 @@ jobs:
       TF_VAR_fingerprint: "18:56:c7:01:bf:67:31:f4:03:69:ca:d6:30:a6:65:c7"
       TF_VAR_private_key_path: "oci_api_key.pem"
       TF_VAR_region: "ap-mumbai-1"
-      AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ vars.AWS_SECRET_ACCESS_KEY }}
-      OCI_KEY_FILE_CONTENT: ${{ vars.OCI_KEY_FILE }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      OCI_KEY_FILE_CONTENT: ${{ secrets.OCI_KEY_FILE }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
