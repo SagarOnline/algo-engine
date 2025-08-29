@@ -21,7 +21,7 @@ jobs:
       TF_VAR_fingerprint: "18:56:c7:01:bf:67:31:f4:03:69:ca:d6:30:a6:65:c7"
       TF_VAR_private_key_path: "oci_api_key.pem"
       TF_VAR_region: "ap-mumbai-1"
-      
+      AWS_EC2_METADATA_DISABLED: "true"
       OCI_KEY_FILE_CONTENT: ${{ secrets.OCI_KEY_FILE }}
     steps:
       - name: Checkout repository
