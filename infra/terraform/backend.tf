@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.13.1"
   required_providers {
     oci = {
       source  = "oracle/oci"
@@ -19,6 +20,8 @@ terraform {
     use_path_style              = true
     skip_metadata_api_check     = true
     skip_s3_checksum            = true
-    endpoint                    = "https://bmyojs6ko6dg.compat.objectstorage.ap-mumbai-1.oraclecloud.com"
+    endpoints {
+      s3 = "https://bmyojs6ko6dg.compat.objectstorage.ap-mumbai-1.oraclecloud.com"
+    }
   }
 }
