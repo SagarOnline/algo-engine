@@ -56,7 +56,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
-  source                    = local.network.vcn_cidr
+  source                    = "0.0.0.0/0"
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
@@ -70,7 +70,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_5000" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
-  source                    = local.network.vcn_cidr
+  source                    = "0.0.0.0/0"
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
@@ -104,7 +104,7 @@ resource "oci_core_instance" "core_vm" {
 
   create_vnic_details {
     subnet_id        = oci_core_subnet.public.id
-    assign_public_ip = false
+    assign_public_ip = true
     display_name     = "public-vm-vnic"
     nsg_ids          = [oci_core_network_security_group.vm_nsg.id]
   }
