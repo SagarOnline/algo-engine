@@ -163,6 +163,14 @@ deploy_app() {
     echo "✅ core_api deployment complete."
 }
 
+restart_service() {
+    echo "🔄 Restarting core API service..."
+    sudo systemctl daemon-reload
+    sudo systemctl enable algo-core.service
+    sudo systemctl restart algo-core.service
+    echo "✅ core API service restarted."
+}
+
 # Function to deploy core API
 setup_core_api() {
     echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
@@ -180,4 +188,5 @@ setup_core_api() {
 upgrade_python_to_311
 check_and_install_git
 setup_core_api
+restart_service
 open_firewall_port ${core_api_port}
