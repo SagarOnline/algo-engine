@@ -27,14 +27,14 @@ jobs:
       TF_VAR_region: "ap-mumbai-1"
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      OCI_PRIVATE_KEY_FILE_CONTENT: ${{ secrets.PRIVATE_KEY }}
+      OCI_KEY_FILE_CONTENT: ${{ secrets.OCI_KEY_FILE_CONTENT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Write OCI Key File
         run: |
-          echo "$OCI_PRIVATE_KEY_FILE_CONTENT" > oci_api_key.pem
+          echo "$OCI_KEY_FILE_CONTENT" > oci_api_key.pem
           chmod 600 oci_api_key.pem
 
       - name: Set up Terraform
