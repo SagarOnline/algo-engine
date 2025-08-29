@@ -1,29 +1,3 @@
-provider "oci" {
-  region = var.region
-}
-
-
-# Network Security Group: allow 22 and api port from VCN CIDR
-resource "oci_core_network_security_group" "vm_nsg" {
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "vm-nsg"
-}
-
-resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
-  network_security_group_id = oci_core_network_security_group.vm_nsg.id
-  direction                 = "INGRESS"
-  protocol                  = "6" # TCP
-  source                    = "0.0.0.0/0"
-  source_type               = "CIDR_BLOCK"
-  tcp_options {
-    destination_port_range {
-      min = 22
-      max = 22
-    }
-  }
-}
-
 resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
@@ -40,7 +14,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
 
 
 # Run shell script on core_vm after creation
-resource "null_resource" "core_vm_provision" {
+resource "null_resource" "core_api_setup" {
   depends_on = [oci_core_instance.core_vm]
   triggers = {
     setup_script = filesha1("${path.module}/scripts/core_vm_setup.sh.tpl")
