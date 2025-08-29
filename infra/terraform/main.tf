@@ -8,27 +8,7 @@ resource "oci_core_vcn" "vcn" {
   display_name   = local.network.vcn_display_name
 }
 
-# Service Gateway for Oracle Services
-resource "oci_core_service_gateway" "svc_gw" {
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "service-gateway"
-  services {
-    service_id = data.oci_core_services.all_oci_services.services[0].id
-  }
-}
 
-data "oci_core_services" "all_oci_services" {
-  filter {
-    name   = "cidr_block"
-    values = ["all-bom-services-in-oracle-services-network"]
-
-  }
-}
-
-output "all_oci_services" {
-  value = data.oci_core_services.all_oci_services.services
-}
 # Internet Gateway for public subnet
 resource "oci_core_internet_gateway" "igw" {
   compartment_id = var.compartment_ocid
@@ -37,13 +17,6 @@ resource "oci_core_internet_gateway" "igw" {
   enabled        = true
 }
 
-# NAT Gateway for private subnet
-resource "oci_core_nat_gateway" "natgw" {
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "nat-gateway"
-  block_traffic  = false
-}
 
 # Route Table for public subnet
 resource "oci_core_route_table" "public_rt" {
@@ -56,32 +29,9 @@ resource "oci_core_route_table" "public_rt" {
     destination_type  = "CIDR_BLOCK"
     network_entity_id = oci_core_internet_gateway.igw.id
   }
-
-  route_rules {
-    destination       = "all-services-in-oracle-services-network"
-    destination_type  = "SERVICE_CIDR_BLOCK"
-    network_entity_id = oci_core_service_gateway.svc_gw.id
-  }
 }
 
-# Route Table for private subnet
-resource "oci_core_route_table" "private_rt" {
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "private-rt"
 
-  route_rules {
-    destination       = "0.0.0.0/0"
-    destination_type  = "CIDR_BLOCK"
-    network_entity_id = oci_core_nat_gateway.natgw.id
-  }
-
-  route_rules {
-    destination       = "all-services-in-oracle-services-network"
-    destination_type  = "SERVICE_CIDR_BLOCK"
-    network_entity_id = oci_core_service_gateway.svc_gw.id
-  }
-}
 
 # Security List: allow all egress
 resource "oci_core_security_list" "all_egress" {
@@ -96,14 +46,14 @@ resource "oci_core_security_list" "all_egress" {
 }
 
 # Network Security Group: allow 22 and 5000 from VCN CIDR
-resource "oci_core_network_security_group" "private_nsg" {
+resource "oci_core_network_security_group" "vm_nsg" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "private-nsg"
+  display_name   = "vm-nsg"
 }
 
-resource "oci_core_network_security_group_security_rule" "private_nsg_ssh" {
-  network_security_group_id = oci_core_network_security_group.private_nsg.id
+resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
+  network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
   source                    = local.network.vcn_cidr
@@ -116,8 +66,8 @@ resource "oci_core_network_security_group_security_rule" "private_nsg_ssh" {
   }
 }
 
-resource "oci_core_network_security_group_security_rule" "private_nsg_5000" {
-  network_security_group_id = oci_core_network_security_group.private_nsg.id
+resource "oci_core_network_security_group_security_rule" "vm_nsg_5000" {
+  network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
   source                    = local.network.vcn_cidr
@@ -141,20 +91,8 @@ resource "oci_core_subnet" "public" {
   security_list_ids          = null
 }
 
-# Private Subnet
-resource "oci_core_subnet" "private" {
-  compartment_id             = var.compartment_ocid
-  vcn_id                     = oci_core_vcn.vcn.id
-  cidr_block                 = local.network.private_subnet_cidr
-  display_name               = "private-subnet"
-  prohibit_public_ip_on_vnic = true
-  route_table_id             = oci_core_route_table.private_rt.id
-  security_list_ids          = null
-  # nsg_ids is not supported for oci_core_subnet, use create_vnic_details.create_nsg_ids in oci_core_instance
-}
-
-# Compute Instance in Private Subnet
-resource "oci_core_instance" "private_vm" {
+# Compute Instance in Public Subnet
+resource "oci_core_instance" "core_vm" {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
   shape               = local.vm.shape
@@ -165,10 +103,10 @@ resource "oci_core_instance" "private_vm" {
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.private.id
+    subnet_id        = oci_core_subnet.public.id
     assign_public_ip = false
-    display_name     = "private-vm-vnic"
-    nsg_ids          = [oci_core_network_security_group.private_nsg.id]
+    display_name     = "public-vm-vnic"
+    nsg_ids          = [oci_core_network_security_group.vm_nsg.id]
   }
 
   source_details {
