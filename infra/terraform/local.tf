@@ -1,7 +1,7 @@
 locals {
   application_name = "algo-core"
   network = {
-    vcn_display_name    = local.application_name
+    vcn_display_name    = "${local.application_name}-vcn"
     vcn_cidr            = "10.0.0.0/16"
     private_subnet_cidr = "10.0.2.0/24"
     public_subnet_cidr  = "10.0.1.0/24"
