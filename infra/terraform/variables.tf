@@ -1,27 +1,3 @@
-variable "tenancy_ocid" {
-  type        = string
-  description = "OCI Tenancy OCID"
-  default     = null
-}
-
-variable "user_ocid" {
-  type        = string
-  description = "OCI User OCID"
-  default     = null
-}
-
-variable "fingerprint" {
-  type        = string
-  description = "OCI API Key fingerprint"
-  default     = null
-}
-
-variable "private_key_path" {
-  type        = string
-  description = "Path to OCI API private key PEM"
-  default     = "~/.oci/oci_api_key.pem"
-}
-
 variable "region" {
   type        = string
   description = "OCI region (e.g. ap-mumbai-1)"
