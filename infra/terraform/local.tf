@@ -8,6 +8,7 @@ locals {
   }
 
   vm = {
+    display_name    = "${local.application_name}"
     shape           = "VM.Standard.A1.Flex"
     ocpus           = 2
     memory_in_gbs   = 4
