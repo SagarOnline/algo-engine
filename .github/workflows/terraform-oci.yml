@@ -37,6 +37,13 @@ jobs:
           echo "$OCI_KEY_FILE_CONTENT" > oci_api_key.pem
           chmod 600 oci_api_key.pem
 
+      - name: Write VM SSH Private Key
+        run: |
+          echo "$VM_SSH_PRIVATE_KEY" > infra/terraform/id_rsa
+          chmod 600 infra/terraform/id_rsa
+        env:
+          VM_SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
