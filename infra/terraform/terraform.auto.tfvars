@@ -1,0 +1,5 @@
+region           = "ap-mumbai-1"
+compartment_ocid = "ocid1.compartment.oc1..aaaaaaaaqjfheptwskrxykqfevhsyvgdu6q37qw2bheah3ymvqeqobn3ywgq"
+vcn_cidr         = "10.0.0.0/16"
+vcn_display_name = "example-vcn"
+vcn_dns_label    = "examplevcn"
