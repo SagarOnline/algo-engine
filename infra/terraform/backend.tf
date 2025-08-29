@@ -20,7 +20,7 @@ terraform {
     use_path_style              = true
     skip_metadata_api_check     = true
     skip_s3_checksum            = true
-    endpoints {
+    endpoints = {
       s3 = "https://bmyojs6ko6dg.compat.objectstorage.ap-mumbai-1.oraclecloud.com"
     }
   }
