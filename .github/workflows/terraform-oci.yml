@@ -6,6 +6,8 @@ on:
     paths:
       - 'infra/terraform/**'
       - '.github/workflows/terraform-oci.yml'
+  pull_request:
+    branches: [ main ]
  
 jobs:
   terraform:
@@ -31,6 +33,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      # - name: Debug
+      #   run: |
+      #     pwd
+      #     ls -lrst
 
       - name: Write OCI Key File
         run: |
@@ -39,10 +46,15 @@ jobs:
 
       - name: Write VM SSH Private Key
         run: |
-          echo "$VM_SSH_PRIVATE_KEY" > infra/terraform/id_rsa
-          chmod 600 infra/terraform/id_rsa
+          echo "$VM_SSH_PRIVATE_KEY" > ./id_rsa
+          chmod 600 ./id_rsa
         env:
           VM_SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+
+      # - name: Debug Again
+      #   run: |
+      #     pwd
+      #     ls -lrst
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
