@@ -212,3 +212,5 @@ __marimo__/
 # Terraform local state and cache
 .terraform/
 **/.terraform/
+**/.terraform.lock.hcl
+**/errored.tfstate
