@@ -159,7 +159,7 @@ resource "null_resource" "core_vm_provision" {
     inline = [
       "chmod +x /tmp/core_vm_setup.sh",
       "dos2unix /tmp/core_vm_setup.sh",
-      "/tmp/core_vm_setup.sh"
+      "/tmp/core_vm_setup.sh > /tmp/core_vm_setup.log 2>&1"
     ]
     connection {
       type        = "ssh"
