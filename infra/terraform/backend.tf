@@ -1,13 +1,13 @@
 terraform {
-  required_version = ">= 1.4.0"
-
   required_providers {
     oci = {
       source  = "oracle/oci"
       version = ">= 5.38.0"
     }
   }
+}
 
+terraform {
   # Remote state in OCI Object Storage (values are supplied via -backend-config in the workflow)
   backend "s3" {
     bucket                      = "infra-state"
