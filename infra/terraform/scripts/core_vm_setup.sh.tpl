@@ -13,7 +13,7 @@ get_python_version() {
 # Function to upgrade Python to 3.11
 upgrade_python_to_311() {
     CURRENT_VERSION=$(get_python_version)
-    echo "🔍 Current Python3 version: ${CURRENT_VERSION:-not installed}"
+    echo "🔍 Current Python3 version: $${CURRENT_VERSION:-not installed}"
 
     if [[ "$CURRENT_VERSION" == "3.11" ]]; then
         echo "✅ Python 3.11 is already installed and set as default."
@@ -41,10 +41,10 @@ upgrade_python_to_311() {
 
 # Function to deploy core API
 deploy_core_api() {
-    echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
+    echo "🚀 Deploying core API from repository: $git_repository (branch: $branch)"
     cd /tmp
     rm -rf algo-engine
-    git clone --branch "${branch}" "${git_repository}" algo-engine
+    git clone --branch "$branch" "$git_repository" algo-engine
     cd algo-engine/components/algo_core
     echo "🔧 Creating Python virtual environment..."
     python3 -m venv venv
