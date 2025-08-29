@@ -141,7 +141,10 @@ resource "null_resource" "core_vm_provision" {
   }
 
   provisioner "file" {
-    content     = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {})
+    content = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {
+      git_repository = local.core_api.git_repository,
+      branch         = local.core_api.branch
+    })
     destination = "/tmp/core_vm_setup.sh"
     connection {
       type        = "ssh"

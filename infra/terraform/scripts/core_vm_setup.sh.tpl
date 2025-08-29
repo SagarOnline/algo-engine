@@ -38,5 +38,23 @@ upgrade_python_to_311() {
     echo "🎉 Upgrade complete. Current Python3 version: $NEW_VERSION"
 }
 
+
+# Function to deploy core API
+deploy_core_api() {
+    echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
+    cd /tmp
+    rm -rf algo-engine
+    git clone --branch "${branch}" "${git_repository}" algo-engine
+    cd algo-engine/components/algo_core
+    echo "🔧 Creating Python virtual environment..."
+    python3 -m venv venv
+    source venv/bin/activate
+    echo "📦 Installing dependencies..."
+    python -m pip install --upgrade pip
+    python -m pip install .
+    echo "✅ core_api deployment complete."
+}
+
 # --- Main Script ---
 upgrade_python_to_311
+deploy_core_api
