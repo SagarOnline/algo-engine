@@ -34,7 +34,7 @@ jobs:
 
       - name: Write OCI Key File
         run: |
-          echo "$OCI_KEY_FILE_CONTENT" > oci_api_key.pem
+          echo "$OCI_PRIVATE_KEY_FILE_CONTENT" > oci_api_key.pem
           chmod 600 oci_api_key.pem
 
       - name: Set up Terraform
