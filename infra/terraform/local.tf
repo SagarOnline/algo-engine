@@ -16,7 +16,7 @@ locals {
   }
   core_api = {
     git_repository = "https://github.com/SagarOnline/algo-engine.git"
-    branch         = "fix-tf"
+    branch         = "main"
     port           = 5000
   }
 }

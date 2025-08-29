@@ -8,6 +8,9 @@ on:
       - '.github/workflows/terraform-oci.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/terraform-oci.yml'
  
 jobs:
   terraform:

@@ -12,7 +12,7 @@ get_python_version() {
 
 open_firewall_port() {
     PORT=$1
-    PROTOCOL=${2:-tcp}  # Default protocol is tcp
+    PROTOCOL=$${2:-tcp}  # Default protocol is tcp
 
     if [ -z "$PORT" ]; then
         echo "Usage: open_firewall_port <port> [protocol]"
@@ -20,13 +20,13 @@ open_firewall_port() {
     fi
 
     # Check if port is already open
-    if sudo firewall-cmd --list-ports | grep -q "${PORT}/${PROTOCOL}"; then
-        echo "Port ${PORT}/${PROTOCOL} is already open."
+    if sudo firewall-cmd --list-ports | grep -q "$PORT/$PROTOCOL"; then
+        echo "Port $PORT/$PROTOCOL is already open."
     else
-        echo "Opening port ${PORT}/${PROTOCOL} permanently..."
-        sudo firewall-cmd --permanent --add-port=${PORT}/${PROTOCOL}
+        echo "Opening port $PORT/$PROTOCOL permanently..."
+        sudo firewall-cmd --permanent --add-port=$PORT/$PROTOCOL
         sudo firewall-cmd --reload
-        echo "Port ${PORT}/${PROTOCOL} opened successfully."
+        echo "Port $PORT/$PROTOCOL opened successfully."
     fi
 }
 
@@ -85,10 +85,20 @@ copy_app() {
 
 config_app() {
     echo "📦 Copying application files..."
+
+    # app direcotory
     CONFIG_DIR="/etc/algo-core"
     sudo rm -rf "$CONFIG_DIR"
     sudo mkdir -p "$CONFIG_DIR"
     sudo chown -R $(whoami):$(whoami) "$CONFIG_DIR"
+
+    # log directory
+    LOG_DIR="/var/log/algo-core"
+    sudo rm -rf "$LOG_DIR"
+    sudo mkdir -p "$LOG_DIR"
+    sudo chown -R $(whoami):$(whoami) "$LOG_DIR"
+    sudo chmod 755 "$LOG_DIR"
+
     copy_data
     copy_strategies
     copy_config_json
@@ -139,6 +149,7 @@ copy_service_file() {
   SERVICE_FILE="/etc/systemd/system/algo-core.service"
 
   sudo cp  /tmp/algo-core.service $SERVICE_FILE
+  sudo dos2unix $SERVICE_FILE
   sudo chown  root:root "$SERVICE_FILE"
   sudo chmod 644 "$SERVICE_FILE"
   echo "✅ Service file created at $SERVICE_FILE"

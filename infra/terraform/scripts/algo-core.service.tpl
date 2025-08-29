@@ -13,8 +13,8 @@ ExecStart=/opt/algo-core/venv/bin/waitress-serve \
     src.algo_core.app:app
 
 # Redirect stdout/stderr to a log file
-StandardOutput=append:/etc/logs/algo-core/algo-core.log
-StandardError=append:/etc/logs/algo-core/algo-core.log
+StandardOutput=append:/var/log/algo-core/algo-core.log
+StandardError=append:/var/log/algo-core/algo-core.log
 
 # Restart on failure
 Restart=always
