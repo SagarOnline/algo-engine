@@ -34,10 +34,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Debug
-        run: |
-          pwd
-          ls -lrst
+      # - name: Debug
+      #   run: |
+      #     pwd
+      #     ls -lrst
 
       - name: Write OCI Key File
         run: |
@@ -51,10 +51,10 @@ jobs:
         env:
           VM_SSH_PRIVATE_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
 
-      - name: Debug Again
-        run: |
-          pwd
-          ls -lrst
+      # - name: Debug Again
+      #   run: |
+      #     pwd
+      #     ls -lrst
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
