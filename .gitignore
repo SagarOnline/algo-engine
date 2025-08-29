@@ -214,3 +214,5 @@ __marimo__/
 **/.terraform/
 **/.terraform.lock.hcl
 **/errored.tfstate
+
+**/id_rsa

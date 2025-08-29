@@ -56,7 +56,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
-  source                    = local.network.vcn_cidr
+  source                    = "0.0.0.0/0"
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
@@ -70,7 +70,7 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_5000" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
-  source                    = local.network.vcn_cidr
+  source                    = "0.0.0.0/0"
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
@@ -104,7 +104,7 @@ resource "oci_core_instance" "core_vm" {
 
   create_vnic_details {
     subnet_id        = oci_core_subnet.public.id
-    assign_public_ip = false
+    assign_public_ip = true
     display_name     = "public-vm-vnic"
     nsg_ids          = [oci_core_network_security_group.vm_nsg.id]
   }
@@ -130,4 +130,40 @@ data "oci_core_images" "oracle_linux_8" {
   operating_system_version = "8"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
+}
+
+
+# Run shell script on core_vm after creation
+resource "null_resource" "core_vm_provision" {
+  depends_on = [oci_core_instance.core_vm]
+  triggers = {
+    setup_script = filesha1("${path.module}/scripts/core_vm_setup.sh.tpl")
+  }
+
+  provisioner "file" {
+    content     = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {})
+    destination = "/tmp/core_vm_setup.sh"
+    connection {
+      type        = "ssh"
+      host        = oci_core_instance.core_vm.public_ip
+      user        = "opc"
+      private_key = file("${path.module}/${var.vm_ssh_private_key}")
+      timeout     = "2m"
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/core_vm_setup.sh",
+      "dos2unix /tmp/core_vm_setup.sh",
+      "/tmp/core_vm_setup.sh"
+    ]
+    connection {
+      type        = "ssh"
+      host        = oci_core_instance.core_vm.public_ip
+      user        = "opc"
+      private_key = file("${path.module}/${var.vm_ssh_private_key}")
+      timeout     = "2m"
+    }
+  }
 }
