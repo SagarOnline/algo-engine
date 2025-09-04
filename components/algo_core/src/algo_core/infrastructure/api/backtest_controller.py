@@ -22,7 +22,7 @@ def get_historical_data_repository():
 def get_strategy_repository():
     return JsonStrategyRepository()
 
-@backtest_bp.route('/backtest', methods=['POST'])
+@backtest_bp.route('/api/backtest', methods=['POST'])
 def run_backtest():
     try:
         if not request.is_json:

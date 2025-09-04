@@ -18,7 +18,7 @@ locals {
 
   algo = {
     git_repository = "https://github.com/SagarOnline/algo-engine.git"
-    branch         = "main"
+    branch         = "algo-ui"
     api_port       = 5000
     ui_port        = 8008
   }

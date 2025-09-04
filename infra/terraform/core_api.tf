@@ -51,7 +51,7 @@ resource "null_resource" "core_api_setup" {
 
   provisioner "file" {
     content = templatefile("${path.module}/scripts/algo-core.service.tpl", {
-      core_api_port = local.core_api.port
+      core_api_port = local.algo.api_port
     })
     destination = "/tmp/algo-core.service"
     connection {

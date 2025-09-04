@@ -224,10 +224,9 @@ copy_algo_ui() {
     APP_DIR="/var/www/algo-ui"
     sudo rm -rf "$APP_DIR"
     sudo mkdir -p "$APP_DIR"
-    sudo cp -r algo-engine/algo_ui/build/web/* "$APP_DIR/"
+    sudo cp -r /tmp/algo-engine/algo_ui/build/web/* "$APP_DIR/"
     sudo semanage fcontext -a -t httpd_sys_content_t "$APP_DIR(/.*)?"
     sudo restorecon -Rv "$APP_DIR"
-
 }
 
 configure_algo_ui() {

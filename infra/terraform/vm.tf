@@ -8,6 +8,7 @@ data "oci_core_images" "oracle_linux_8" {
   operating_system_version = "8"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
+  shape                    = local.vm.shape
 }
 
 # Compute Instance in Public Subnet

@@ -23,12 +23,12 @@ def test_run_backtest_success(client):
             'start_date': '2023-01-01',
             'end_date': '2023-01-31'
         }
-        response = client.post('/backtest', data=json.dumps(payload), content_type='application/json')
+        response = client.post('/api/backtest', data=json.dumps(payload), content_type='application/json')
         assert response.status_code == 200
         assert response.get_json() == mock_report
 
 def test_run_backtest_invalid_json(client):
-    response = client.post('/backtest', data='not a json', content_type='application/json')
+    response = client.post('/api/backtest', data='not a json', content_type='application/json')
     assert response.status_code == 400
     assert 'error' in response.get_json()
 
@@ -41,7 +41,7 @@ def test_run_backtest_value_error(client):
             'start_date': '2023-01-01',
             'end_date': '2023-01-31'
         }
-        response = client.post('/backtest', data=json.dumps(payload), content_type='application/json')
+        response = client.post('/api/backtest', data=json.dumps(payload), content_type='application/json')
         assert response.status_code == 400
         assert response.get_json()['error'] == 'Invalid input'
 
@@ -54,7 +54,7 @@ def test_run_backtest_internal_error(client):
             'start_date': '2023-01-01',
             'end_date': '2023-01-31'
         }
-        response = client.post('/backtest', data=json.dumps(payload), content_type='application/json')
+        response = client.post('/api/backtest', data=json.dumps(payload), content_type='application/json')
         assert response.status_code == 500
         data = response.get_json()
         assert data['error'] == 'Internal server error'
@@ -62,7 +62,7 @@ def test_run_backtest_internal_error(client):
 
 def test_run_backtest_rejects_non_json_content_type(client):
     payload = 'strategy_name=test_strategy&start_date=2023-01-01&end_date=2023-01-31'
-    response = client.post('/backtest', data=payload, content_type='application/x-www-form-urlencoded')
+    response = client.post('/api/backtest', data=payload, content_type='application/x-www-form-urlencoded')
     assert response.status_code == 400
     data = response.get_json()
     assert 'error' in data
