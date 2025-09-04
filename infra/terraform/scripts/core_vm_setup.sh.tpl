@@ -74,7 +74,7 @@ upgrade_python_to_311() {
     echo "🎉 Upgrade complete. Current Python3 version: $NEW_VERSION"
 }
 
-copy_app() {
+copy_core_api() {
     echo "📦 Copying application files..."
     APP_DIR="/opt/algo-core"
     sudo rm -rf "$APP_DIR"
@@ -83,10 +83,10 @@ copy_app() {
     sudo chown -R $(whoami):$(whoami) "$APP_DIR"
 }
 
-config_app() {
+configure_core_api() {
     echo "📦 Copying application files..."
 
-    # app direcotory
+    # config direcotory
     CONFIG_DIR="/etc/algo-core"
     sudo rm -rf "$CONFIG_DIR"
     sudo mkdir -p "$CONFIG_DIR"
@@ -99,14 +99,14 @@ config_app() {
     sudo chown -R $(whoami):$(whoami) "$LOG_DIR"
     sudo chmod 755 "$LOG_DIR"
 
-    copy_data
-    copy_strategies
-    copy_config_json
-    copy_env_file
-    copy_service_file
+    configure_core_api_data
+    configure_core_api_strategies
+    configure_core_api_config_json
+    configure_core_api_env_file
+    configure_core_api_service_file
 }
 
-copy_data() {
+configure_core_api_data() {
     echo "📦 Copying data files..."
     DATA_DIR="/etc/algo-core/data"
     sudo mkdir -p "$DATA_DIR"
@@ -114,7 +114,7 @@ copy_data() {
     sudo chown -R $(whoami):$(whoami) "$DATA_DIR"
 }
 
-copy_config_json() {
+configure_core_api_config_json() {
   CONFIG_DIR="/etc/algo-core"
   CONFIG_FILE="$CONFIG_DIR/config.json"
 
@@ -133,7 +133,7 @@ EOF
   echo "✅ Config file created at $CONFIG_FILE"
 }
 
-copy_env_file() {
+configure_core_api_env_file() {
   CONFIG_DIR="/etc/algo-core"
   ENV_FILE="$CONFIG_DIR/algo-core.env"
 
@@ -145,7 +145,7 @@ EOF
   echo "✅ Config file created at $ENV_FILE"
 }
 
-copy_service_file() {
+configure_core_api_service_file() {
   SERVICE_FILE="/etc/systemd/system/algo-core.service"
 
   sudo cp  /tmp/algo-core.service $SERVICE_FILE
@@ -155,7 +155,7 @@ copy_service_file() {
   echo "✅ Service file created at $SERVICE_FILE"
 }
 
-copy_strategies() {
+configure_core_api_strategies() {
     echo "📦 Copying strategies files..."
     STRATEGIES_DIR="/etc/algo-core/strategies"
     sudo mkdir -p "$STRATEGIES_DIR"
@@ -163,7 +163,7 @@ copy_strategies() {
     sudo chown -R $(whoami):$(whoami) "$STRATEGIES_DIR"
 }
 
-deploy_app() {
+deploy_core_api() {
     cd /opt/algo-core
     echo "🔧 Creating Python virtual environment..."
     python3 -m venv venv
@@ -174,7 +174,7 @@ deploy_app() {
     echo "✅ core_api deployment complete."
 }
 
-restart_service() {
+restart_core_api_service() {
     echo "🔄 Restarting core API service..."
     sudo systemctl daemon-reload
     sudo systemctl enable algo-core.service
@@ -182,22 +182,81 @@ restart_service() {
     echo "✅ core API service restarted."
 }
 
-# Function to deploy core API
-setup_core_api() {
-    echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
+clone_repo() {
+    echo "🚀 Cloning repository: ${git_repository} (branch: ${branch})"
     cd /tmp
     rm -rf algo-engine
     git clone --branch "${branch}" "${git_repository}" algo-engine
+}
 
-    copy_app
-    config_app
-    deploy_app
-   
+# Function to deploy core API
+setup_core_api() {
+    upgrade_python_to_311
+    echo "🚀 Deploying core API from repository: ${git_repository} (branch: ${branch})"
+    
+    copy_core_api
+    configure_core_api
+    deploy_core_api
+    restart_core_api_service
+    open_firewall_port ${core_api_port}
+}
+
+
+install_nginx() {
+        # Check if nginx is installed
+    if ! rpm -q nginx &> /dev/null; then
+        echo "Nginx not found. Installing..."
+        
+        # Install nginx
+        sudo dnf -y install nginx
+        sudo systemctl enable nginx
+        sudo systemctl start nginx
+    else
+        echo "Nginx is already installed."
+    fi
+
+    # Print nginx version
+    nginx -v
+}
+
+copy_algo_ui() {
+    echo "📦 Copying application files..."
+    APP_DIR="/var/www/algo-ui"
+    sudo rm -rf "$APP_DIR"
+    sudo mkdir -p "$APP_DIR"
+    sudo cp -r /tmp/algo-engine/algo_ui/build/web/* "$APP_DIR/"
+    
+    # Allow Nginx to serve content from this directory
+    sudo semanage fcontext -a -t httpd_sys_content_t "$APP_DIR(/.*)?"
+    sudo restorecon -Rv "$APP_DIR"
+
+    # allow Nginx to connect to network on 127.0.0.1 to forward API requests
+    sudo setsebool -P httpd_can_network_connect 1
+    
+}
+
+configure_algo_ui() {
+    CONF_FILE="/etc/nginx/conf.d/algo-ui.conf"
+
+    sudo cp  /tmp/algo-ui.conf $CONF_FILE
+    sudo dos2unix $CONF_FILE
+    sudo nginx -t
+    sudo systemctl reload nginx
+    echo "✅ Nginx configuration reloaded."
+}
+
+
+# Function to deploy algo UI
+setup_algo_ui() {
+    install_nginx
+    copy_algo_ui
+    configure_algo_ui
+    open_firewall_port ${algo_ui_port}
 }
 
 # --- Main Script ---
-upgrade_python_to_311
+
 check_and_install_git
+clone_repo
 setup_core_api
-restart_service
-open_firewall_port ${core_api_port}
+setup_algo_ui

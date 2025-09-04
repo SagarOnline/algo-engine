@@ -1,4 +1,4 @@
-resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
+resource "oci_core_network_security_group_security_rule" "vm_algo_api" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
@@ -6,27 +6,23 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = local.core_api.port
-      max = local.core_api.port
+      min = local.algo.api_port
+      max = local.algo.api_port
     }
   }
 }
 
-
-# Run shell script on core_vm after creation
-
-# Wait for SSH to be available on the VM
-resource "null_resource" "wait_for_ssh" {
-  depends_on = [oci_core_instance.core_vm]
-  provisioner "local-exec" {
-    command = <<EOT
-      for i in {1..30}; do
-        nc -zv ${oci_core_instance.core_vm.public_ip} 22 && exit 0
-        sleep 10
-      done
-      echo "Timeout waiting for SSH on VM" >&2
-      exit 1
-    EOT
+resource "oci_core_network_security_group_security_rule" "vm_algo_ui" {
+  network_security_group_id = oci_core_network_security_group.vm_nsg.id
+  direction                 = "INGRESS"
+  protocol                  = "6" # TCP
+  source                    = "0.0.0.0/0"
+  source_type               = "CIDR_BLOCK"
+  tcp_options {
+    destination_port_range {
+      min = local.algo.ui_port
+      max = local.algo.ui_port
+    }
   }
 }
 
@@ -38,9 +34,10 @@ resource "null_resource" "core_api_setup" {
 
   provisioner "file" {
     content = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {
-      git_repository = local.core_api.git_repository,
-      branch         = local.core_api.branch
-      core_api_port  = local.core_api.port
+      git_repository = local.algo.git_repository,
+      branch         = local.algo.branch
+      core_api_port  = local.algo.api_port
+      algo_ui_port   = local.algo.ui_port
     })
     destination = "/tmp/core_vm_setup.sh"
     connection {
@@ -54,9 +51,23 @@ resource "null_resource" "core_api_setup" {
 
   provisioner "file" {
     content = templatefile("${path.module}/scripts/algo-core.service.tpl", {
-      core_api_port = local.core_api.port
+      core_api_port = local.algo.api_port
     })
     destination = "/tmp/algo-core.service"
+    connection {
+      type        = "ssh"
+      host        = oci_core_instance.core_vm.public_ip
+      user        = "opc"
+      private_key = file("${path.module}/${var.vm_ssh_private_key}")
+      timeout     = "2m"
+    }
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/scripts/algo-ui.conf.tpl", {
+      algo_ui_port = local.algo.ui_port
+    })
+    destination = "/tmp/algo-ui.conf"
     connection {
       type        = "ssh"
       host        = oci_core_instance.core_vm.public_ip
