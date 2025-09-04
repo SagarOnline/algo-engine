@@ -1,4 +1,4 @@
-resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
+resource "oci_core_network_security_group_security_rule" "core_ui" {
   network_security_group_id = oci_core_network_security_group.vm_nsg.id
   direction                 = "INGRESS"
   protocol                  = "6" # TCP
@@ -6,25 +6,25 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_api" {
   source_type               = "CIDR_BLOCK"
   tcp_options {
     destination_port_range {
-      min = local.core_api.port
-      max = local.core_api.port
+      min = local.algo_ui.port
+      max = local.algo_ui.port
     }
   }
 }
 
-resource "null_resource" "core_api_setup" {
+resource "null_resource" "algo_ui_setup" {
   depends_on = [null_resource.wait_for_ssh]
   triggers = {
-    setup_script = filesha1("${path.module}/scripts/core_vm_setup.sh.tpl")
+    setup_script = filesha1("${path.module}/scripts/algo_ui_setup.sh.tpl")
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {
-      git_repository = local.core_api.git_repository,
-      branch         = local.core_api.branch
-      core_api_port  = local.core_api.port
+    content = templatefile("${path.module}/scripts/algo_ui_setup.sh.tpl", {
+      git_repository = local.algo_ui.git_repository,
+      branch         = local.algo_ui.branch
+      algo_ui_port   = local.algo_ui.port
     })
-    destination = "/tmp/core_vm_setup.sh"
+    destination = "/tmp/algo_ui_setup.sh"
     connection {
       type        = "ssh"
       host        = oci_core_instance.core_vm.public_ip
@@ -35,10 +35,10 @@ resource "null_resource" "core_api_setup" {
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/scripts/algo-core.service.tpl", {
-      core_api_port = local.core_api.port
+    content = templatefile("${path.module}/scripts/algo-ui.conf.tpl", {
+      algo_ui_port = local.algo_ui.port
     })
-    destination = "/tmp/algo-core.service"
+    destination = "/tmp/algo-ui.conf"
     connection {
       type        = "ssh"
       host        = oci_core_instance.core_vm.public_ip
@@ -50,10 +50,10 @@ resource "null_resource" "core_api_setup" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/core_vm_setup.sh",
-      "dos2unix /tmp/core_vm_setup.sh",
-      "dos2unix /tmp/algo-core.service",
-      "/tmp/core_vm_setup.sh > /tmp/core_vm_setup.log 2>&1"
+      "chmod +x /tmp/algo_ui_setup.sh",
+      "dos2unix /tmp/algo_ui_setup.sh",
+      "dos2unix /tmp/algo-ui.conf",
+      "/tmp/algo_ui_setup.sh > /tmp/algo_ui_setup.log 2>&1"
     ]
     connection {
       type        = "ssh"
