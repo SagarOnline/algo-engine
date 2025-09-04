@@ -29,7 +29,10 @@ resource "oci_core_network_security_group_security_rule" "vm_algo_ui" {
 resource "null_resource" "core_api_setup" {
   depends_on = [null_resource.wait_for_ssh]
   triggers = {
-    setup_script = filesha1("${path.module}/scripts/core_vm_setup.sh.tpl")
+    scripts_hash = sha1(join("", [
+      for f in fileset("${path.module}/scripts", "**") :
+      filesha1("${path.module}/scripts/${f}")
+    ]))
   }
 
   provisioner "file" {
