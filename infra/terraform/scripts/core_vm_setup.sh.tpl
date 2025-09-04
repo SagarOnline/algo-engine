@@ -225,8 +225,14 @@ copy_algo_ui() {
     sudo rm -rf "$APP_DIR"
     sudo mkdir -p "$APP_DIR"
     sudo cp -r /tmp/algo-engine/algo_ui/build/web/* "$APP_DIR/"
+    
+    # Allow Nginx to serve content from this directory
     sudo semanage fcontext -a -t httpd_sys_content_t "$APP_DIR(/.*)?"
     sudo restorecon -Rv "$APP_DIR"
+
+    # allow Nginx to connect to network on 127.0.0.1 to forward API requests
+    sudo setsebool -P httpd_can_network_connect 1
+    
 }
 
 configure_algo_ui() {

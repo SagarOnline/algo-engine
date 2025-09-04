@@ -1,5 +1,5 @@
 locals {
-  application_name = "algo-core"
+  application_name = "algo"
   network = {
     vcn_display_name    = "${local.application_name}"
     vcn_cidr            = "10.0.0.0/16"
@@ -18,7 +18,7 @@ locals {
 
   algo = {
     git_repository = "https://github.com/SagarOnline/algo-engine.git"
-    branch         = "algo-ui"
+    branch         = "main"
     api_port       = 5000
     ui_port        = 8008
   }
