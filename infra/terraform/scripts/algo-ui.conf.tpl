@@ -1,6 +1,6 @@
 server {
     listen ${algo_ui_port};
-    server_name ${algo_ui_host};
+    server_name _;
 
     # Serve Flutter Web
     root /var/www/algo-ui;
