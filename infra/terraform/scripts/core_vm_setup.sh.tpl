@@ -241,7 +241,7 @@ configure_algo_ui() {
     sudo cp  /tmp/algo-ui.conf $CONF_FILE
     sudo dos2unix $CONF_FILE
     sudo nginx -t
-    sudo systemctl reload nginx
+    sudo systemctl restart nginx
     echo "✅ Nginx configuration reloaded."
 }
 
