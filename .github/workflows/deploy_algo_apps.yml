@@ -1,4 +1,4 @@
-name: Terraform OCI Infrastructure
+name: Deploy Algo Apps
 
 on:
   push:

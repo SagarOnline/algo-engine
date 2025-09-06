@@ -1,4 +1,4 @@
-name: Python CI for algo-api
+name: Build and Test algo-api
 
 on:
   pull_request:
