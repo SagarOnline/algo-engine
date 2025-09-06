@@ -52,17 +52,6 @@ python -m venv venv
 source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 ```
 
-Create Environment File (for developement)
-```bash
-python - <<EOF
-CONFIG_JSON_PATH=../../config/config.json
-"""
-with open(".env", "w") as f:
-    f.write(content)
-EOF
-
-```
-
 Install dependencies ( for production ):  
 
 ```bash

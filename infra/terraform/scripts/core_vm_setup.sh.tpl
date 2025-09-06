@@ -80,6 +80,7 @@ copy_core_api() {
     sudo rm -rf "$APP_DIR"
     sudo mkdir -p "$APP_DIR"
     sudo cp -r algo-engine/components/algo_core/* "$APP_DIR/"
+    sudo rm -f "$APP_DIR/.env"
     sudo chown -R $(whoami):$(whoami) "$APP_DIR"
 }
 

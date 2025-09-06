@@ -138,6 +138,7 @@ celerybeat.pid
 
 # Environments
 .env
+!components/algo-api/.env
 .envrc
 .venv
 env/

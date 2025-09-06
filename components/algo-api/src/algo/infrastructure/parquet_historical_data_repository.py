@@ -6,7 +6,7 @@ from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy import Instrument
 from algo.domain.timeframe import Timeframe
-from algo_core import config_context
+from algo import config_context
 
 class ParquetHistoricalDataRepository(HistoricalDataRepository):
     def __init__(self, data_path: str):

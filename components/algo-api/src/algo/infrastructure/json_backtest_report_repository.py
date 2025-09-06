@@ -5,7 +5,7 @@ from datetime import date
 
 from algo.domain.backtest.report_repository import BacktestReportRepository
 from algo.domain.backtest.report import BackTestReport
-from algo_core import config_context
+from algo import config_context
 
 
 class JsonBacktestReportRepository(BacktestReportRepository):
