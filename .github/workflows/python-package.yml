@@ -21,10 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e components/algo_core
-          pip install -e components/algo_core[dev]
+          pip install -e algo-api
+          pip install -e algo-api[dev]
 
       - name: Run tests
         run: |
-          cd components/algo_core
+          cd algo-api
           python -m pytest
