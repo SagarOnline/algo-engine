@@ -43,7 +43,7 @@ jobs:
       - name: Zip build artifacts
         run: |
           cd build
-          zip -r web_build_${{ github.ref_name }}.zip web
+          zip -r web_build_test.zip web
 
   release:
     name: Release Build
