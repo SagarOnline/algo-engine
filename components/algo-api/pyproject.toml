@@ -64,4 +64,4 @@ dev = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["src/tests"]
+testpaths = ["tests"]
