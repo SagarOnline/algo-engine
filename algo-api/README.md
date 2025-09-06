@@ -1,7 +1,7 @@
-# Algo Core
+# Algo API
 
-The **Algo Core** component is the central engine for **algorithmic trading**.  
-It provides functionality for both **backtesting** strategies using historical data and **executing live trades** through broker integrations.
+The **Algo API** component is the central engine for **algorithmic trading**.  
+It provides REST interface for both **backtesting** strategies using historical data and **executing live trades** through broker integrations.
 
 ---
 
@@ -43,7 +43,7 @@ It provides functionality for both **backtesting** strategies using historical d
 Navigate to the algo-core project directory:  
 
 ```bash
-cd components/algo-core
+cd algo-api
 ```
 
 Create Vitual Environment
@@ -84,7 +84,7 @@ python -m pytest
 2. Start the Flask API server:
 
    ```bash
-   python ./src/algo_core/app.py # On Windows: python .\src\algo_core\app.py
+   python ./src/algo/app.py # On Windows: python .\src\algo\app.py
    ```
    By default, the API will be available at: http://127.0.0.1:5000
 
