@@ -64,15 +64,28 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Zip build artifacts
+        run: |
+          cd algo-ui/build
+          zip -r web_build_${{ github.ref_name }}.zip web
+
+      # - name: Upload build artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: algo-ui
+      #     path: algo-ui/build/web
+      
+      - name: Delete existing release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
-          name: algo-ui
-          path: algo-ui/build/web
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: algo-ui/build/web/**
+          tag_name: ${{ github.ref_name }}
+          files: algo-ui/build/web_build_${{ github.ref_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
