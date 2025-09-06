@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "components/algo_core/src/tests"
+        "algo-api/tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true

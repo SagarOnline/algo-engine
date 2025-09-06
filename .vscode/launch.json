@@ -2,27 +2,27 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Debug algo_core main.py",
+      "name": "Python: Debug algo-api main.py",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/components/algo_core/src/algo_core/main.py",
+      "program": "${workspaceFolder}/algo-api/src/algo/main.py",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "cwd": "${workspaceFolder}/components/algo_core",
+      "cwd": "${workspaceFolder}/algo-api",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/components/algo_core/src"
+        "PYTHONPATH": "${workspaceFolder}/algo-api/src"
       }
     },
     {
       "name": "Python: Debug Flask App",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/components/algo_core/src/algo_core/app.py",
+      "program": "${workspaceFolder}/algo-api/src/algo/app.py",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "cwd": "${workspaceFolder}/components/algo_core",
+      "cwd": "${workspaceFolder}/algo-api",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/components/algo_core/src"
+        "PYTHONPATH": "${workspaceFolder}/algo-api/src"
       }
     },
     {

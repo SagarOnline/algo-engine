@@ -16,7 +16,7 @@ An extensible and testable **algorithmic trading engine** designed to **run and 
 
 ## 🚀 Components
 
-- [Algo Core Component](./components/algo_core/README.md) : It provides functionality for both **backtesting** strategies using historical data and **executing live trades** through broker integrations.
+- [Algo API Component](./algo-api/README.md) : It provides REST interface for both **backtesting** strategies using historical data and **executing live trades** through broker integrations.
 - [Historical Data Component](./components/historical_data/README.md) : It is responsible for fetching, managing, and storing historical market data for various instruments. This data is a critical dependency for the **algo-core** component, which uses it to perform **backtesting** and validate algorithmic trading strategies before live execution.  
 
 ---

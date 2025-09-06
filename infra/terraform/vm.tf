@@ -12,7 +12,7 @@ data "oci_core_images" "oracle_linux_8" {
 }
 
 # Compute Instance in Public Subnet
-resource "oci_core_instance" "core_vm" {
+resource "oci_core_instance" "algo_vm" {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
   shape               = local.vm.shape
@@ -62,15 +62,15 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
   }
 }
 
-# Run shell script on core_vm after creation
+# Run shell script on algo_vm after creation
 
 # Wait for SSH to be available on the VM
 resource "null_resource" "wait_for_ssh" {
-  depends_on = [oci_core_instance.core_vm]
+  depends_on = [oci_core_instance.algo_vm]
   provisioner "local-exec" {
     command = <<EOT
       for i in {1..30}; do
-        nc -zv ${oci_core_instance.core_vm.public_ip} 22 && exit 0
+        nc -zv ${oci_core_instance.algo_vm.public_ip} 22 && exit 0
         sleep 10
       done
       echo "Timeout waiting for SSH on VM" >&2
