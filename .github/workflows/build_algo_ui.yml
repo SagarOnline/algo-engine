@@ -40,11 +40,6 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Zip build artifacts
-        run: |
-          cd build
-          zip -r web_build_test.zip web
-
   release:
     name: Release Build
     if: startsWith(github.ref, 'refs/tags/v')
