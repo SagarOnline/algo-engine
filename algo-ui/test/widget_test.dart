@@ -11,20 +11,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:algo_ui/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App title and home page text are shown', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const AlgoApp());
+    expect(find.text('Sattva'), findsWidgets); // AppBar and NavigationRail
+    expect(find.text('Welcome to Sattva Home!'), findsOneWidget);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('NavigationRail toggles and navigates (desktop)', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.window.physicalSizeTestValue = const Size(1200, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    await tester.pumpWidget(const AlgoApp());
+    // Should show NavigationRail
+    expect(find.byType(NavigationRail), findsOneWidget);
+    // Toggle NavigationRail
+    await tester.tap(find.byIcon(Icons.chevron_left));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    // Navigate to My Strategies
+    await tester.tap(find.text('My Strategies'));
+    await tester.pump();
+    expect(find.text('My Strategies'), findsWidgets);
+    expect(find.text('Welcome to Sattva Home!'), findsNothing);
+    // Reset window size
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
   });
 }
