@@ -26,7 +26,7 @@ resource "oci_core_network_security_group_security_rule" "vm_algo_ui" {
   }
 }
 
-resource "null_resource" "core_api_setup" {
+resource "null_resource" "algo_api_setup" {
   depends_on = [null_resource.wait_for_ssh]
   triggers = {
     scripts_hash = sha1(join("", [
@@ -36,16 +36,16 @@ resource "null_resource" "core_api_setup" {
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/scripts/core_vm_setup.sh.tpl", {
+    content = templatefile("${path.module}/scripts/algo_vm_setup.sh.tpl", {
       git_repository = local.algo.git_repository,
       branch         = local.algo.branch
-      core_api_port  = local.algo.api_port
+      algo_api_port  = local.algo.api_port
       algo_ui_port   = local.algo.ui_port
     })
-    destination = "/tmp/core_vm_setup.sh"
+    destination = "/tmp/algo_vm_setup.sh"
     connection {
       type        = "ssh"
-      host        = oci_core_instance.core_vm.public_ip
+      host        = oci_core_instance.algo_vm.public_ip
       user        = "opc"
       private_key = file("${path.module}/${var.vm_ssh_private_key}")
       timeout     = "2m"
@@ -53,13 +53,13 @@ resource "null_resource" "core_api_setup" {
   }
 
   provisioner "file" {
-    content = templatefile("${path.module}/scripts/algo-core.service.tpl", {
-      core_api_port = local.algo.api_port
+    content = templatefile("${path.module}/scripts/algo-api.service.tpl", {
+      algo_api_port = local.algo.api_port
     })
-    destination = "/tmp/algo-core.service"
+    destination = "/tmp/algo-api.service"
     connection {
       type        = "ssh"
-      host        = oci_core_instance.core_vm.public_ip
+      host        = oci_core_instance.algo_vm.public_ip
       user        = "opc"
       private_key = file("${path.module}/${var.vm_ssh_private_key}")
       timeout     = "2m"
@@ -73,7 +73,7 @@ resource "null_resource" "core_api_setup" {
     destination = "/tmp/algo-ui.conf"
     connection {
       type        = "ssh"
-      host        = oci_core_instance.core_vm.public_ip
+      host        = oci_core_instance.algo_vm.public_ip
       user        = "opc"
       private_key = file("${path.module}/${var.vm_ssh_private_key}")
       timeout     = "2m"
@@ -82,14 +82,14 @@ resource "null_resource" "core_api_setup" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/core_vm_setup.sh",
-      "dos2unix /tmp/core_vm_setup.sh",
-      "dos2unix /tmp/algo-core.service",
-      "/tmp/core_vm_setup.sh > /tmp/core_vm_setup.log 2>&1"
+      "chmod +x /tmp/algo_vm_setup.sh",
+      "dos2unix /tmp/algo_vm_setup.sh",
+      "dos2unix /tmp/algo-api.service",
+      "/tmp/algo_vm_setup.sh > /tmp/algo_vm_setup.log 2>&1"
     ]
     connection {
       type        = "ssh"
-      host        = oci_core_instance.core_vm.public_ip
+      host        = oci_core_instance.algo_vm.public_ip
       user        = "opc"
       private_key = file("${path.module}/${var.vm_ssh_private_key}")
       timeout     = "2m"

@@ -10,7 +10,7 @@ variable "compartment_ocid" {
 }
 
 variable "vm_ssh_private_key" {
-  description = "SSH private key for connecting to core_vm (should be set from GitHub secret VM_SSH_PRIVATE_KEY)"
+  description = "SSH private key for connecting to algo_vm (should be set from GitHub secret VM_SSH_PRIVATE_KEY)"
   type        = string
   sensitive   = true
 }
