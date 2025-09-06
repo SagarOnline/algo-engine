@@ -5,12 +5,12 @@ on:
     branches: [ "main" ]
     paths:
       - 'algo-ui/**'
-      - '.github/workflows/algo_ui.yml'
+      - '.github/workflows/build_algo_ui.yml'
   push:
     branches: [ "main" ]
     paths:
       - 'algo-ui/**'
-      - '.github/workflows/algo_ui.yml'
+      - '.github/workflows/build_algo_ui.yml'
     tags:
       - "v*.*.*"   # e.g. v1.0.0
 permissions:
