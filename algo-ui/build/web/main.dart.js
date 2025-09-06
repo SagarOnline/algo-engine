@@ -6487,10 +6487,9 @@ j=i}s.HT(new A.ue(p,B.vk,o,j,h))
 s.yd()},
 xl:function xl(a){this.a=a},
 oM:function oM(a){this.a=a},
-CX:function CX(a){var _=this
+CX:function CX(){var _=this
 _.d=0
 _.e=!0
-_.f=a
 _.c=_.a=null},
 Yq:function Yq(a){this.a=a},
 Yp:function Yp(a){this.a=a},
@@ -30948,7 +30947,7 @@ A.xl.prototype={
 M(a){var s=null
 return new A.r1(B.vl,"Sattva",A.a5R(B.N,s,s).V2(new A.k2(B.N,B.hr,B.k,s,s,s,s,s,s,B.CG,B.k,s,s,s,s,s,s,s,s,s,s,s,s,s,s,B.xY,B.k,s,s,B.j6,B.i,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,B.j6,B.i),B.k),!1,s)}}
 A.oM.prototype={
-ai(){return new A.CX(A.d(["Home","My Strategies"],t.s))}}
+ai(){return new A.CX()}}
 A.CX.prototype={
 Az(a){switch(a){case 0:return B.wZ
 case 1:return B.wY

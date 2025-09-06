@@ -17,6 +17,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!algo-ui/lib
 lib64/
 parts/
 sdist/
