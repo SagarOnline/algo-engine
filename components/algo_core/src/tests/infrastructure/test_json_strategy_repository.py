@@ -1,7 +1,7 @@
 import os
 import json
 import pytest
-from algo_core.infrastructure.json_strategy_repository import JsonStrategyRepository
+from algo.infrastructure.json_strategy_repository import JsonStrategyRepository
 
 
 class DummyConfig:
@@ -22,7 +22,7 @@ def make_strategy_json(tmpdir, name, data):
 def patch_config(monkeypatch, tmp_path):
     DummyConfig.backtest_engine.strategy_json_config_dir = str(tmp_path)
     monkeypatch.setattr(
-        "algo_core.infrastructure.json_strategy_repository.get_config",
+        "algo.infrastructure.json_strategy_repository.get_config",
         lambda: DummyConfig,
     )
     return tmp_path

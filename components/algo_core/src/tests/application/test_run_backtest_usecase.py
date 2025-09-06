@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, ANY
-from algo_core.application.run_backtest_usecase import RunBacktestUseCase
-from algo_core.application.run_backtest_usecase import RunBacktestInput
+from algo.application.run_backtest_usecase import RunBacktestUseCase
+from algo.application.run_backtest_usecase import RunBacktestInput
 
 @pytest.fixture
 def mock_historical_data_repository():

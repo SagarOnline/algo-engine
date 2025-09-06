@@ -1,12 +1,12 @@
 import pytest
-from algo_core.infrastructure.upstox_historical_data_repository import parse_timeframe
-from algo_core.domain.timeframe import Timeframe
+from algo.infrastructure.upstox_historical_data_repository import parse_timeframe
+from algo.domain.timeframe import Timeframe
 from unittest.mock import patch, MagicMock
 from datetime import date
-from algo_core.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
-from algo_core.domain.strategy import Exchange, Instrument, InstrumentType
-from algo_core.domain.timeframe import Timeframe
-from algo_core.domain.backtest.historical_data import HistoricalData
+from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
+from algo.domain.strategy import Exchange, Instrument, InstrumentType
+from algo.domain.timeframe import Timeframe
+from algo.domain.backtest.historical_data import HistoricalData
 
 
 
@@ -48,7 +48,7 @@ def timeframe():
 def repo():
     return UpstoxHistoricalDataRepository()
 
-@patch("algo_core.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_success(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_response = MagicMock()
@@ -68,7 +68,7 @@ def test_get_historical_data_success(mock_api_instance, repo, instrument, timefr
     assert result.data[0]["open"] == 100
     assert result.data[1]["close"] == 110
 
-@patch("algo_core.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_empty(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_response = MagicMock()
@@ -82,7 +82,7 @@ def test_get_historical_data_empty(mock_api_instance, repo, instrument, timefram
     assert isinstance(result, HistoricalData)
     assert result.data == []
 
-@patch("algo_core.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_api_exception(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     from upstox_client.rest import ApiException
@@ -95,7 +95,7 @@ def test_get_historical_data_api_exception(mock_api_instance, repo, instrument, 
         repo.get_historical_data(instrument, start, end, timeframe)
     assert "Exception when calling Upstox API" in str(excinfo.value)
 
-@patch("algo_core.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_unexpected_exception(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_api.get_historical_candle_data1.side_effect = Exception("Some error")

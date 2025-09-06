@@ -1,7 +1,7 @@
 # test_access_token.py
 import os
 import pytest
-from algo_core.infrastructure.access_token import AccessToken
+from algo.infrastructure.access_token import AccessToken
 
 
 def test_singleton_instance():

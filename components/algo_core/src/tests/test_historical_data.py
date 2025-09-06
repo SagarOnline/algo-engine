@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from algo_core.domain.backtest.historical_data import HistoricalData
+from algo.domain.backtest.historical_data import HistoricalData
 
 def test_getCandleBy_returns_candle_when_exists():
     data = [

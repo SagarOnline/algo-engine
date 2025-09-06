@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.registry import register_indicator
-from algo_core.domain.indicators.number import indicator_number  # replace with actual module path
+from algo.domain.indicators.registry import register_indicator
+from algo.domain.indicators.number import indicator_number  # replace with actual module path
 
 
 def test_indicator_number():

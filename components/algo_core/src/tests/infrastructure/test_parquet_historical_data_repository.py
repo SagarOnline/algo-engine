@@ -6,11 +6,11 @@ from datetime import date, datetime
 import pytest
 from unittest.mock import patch
 
-from algo_core.domain.strategy import Instrument, InstrumentType, Exchange
-from algo_core.domain.timeframe import Timeframe
-from algo_core.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
-from algo_core.domain.config import HistoricalDataBackend
-from algo_core.domain.backtest.historical_data import HistoricalData
+from algo.domain.strategy import Instrument, InstrumentType, Exchange
+from algo.domain.timeframe import Timeframe
+from algo.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
+from algo.domain.config import HistoricalDataBackend
+from algo.domain.backtest.historical_data import HistoricalData
 
 @pytest.fixture
 def temp_data_dir():
@@ -81,8 +81,8 @@ def test_get_historical_data_no_files(repository, instrument, timeframe):
 #     timestamps = [pd.to_datetime(d['timestamp']) for d in hd.data]
 #     assert all(ts.date() == date(2023, 1, 1) for ts in timestamps)
 
-@patch("algo_core.infrastructure.parquet_historical_data_repository.os.path.exists")
-@patch("algo_core.infrastructure.parquet_historical_data_repository.pd.read_parquet")
+@patch("algo.infrastructure.parquet_historical_data_repository.os.path.exists")
+@patch("algo.infrastructure.parquet_historical_data_repository.pd.read_parquet")
 def test_get_historical_data_found(mock_read_parquet, mock_exists, repository, instrument, timeframe):
     mock_exists.side_effect = [True, True]
     df1 = pd.DataFrame([
@@ -100,7 +100,7 @@ def test_get_historical_data_found(mock_read_parquet, mock_exists, repository, i
     assert result.data[0]["open"] == 100
     assert result.data[1]["close"] == 110
 
-@patch("algo_core.infrastructure.parquet_historical_data_repository.os.path.exists")
+@patch("algo.infrastructure.parquet_historical_data_repository.os.path.exists")
 def test_get_historical_data_not_found(mock_exists, repository, instrument, timeframe):
     mock_exists.return_value = False
     start = date(2024, 1, 1)
@@ -109,8 +109,8 @@ def test_get_historical_data_not_found(mock_exists, repository, instrument, time
     assert isinstance(result, HistoricalData)
     assert result.data == []
 
-# @patch("algo_core.infrastructure.parquet_historical_data_repository.os.path.exists")
-# @patch("algo_core.infrastructure.parquet_historical_data_repository.pd.read_parquet")
+# @patch("algo.infrastructure.parquet_historical_data_repository.os.path.exists")
+# @patch("algo.infrastructure.parquet_historical_data_repository.pd.read_parquet")
 # def test_get_historical_data_date_filtering(mock_read_parquet, mock_exists, repository, instrument, timeframe):
 #     mock_exists.side_effect = [True]
 #     df = pd.DataFrame([

@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
-from algo_core.domain.strategy import Instrument, InstrumentType, PositionAction
-from algo_core.domain.backtest.report import TradableInstrument
+from algo.domain.strategy import Instrument, InstrumentType, PositionAction
+from algo.domain.backtest.report import TradableInstrument
 
 def make_instrument():
     return Instrument(type= InstrumentType.STOCK, exchange= "NSE", instrument_key= "NSE_TEST_INSTRUMENT" )

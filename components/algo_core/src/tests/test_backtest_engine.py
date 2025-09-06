@@ -3,10 +3,10 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import date, datetime
 from typing import Dict, Any, List
 
-from algo_core.domain.backtest.engine import BacktestEngine
-from algo_core.domain.strategy import InstrumentType, Strategy,Instrument,Exchange,Position,PositionAction
-from algo_core.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo_core.domain.timeframe import Timeframe
+from algo.domain.backtest.engine import BacktestEngine
+from algo.domain.strategy import InstrumentType, Strategy,Instrument,Exchange,Position,PositionAction
+from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
+from algo.domain.timeframe import Timeframe
 
 @pytest.fixture
 def mock_strategy():
@@ -40,7 +40,7 @@ def mock_strategy_for_respect_start_date():
 
 @pytest.fixture
 def mock_historical_data_repository():
-    from algo_core.domain.backtest.historical_data import HistoricalData
+    from algo.domain.backtest.historical_data import HistoricalData
     repo = Mock(spec=HistoricalDataRepository)
     repo.get_historical_data.return_value = HistoricalData([])
     return repo
@@ -71,7 +71,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     start_date = date(2023, 1, 1)
     end_date = date(2023, 1, 5)
     
-    from algo_core.domain.backtest.historical_data import HistoricalData
+    from algo.domain.backtest.historical_data import HistoricalData
     historical_data = [
         generate_candle("2023-01-01T09:15:00", 100),
         generate_candle("2023-01-02T09:15:00", 110), # Entry signal
@@ -102,7 +102,7 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     required_start_date = date(2023, 1, 1)
     mock_strategy.get_required_history_start_date.return_value = required_start_date
 
-    from algo_core.domain.backtest.historical_data import HistoricalData
+    from algo.domain.backtest.historical_data import HistoricalData
     historical_data = [
         generate_candle("2023-01-01T09:15:00", 100), # Should be ignored for trading
         generate_candle("2023-01-02T09:15:00", 110), # Should be ignored for trading

@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.rsi import indicator_rsi
+from algo.domain.indicators.rsi import indicator_rsi
 
 def test_indicator_rsi_with_dataframe():
     df = pd.DataFrame([

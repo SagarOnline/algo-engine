@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
-from algo_core.domain.strategy import Exchange, Instrument, InstrumentType, Strategy
-from algo_core.domain.backtest.report import BackTestReport
+from algo.domain.strategy import Exchange, Instrument, InstrumentType, Strategy
+from algo.domain.backtest.report import BackTestReport
 
-from algo_core.domain.backtest.backtest_run import BackTest
-from algo_core.domain.backtest.historical_data import HistoricalData
+from algo.domain.backtest.backtest_run import BackTest
+from algo.domain.backtest.historical_data import HistoricalData
 
 def generate_candle(timestamp_str: str, close_price: float):
     return {"timestamp": datetime.fromisoformat(timestamp_str), "close": close_price}

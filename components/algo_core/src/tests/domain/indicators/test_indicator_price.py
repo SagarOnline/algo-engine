@@ -1,8 +1,8 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.exceptions import InvalidStrategyConfiguration
-from algo_core.domain.indicators.registry import register_indicator
-from algo_core.domain.indicators.price import indicator_price  # replace with actual module path
+from algo.domain.indicators.exceptions import InvalidStrategyConfiguration
+from algo.domain.indicators.registry import register_indicator
+from algo.domain.indicators.price import indicator_price  # replace with actual module path
 
 
 def test_indicator_price_with_dataframe():

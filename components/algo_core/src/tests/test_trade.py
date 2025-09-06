@@ -1,6 +1,6 @@
 from datetime import datetime
-from algo_core.domain.market import Market
-from algo_core.domain.backtest.trade import Trade
+from algo.domain.market import Market
+from algo.domain.backtest.trade import Trade
 import pytest
 
 def test_trade():

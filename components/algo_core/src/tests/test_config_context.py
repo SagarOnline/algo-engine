@@ -3,8 +3,8 @@
 # import tempfile
 # import json
 # import pytest
-# from algo_core.config_context import  get_config, load_config, _config, _config_lock
-# from algo_core.domain.config import Config
+# from algo.config_context import  get_config, load_config, _config, _config_lock
+# from algo.domain.config import Config
 
 
 # def setup_module(module):

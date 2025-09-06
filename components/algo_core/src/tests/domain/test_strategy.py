@@ -1,8 +1,8 @@
 import pytest
 from typing import Dict, Any, List
 from dataclasses import dataclass
-from algo_core.domain.indicators.registry import register_indicator, IndicatorRegistry
-from algo_core.domain.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, Position, InstrumentType, Exchange, PositionAction
+from algo.domain.indicators.registry import register_indicator, IndicatorRegistry
+from algo.domain.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, Position, InstrumentType, Exchange, PositionAction
 from datetime import date, timedelta
 
 # --- Mock domain classes ---

@@ -1,6 +1,6 @@
 import pytest
-from algo_core.infrastructure.jsonstrategy import JsonStrategy
-from algo_core.domain.strategy import (
+from algo.infrastructure.jsonstrategy import JsonStrategy
+from algo.domain.strategy import (
     RuleSet,
     Condition,
     Expression,
@@ -10,7 +10,7 @@ from algo_core.domain.strategy import (
     Expiry,
     Expiring,
 )
-from algo_core.domain.timeframe import Timeframe
+from algo.domain.timeframe import Timeframe
 
 
 @pytest.fixture

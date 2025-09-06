@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.ema import indicator_ema
+from algo.domain.indicators.ema import indicator_ema
 
 def test_indicator_ema_with_dataframe():
     df = pd.DataFrame([

@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.adx import indicator_adx
+from algo.domain.indicators.adx import indicator_adx
 
 def test_indicator_adx_with_dataframe():
     df = pd.DataFrame([

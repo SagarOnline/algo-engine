@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.atr import indicator_atr
+from algo.domain.indicators.atr import indicator_atr
 
 def test_indicator_atr_with_dataframe():
     df = pd.DataFrame([

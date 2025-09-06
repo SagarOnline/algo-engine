@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from algo_core.domain.indicators.minus_di import indicator_minus_di
+from algo.domain.indicators.minus_di import indicator_minus_di
 
 def test_indicator_minus_di_with_dataframe():
     df = pd.DataFrame([
