@@ -40,10 +40,11 @@ It provides REST interface for both **backtesting** strategies using historical 
 
 ### Installation
 
-Navigate to the algo-core project directory:  
+Navigate to the algo-core project directory and create environment file (.env)  
 
 ```bash
 cd algo-api
+cp .env.template .env  # On Windows: copy .env.template .env
 ```
 
 Create Vitual Environment
