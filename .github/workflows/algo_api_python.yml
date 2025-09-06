@@ -1,4 +1,4 @@
-name: Infrastructure CI
+name: Python CI for algo-api
 
 on:
   pull_request:
