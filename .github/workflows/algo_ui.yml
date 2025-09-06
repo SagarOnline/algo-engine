@@ -14,7 +14,7 @@ on:
     tags:
       - "v*.*.*"   # e.g. v1.0.0
 
-      
+
 jobs:
   flutter-checks:
     name: Flutter Checks
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          flutter-version: '3.24.1'
 
       - name: Install dependencies
         run: flutter pub get
@@ -57,7 +57,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          flutter-version: '3.24.1'
 
       - name: Install dependencies
         run: flutter pub get
