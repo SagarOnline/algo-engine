@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'infra/terraform/**'
-      - '.github/workflows/terraform-oci.yml'
+      - '.github/workflows/deploy_algo_apps.yml'
   pull_request:
     branches: [ main ]
  

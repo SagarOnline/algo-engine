@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'algo-api/**'
-      - '.github/workflows/algo_api_python.yml'
+      - '.github/workflows/build_algo_api.yml'
 
 jobs:
   build:
