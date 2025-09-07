@@ -31,8 +31,19 @@ def patch_config(monkeypatch, tmp_path):
 def test_get_strategy_success(patch_config, tmp_path):
     # Arrange
     strategy_name = "bullish_nifty"
+    strategy_data = _get_strategy_data(strategy_name=strategy_name, timeframe="15min", capital=100000)
+    make_strategy_json(tmp_path, strategy_name, strategy_data)
+    repo = JsonStrategyRepository()
+    # Act
+    strategy = repo.get_strategy(strategy_name)
+    # Assert
+    assert strategy is not None
+    assert strategy.strategy_name == strategy_name
+
+
+def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital=100000):
     strategy_data = {
-        "strategy_name": "bullish_nifty",
+        "strategy_name": strategy_name,
         "instrument": {
             "type": "FUTURE",
             "expiry": "MONTHLY",
@@ -41,8 +52,8 @@ def test_get_strategy_success(patch_config, tmp_path):
             "instrument_key": "NSE_INDEX|Nifty 50",
             "exchange": "NSE",
         },
-        "timeframe": "15min",
-        "capital": 100000,
+        "timeframe": timeframe,
+        "capital": capital,
         "position": {
             "action": "BUY",
             "instrument": {
@@ -97,16 +108,27 @@ def test_get_strategy_success(patch_config, tmp_path):
             ],
         },
     }
-    make_strategy_json(tmp_path, strategy_name, strategy_data)
-    repo = JsonStrategyRepository()
-    # Act
-    strategy = repo.get_strategy(strategy_name)
-    # Assert
-    assert strategy is not None
-    assert strategy.strategy_name == "bullish_nifty"
+
+    return strategy_data
 
 
 def test_invalid_strategy_name(patch_config):
     repo = JsonStrategyRepository()
     with pytest.raises(ValueError):
         repo.get_strategy("nonexistent_strategy")
+
+
+def test_list_strategies_returns_all_strategies(patch_config, tmp_path):
+    # Arrange
+    strategy_data_1 = _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital=100000)
+    strategy_data_2 = _get_strategy_data(strategy_name="bearish_banknifty", timeframe="15min", capital=200000)
+    make_strategy_json(tmp_path, "bullish_nifty", strategy_data_1)
+    make_strategy_json(tmp_path, "bearish_banknifty", strategy_data_2)
+    repo = JsonStrategyRepository()
+    # Act
+    strategies = repo.list_strategies()
+    # Assert
+    names = [s.strategy_name for s in strategies]
+    assert "bullish_nifty" in names
+    assert "bearish_banknifty" in names
+    assert len(strategies) == 2

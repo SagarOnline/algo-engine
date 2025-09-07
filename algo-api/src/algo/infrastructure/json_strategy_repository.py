@@ -1,5 +1,3 @@
-
-
 import json
 import os
 from algo.domain.strategy_repository import StrategyRepository
@@ -21,3 +19,15 @@ class JsonStrategyRepository(StrategyRepository):
             strategy_data = json.load(f)
         strategy = JsonStrategy(strategy_data)
         return strategy
+
+    def list_strategies(self) -> list[Strategy]:
+        """Return a list of all available Strategy objects by reading all JSON files in the config directory."""
+        strategies = []
+        for filename in os.listdir(self.base_dir):
+            if filename.endswith('.json'):
+                file_path = os.path.join(self.base_dir, filename)
+                with open(file_path, 'r') as f:
+                    strategy_data = json.load(f)
+                strategy = JsonStrategy(strategy_data)
+                strategies.append(strategy)
+        return strategies
