@@ -16,7 +16,6 @@ on:
 permissions:
   contents: write
 
-
 jobs:
   build-algo-ui:
     name: Build and Test algo-ui
