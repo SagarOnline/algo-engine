@@ -35,6 +35,9 @@ class DummyStrategy(Strategy):
 
     def get_name(self) -> str:
         return "DummyStrategy"
+    
+    def get_display_name(self) -> str:
+        return "Dummy Strategy"
 
     def get_instrument(self) -> Instrument:
         return Instrument(type=InstrumentType.STOCK, exchange=Exchange.NSE, instrument_key="DUMMY")

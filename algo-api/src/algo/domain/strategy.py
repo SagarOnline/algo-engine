@@ -147,6 +147,10 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
+    def get_display_name(self) -> str:
+        pass
+
+    @abstractmethod
     def get_instrument(self) -> Instrument:
         pass
 

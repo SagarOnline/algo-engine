@@ -16,7 +16,8 @@ from algo.domain.timeframe import Timeframe
 @pytest.fixture
 def sample_json():
     return {
-        "strategy_name": "bullish_nifty",
+        "name": "bullish_nifty",
+        "display_name": "Bullish Nifty",
         "instrument": {
             "type": "PE",
             "expiry": "MONTHLY",
@@ -74,7 +75,8 @@ def sample_json():
 @pytest.fixture
 def sample_json_required_only():
     return {
-        "strategy_name": "bullish_nifty",
+        "name": "bullish_nifty",
+        "display_name": "Bullish Nifty",
         "instrument": {"type": "PE", "instrument_key": "NIFTY", "exchange": "NSE"},
         "timeframe": "5min",
         "capital": 100000,
@@ -117,6 +119,7 @@ def strategy_required_only(sample_json_required_only):
 
 def test_metadata(strategy):
     assert strategy.get_name() == "bullish_nifty"
+    assert strategy.get_display_name() == "Bullish Nifty"
     assert strategy.get_timeframe() == Timeframe.FIVE_MINUTES
     assert strategy.get_capital() == 100000
 
