@@ -37,10 +37,10 @@ resource "null_resource" "algo_api_setup" {
 
   provisioner "file" {
     content = templatefile("${path.module}/scripts/algo_vm_setup.sh.tpl", {
-      git_repository = local.algo.git_repository,
-      branch         = local.algo.branch
-      algo_api_port  = local.algo.api_port
-      algo_ui_port   = local.algo.ui_port
+      git_repository  = local.algo.git_repository,
+      release_version = local.algo.release_version
+      algo_api_port   = local.algo.api_port
+      algo_ui_port    = local.algo.ui_port
     })
     destination = "/tmp/algo_vm_setup.sh"
     connection {

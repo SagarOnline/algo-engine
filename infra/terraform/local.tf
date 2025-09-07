@@ -17,9 +17,10 @@ locals {
   }
 
   algo = {
-    git_repository = "SagarOnline/algo-engine"
-    api_port       = 5000
-    ui_port        = 8008
+    git_repository  = "SagarOnline/algo-engine"
+    release_version = "v0.1.1"
+    api_port        = 5000
+    ui_port         = 8008
   }
 
 }
