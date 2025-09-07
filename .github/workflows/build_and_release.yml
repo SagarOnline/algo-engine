@@ -94,7 +94,7 @@ jobs:
       - name: Zip algo-ui build artifacts
         run: |
           cd algo-ui/build
-          zip -r algo-ui_${{ github.ref_name }}.zip web
+          zip -r algo_ui_${{ github.ref_name }}.zip web
 
       - name: Zip algo-api build artifacts
         run: |
@@ -112,7 +112,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            algo-ui/build/web_build_${{ github.ref_name }}.zip
+            algo-ui/build/algo_ui_${{ github.ref_name }}.zip
             algo_api_${{ github.ref_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
