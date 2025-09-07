@@ -1,6 +1,7 @@
 name: Deploy
 
 on:
+  workflow_dispatch:   # ✅ allows manual trigger
   push:
     branches: [ main ]
     paths:
@@ -72,5 +73,10 @@ jobs:
         run: terraform plan -var-file="terraform.auto.tfvars"
 
       - name: Terraform Apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -var-file="terraform.auto.tfvars"
+        if: >
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'workflow_dispatch')
+        run: |
+          git fetch --tags
+          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+          terraform apply -auto-approve -var="algo_version=$latest_tag" -var-file="terraform.auto.tfvars"

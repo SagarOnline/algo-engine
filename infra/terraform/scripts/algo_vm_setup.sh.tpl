@@ -253,6 +253,42 @@ setup_algo_ui() {
     open_firewall_port ${algo_ui_port}
 }
 
+download_github_artifact() {
+  repo=$1             # e.g. user/algo-engine
+  release_version=$2  # e.g. v1.0.0
+  asset_name=$3       # e.g. algo-ui
+
+  if [ -z "$repo" ] || [ -z "$release_version" ] || [ -z "$asset_name" ]; then
+    echo "Usage: download_github_artifact <repo> <release_version> <asset_name>"
+    return 1
+  fi
+
+  echo "🔎 Fetching release: $release_version for repo: $repo"
+
+  # Get release info for the given tag
+  release_json=$(curl -sL \
+    -H "Accept: application/vnd.github+json" \
+    "https://api.github.com/repos/$repo/releases/tags/$release_version")
+
+  # Extract asset download URL that matches asset_name
+  asset_url=$(echo "$release_json" | jq -r ".assets[] | select(.name | contains(\"$asset_name\")) | .browser_download_url")
+  echo $asset_url
+  if [ -z "$asset_url" ] || [ "$asset_url" == "null" ]; then
+    echo "❌ No asset found with name containing '$asset_name' in release $release_version"
+    return 1
+  fi
+
+  echo "  Downloading asset: $asset_name.zip from release $release_version"
+
+  # Download asset (requires GitHub token if repo is private)
+  curl -L \
+    -H "Accept: application/octet-stream" \
+    -H "Authorization: Bearer ${GITHUB_TOKEN:-}" \
+    "$asset_url" -o "$asset_name.zip"
+
+  echo "✅ Saved as $asset_name.zip"
+}
+
 # --- Main Script ---
 
 check_and_install_git

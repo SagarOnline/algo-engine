@@ -14,3 +14,11 @@ variable "vm_ssh_private_key" {
   type        = string
   sensitive   = true
 }
+
+variable "algo_version" {
+  description = "Algo Application Version to Deploy"
+  type        = string
+  sensitive   = true
+}
+
+

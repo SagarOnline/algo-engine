@@ -96,7 +96,7 @@ python -m pytest
 **Endpoint:**
 
 ```
-POST http://127.0.0.1:5000/backtest
+POST http://127.0.0.1:5000/api/backtest
 Content-Type: application/json
 ```
 
@@ -113,7 +113,7 @@ Content-Type: application/json
 **Example cURL Command:**
 
 ```bash
-curl -X POST http://127.0.0.1:5000/backtest \
+curl -X POST http://127.0.0.1:5000/api/backtest \
   -H "Content-Type: application/json" \
   -d '{"strategy_name": "bullish_nifty", "start_date": "2025-08-01", "end_date": "2025-08-14"}'
 ```
