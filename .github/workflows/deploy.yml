@@ -1,11 +1,11 @@
-name: Deploy Algo Apps
+name: Deploy
 
 on:
   push:
     branches: [ main ]
     paths:
       - 'infra/terraform/**'
-      - '.github/workflows/deploy_algo_apps.yml'
+      - '.github/workflows/deploy.yml'
   pull_request:
     branches: [ main ]
  
