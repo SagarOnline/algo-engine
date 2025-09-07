@@ -38,12 +38,13 @@ def test_get_strategy_success(patch_config, tmp_path):
     strategy = repo.get_strategy(strategy_name)
     # Assert
     assert strategy is not None
-    assert strategy.strategy_name == strategy_name
+    assert strategy.name == strategy_name
 
 
 def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital=100000):
     strategy_data = {
-        "strategy_name": strategy_name,
+        "name": strategy_name,
+        "display_name": strategy_name.replace("_", " ").title() ,
         "instrument": {
             "type": "FUTURE",
             "expiry": "MONTHLY",
@@ -128,7 +129,7 @@ def test_list_strategies_returns_all_strategies(patch_config, tmp_path):
     # Act
     strategies = repo.list_strategies()
     # Assert
-    names = [s.strategy_name for s in strategies]
+    names = [s.name for s in strategies]
     assert "bullish_nifty" in names
     assert "bearish_banknifty" in names
     assert len(strategies) == 2

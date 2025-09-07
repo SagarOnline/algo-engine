@@ -1,5 +1,6 @@
 {
-  "strategy_name": "bullish_nifty",
+  "name": "bullish_nifty",
+  "display_name": "Bullish Nifty",
   "instrument": {
     "type": "FUTURE",
     "expiry": "MONTHLY",

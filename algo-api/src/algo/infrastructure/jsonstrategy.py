@@ -7,7 +7,8 @@ from algo.domain.timeframe import Timeframe
 
 class JsonStrategy(Strategy):
     def __init__(self, json_data: Dict[str, Any]):
-        self.strategy_name = json_data.get("strategy_name")
+        self.name = json_data.get("name")
+        self.display_name = json_data.get("display_name")
         self.timeframe = Timeframe(json_data.get("timeframe"))
         self.capital = json_data.get("capital")
         self.instrument = self._get_parsed_instrument(json_data.get("instrument", {}))
@@ -54,9 +55,10 @@ class JsonStrategy(Strategy):
         return RuleSet(logic, conditions)
 
     def get_name(self) -> str:
-        return self.strategy_name
+        return self.name
 
-    
+    def get_display_name(self) -> str:
+        return self.display_name
 
     def get_timeframe(self) -> Timeframe:
         return self.timeframe
