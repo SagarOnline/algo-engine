@@ -78,5 +78,5 @@ jobs:
           (github.event_name == 'workflow_dispatch')
         run: |
           git fetch --tags
-          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
-          terraform apply -auto-approve -var="algo_version=$latest_tag" -var-file="terraform.auto.tfvars"
+          release_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+          terraform apply -auto-approve -var="release_version=$release_version" -var-file="terraform.auto.tfvars"

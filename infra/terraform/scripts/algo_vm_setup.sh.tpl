@@ -78,7 +78,7 @@ copy_algo_api() {
     APP_DIR="/opt/algo-api"
     sudo rm -rf "$APP_DIR"
     sudo mkdir -p "$APP_DIR"
-    sudo cp -r algo-engine/algo-api/* "$APP_DIR/"
+    sudo cp -r /tmp/algo-api/* "$APP_DIR/"
     sudo chown -R $(whoami):$(whoami) "$APP_DIR"
 }
 
@@ -109,7 +109,7 @@ configure_algo_api_data() {
     echo "📦 Copying data files..."
     DATA_DIR="/etc/algo-api/data"
     sudo mkdir -p "$DATA_DIR"
-    sudo cp -r algo-engine/data/* "$DATA_DIR"
+    sudo cp -r /tmp/algo-api/historical-data/* "$DATA_DIR"
     sudo chown -R $(whoami):$(whoami) "$DATA_DIR"
 }
 
@@ -158,7 +158,7 @@ configure_algo_api_strategies() {
     echo "📦 Copying strategies files..."
     STRATEGIES_DIR="/etc/algo-api/strategies"
     sudo mkdir -p "$STRATEGIES_DIR"
-    sudo cp -r algo-engine/strategies/* "$STRATEGIES_DIR"
+    sudo cp -r /tmp/algo-api/strategies/* "$STRATEGIES_DIR"
     sudo chown -R $(whoami):$(whoami) "$STRATEGIES_DIR"
 }
 
@@ -181,18 +181,14 @@ restart_algo_api_service() {
     echo "✅ Algo API service restarted."
 }
 
-clone_repo() {
-    echo "🚀 Cloning repository: ${git_repository} (branch: ${branch})"
-    cd /tmp
-    rm -rf algo-engine
-    git clone --branch "${branch}" "${git_repository}" algo-engine
-}
+
 
 # Function to deploy algo API
 setup_algo_api() {
     upgrade_python_to_311
-    echo "🚀 Deploying algo API from repository: ${git_repository} (branch: ${branch})"
-    
+    echo "🚀 Deploying algo API from repository: ${git_repository} (version: ${release_version})"
+
+    download_github_artifact "${git_repository}" "${release_version}" "algo_api"
     copy_algo_api
     configure_algo_api
     deploy_algo_api
@@ -223,7 +219,7 @@ copy_algo_ui() {
     APP_DIR="/var/www/algo-ui"
     sudo rm -rf "$APP_DIR"
     sudo mkdir -p "$APP_DIR"
-    sudo cp -r /tmp/algo-engine/algo-ui/build/web/* "$APP_DIR/"
+    sudo cp -r /tmp/web/* "$APP_DIR/"
     
     # Allow Nginx to serve content from this directory
     sudo semanage fcontext -a -t httpd_sys_content_t "$APP_DIR(/.*)?"
@@ -248,6 +244,7 @@ configure_algo_ui() {
 # Function to deploy algo UI
 setup_algo_ui() {
     install_nginx
+    download_github_artifact "${git_repository}" "${release_version}" "algo_ui"
     copy_algo_ui
     configure_algo_ui
     open_firewall_port ${algo_ui_port}
@@ -270,6 +267,7 @@ download_github_artifact() {
     -H "Accept: application/vnd.github+json" \
     "https://api.github.com/repos/$repo/releases/tags/$release_version")
 
+  echo "Release Info: $release_json"
   # Extract asset download URL that matches asset_name
   asset_url=$(echo "$release_json" | jq -r ".assets[] | select(.name | contains(\"$asset_name\")) | .browser_download_url")
   echo $asset_url
@@ -283,15 +281,15 @@ download_github_artifact() {
   # Download asset (requires GitHub token if repo is private)
   curl -L \
     -H "Accept: application/octet-stream" \
-    -H "Authorization: Bearer ${GITHUB_TOKEN:-}" \
+    -H "Authorization: Bearer $${GITHUB_TOKEN:-}" \
     "$asset_url" -o "$asset_name.zip"
 
-  echo "✅ Saved as $asset_name.zip"
+   echo "✅ Saved as $asset_name.zip"
+   rm -rf $asset_name
+   # Unzip asset
+   unzip -o "$asset_name.zip" -d "/tmp/"
 }
 
 # --- Main Script ---
-
-check_and_install_git
-clone_repo
 setup_algo_api
 setup_algo_ui
