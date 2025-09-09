@@ -5,11 +5,13 @@ on:
     branches: [ "main" ]
     paths:
       - 'algo-ui/**'
+      - 'algo-api/**'
       - '.github/workflows/build_and_release.yml'
   push:
     branches: [ "main" ]
     paths:
       - 'algo-ui/**'
+      - 'algo-api/**'
       - '.github/workflows/build_and_release.yml'
     tags:
       - "v*.*.*"   # e.g. v1.0.0
