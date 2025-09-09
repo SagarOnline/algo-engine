@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'app_config.dart';
+import 'my_strategies.dart';
 
 void main() {
   runApp(const AlgoApp());
@@ -45,9 +47,7 @@ class _AlgoHomeState extends State<AlgoHome> {
           ),
         );
       case 1:
-        return const Center(
-          child: Text('My Strategies', style: TextStyle(fontSize: 24)),
-        );
+        return const MyStrategiesPage();
       default:
         return const Center(child: Text('Unknown Page'));
     }

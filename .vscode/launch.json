@@ -2,6 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Algo UI",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/algo-ui/lib/main.dart",
+      "cwd": "${workspaceFolder}/algo-ui",
+      "toolArgs": [
+        "--dart-define=ALGO_API_BASE_URL=http://127.0.0.1:5000/api"
+      ]
+    },
+    {
       "name": "Python: Debug algo-api main.py",
       "type": "debugpy",
       "request": "launch",
