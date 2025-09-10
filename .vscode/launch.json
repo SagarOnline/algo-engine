@@ -2,40 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Algo UI",
-      "type": "dart",
-      "request": "launch",
-      "program": "${workspaceFolder}/algo-ui/lib/main.dart",
-      "cwd": "${workspaceFolder}/algo-ui",
-      "toolArgs": [
-        "--dart-define=ALGO_API_BASE_URL=http://127.0.0.1:5000/api"
-      ]
-    },
-    {
-      "name": "Backtest",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/algo-api/src/algo/main.py",
-      "console": "integratedTerminal",
-      "justMyCode": true,
-      "cwd": "${workspaceFolder}/algo-api",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/algo-api/src"
-      }
-    },
-    {
-      "name": "Algo API",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/algo-api/src/algo/app.py",
-      "console": "integratedTerminal",
-      "justMyCode": true,
-      "cwd": "${workspaceFolder}/algo-api",
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}/algo-api/src"
-      }
-    },
-    {
       "name": "Python: Debug historical_data main.py",
       "type": "debugpy",
       "request": "launch",
