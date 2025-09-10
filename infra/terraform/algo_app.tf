@@ -33,6 +33,9 @@ resource "null_resource" "algo_api_setup" {
       for f in fileset("${path.module}/scripts", "**") :
       filesha1("${path.module}/scripts/${f}")
     ]))
+    release_version = var.release_version
+    algo_api_port   = local.algo.api_port
+    algo_ui_port    = local.algo.ui_port
   }
 
   provisioner "file" {
