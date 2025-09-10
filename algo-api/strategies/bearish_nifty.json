@@ -1,0 +1,101 @@
+{
+  "name": "bearish_nifty",
+  "display_name": "Bearish Nifty",
+  "instrument": {
+    "type": "FUTURE",
+    "expiry": "MONTHLY",
+    "expiring": "NEXT",
+    "atm": -50,
+    "instrument_key": "NSE_INDEX|Nifty 50",
+    "exchange": "NSE"
+  },
+  "timeframe": "15min",
+  "capital": 100000,
+  "position": {
+    "action": "BUY",
+    "instrument": {
+      "type": "FUTURE",
+      "expiry": "MONTHLY",
+      "expiring": "NEXT",
+      "atm": -50,
+      "instrument_key": "NSE_FO|64103",
+      "exchange": "NSE"
+    }
+  },
+  "entry_rules": {
+    "logic": "AND",
+    "conditions": [
+      {
+        "operator": ">",
+        "left": {
+          "type": "ema",
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 50,
+            "price": "close"
+          }
+        }
+      },
+      {
+        "operator": ">",
+        "left": {
+          "type": "price",
+          "params": {
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
+        }
+      }
+    ]
+  },
+  "exit_rules": {
+    "logic": "OR",
+    "conditions": [
+      {
+        "operator": "<",
+        "left": {
+          "type": "ema",
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 50,
+            "price": "close"
+          }
+        }
+      },
+      {
+        "operator": "<",
+        "left": {
+          "type": "price",
+          "params": {
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
+        }
+      }
+    ]
+  }
+}

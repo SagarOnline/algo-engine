@@ -2,7 +2,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Debug algo-api main.py",
+      "name": "Algo UI",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/algo-ui/lib/main.dart",
+      "cwd": "${workspaceFolder}/algo-ui",
+      "toolArgs": [
+        "--dart-define=ALGO_API_BASE_URL=http://127.0.0.1:5000/api"
+      ]
+    },
+    {
+      "name": "Backtest",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/algo-api/src/algo/main.py",
@@ -14,7 +24,7 @@
       }
     },
     {
-      "name": "Python: Debug Flask App",
+      "name": "Algo API",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/algo-api/src/algo/app.py",
