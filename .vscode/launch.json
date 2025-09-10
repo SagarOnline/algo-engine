@@ -12,7 +12,7 @@
       ]
     },
     {
-      "name": "Python: Debug algo-api main.py",
+      "name": "Backtest",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/algo-api/src/algo/main.py",
@@ -24,7 +24,7 @@
       }
     },
     {
-      "name": "Python: Debug Flask App",
+      "name": "Algo API",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/algo-api/src/algo/app.py",
