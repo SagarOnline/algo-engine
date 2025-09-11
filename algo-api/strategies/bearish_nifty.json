@@ -1,6 +1,7 @@
 {
   "name": "bearish_nifty",
   "display_name": "Bearish Nifty",
+  "description": "A simple bearish strategy for Nifty using EMA crossover.",
   "instrument": {
     "type": "FUTURE",
     "expiry": "MONTHLY",

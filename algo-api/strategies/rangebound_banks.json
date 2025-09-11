@@ -1,6 +1,7 @@
 {
-  "name": "rangebound_nifty",
-  "display_name": "Rangebound Nifty",
+  "name": "rangebound_banks",
+  "display_name": "Rangebound Banks",
+  "description": "A simple rangebound strategy for Banks using EMA crossover.",
   "instrument": {
     "type": "FUTURE",
     "expiry": "MONTHLY",

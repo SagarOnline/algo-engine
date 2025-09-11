@@ -9,6 +9,7 @@ class JsonStrategy(Strategy):
     def __init__(self, json_data: Dict[str, Any]):
         self.name = json_data.get("name")
         self.display_name = json_data.get("display_name")
+        self.description = json_data.get("description", "")
         self.timeframe = Timeframe(json_data.get("timeframe"))
         self.capital = json_data.get("capital")
         self.instrument = self._get_parsed_instrument(json_data.get("instrument", {}))
@@ -59,6 +60,9 @@ class JsonStrategy(Strategy):
 
     def get_display_name(self) -> str:
         return self.display_name
+    
+    def get_description(self) -> str:
+        return self.description
 
     def get_timeframe(self) -> Timeframe:
         return self.timeframe

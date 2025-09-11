@@ -36,6 +36,9 @@ class DummyStrategy(Strategy):
     def get_name(self) -> str:
         return "DummyStrategy"
     
+    def get_description(self):
+        return "DummyStrategy"
+    
     def get_display_name(self) -> str:
         return "Dummy Strategy"
 
