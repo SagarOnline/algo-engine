@@ -124,13 +124,22 @@ class _BacktestScreenState extends State<BacktestScreen> {
                   isBacktestLoading: _isBacktestLoading,
                   backtestError: _backtestError,
                 ),
-                if (_backtestResult != null)
+                if (_backtestResult != null) ...[
+                  if (_backtestResult!['summary'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: BacktestSummaryWidget(
+                        summary:
+                            _backtestResult!['summary'] as Map<String, dynamic>,
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: TradesTableWidget(
                       trades: _backtestResult!['instrument']['trades'] as List,
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -532,6 +541,92 @@ class TradesTableWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class BacktestSummaryWidget extends StatelessWidget {
+  final Map<String, dynamic> summary;
+  const BacktestSummaryWidget({Key? key, required this.summary})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Extract values safely
+    final startDate = summary['start_date'] ?? '';
+    final endDate = summary['end_date'] ?? '';
+    final strategyName = summary['strategy_name'] ?? '';
+    final totalTrades = summary['total_trades']?.toString() ?? '0';
+    final winningTrades = summary['winning_trades']?.toString() ?? '0';
+    final losingTrades = summary['losing_trades']?.toString() ?? '0';
+    final winningStreak = summary['winning_streak']?.toString() ?? '0';
+    final losingStreak = summary['losing_streak']?.toString() ?? '0';
+    final maxGain = summary['max_gain']?.toString() ?? '0';
+    final maxLoss = summary['max_loss']?.toString() ?? '0';
+    final totalPnLPoints = summary['total_pnl_points']?.toString() ?? '0';
+    final totalPnLPercentage = summary['total_pnl_percentage'] != null
+        ? (summary['total_pnl_percentage'] * 100).toStringAsFixed(2) + '%'
+        : '0%';
+
+    return Center(
+      child: Card(
+        color: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Backtest Summary',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 32,
+                runSpacing: 12,
+                children: [
+                  _summaryItem('Strategy', strategyName),
+                  _summaryItem('Start Date', startDate),
+                  _summaryItem('End Date', endDate),
+                  _summaryItem('Total Trades', totalTrades),
+                  _summaryItem('Winning Trades', winningTrades),
+                  _summaryItem('Losing Trades', losingTrades),
+                  _summaryItem('Winning Streak', winningStreak),
+                  _summaryItem('Losing Streak', losingStreak),
+                  _summaryItem('Max Gain', maxGain),
+                  _summaryItem('Max Loss', maxLoss),
+                  _summaryItem('Total PnL (pts)', totalPnLPoints),
+                  _summaryItem('Total PnL (%)', totalPnLPercentage),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15)),
+      ],
     );
   }
 }
