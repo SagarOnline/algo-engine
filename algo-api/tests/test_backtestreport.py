@@ -41,7 +41,7 @@ def test_total_pnl_percentage(sample_tradable):
     report = BackTestReport('strat', sample_tradable, date(2023,1,1), date(2023,1,5))
     total_invested = 100 + 110 + 105 + 120 + 115
     total_points = 10 - 5 + 15 - 5 + 15
-    assert report.total_pnl_percentage() == pytest.approx((total_points/total_invested)*100)
+    assert report.total_pnl_percentage() == pytest.approx((total_points/total_invested))
 
 def test_winning_trades_count(sample_tradable):
     report = BackTestReport('strat', sample_tradable, date(2023,1,1), date(2023,1,5))
