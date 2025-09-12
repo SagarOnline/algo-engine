@@ -73,8 +73,8 @@ class BackTestReport:
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):
         self.strategy_name = strategy_name
         self.tradable = tradable
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date: date = start_date
+        self.end_date: date = end_date
 
     def to_dict(self):
         return {
@@ -109,10 +109,10 @@ class BackTestReport:
 
     # Profit and Loss in percentage
     def total_pnl_percentage(self) -> float:
-        total_invested = sum(trade.entry_price for trade in self.tradable.trades if trade.entry_price > 0)
-        if total_invested == 0:
-            return 0
-        return (self.total_pnl_points() / total_invested) * 100
+        total_buy = sum(trade.entry_price * trade.quantity for trade in self.tradable.trades if trade.entry_price > 0)
+        total_sell = sum(trade.exit_price * trade.quantity for trade in self.tradable.trades if trade.exit_price > 0)
+        total_pnl_percentage = ((total_sell - total_buy) / total_buy) if total_buy != 0 else 0
+        return total_pnl_percentage
 
     # Number of Winning Trades
     def winning_trades_count(self) -> int:

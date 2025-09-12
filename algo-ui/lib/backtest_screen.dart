@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'app_config.dart';
+import 'dashboard_table.dart';
 
 class BacktestScreen extends StatefulWidget {
   final String strategyName;
@@ -17,6 +18,10 @@ class _BacktestScreenState extends State<BacktestScreen> {
   final _fromDateController = TextEditingController();
   final _toDateController = TextEditingController();
 
+  Map<String, dynamic>? _backtestResult;
+  bool _isBacktestLoading = false;
+  String? _backtestError;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +36,44 @@ class _BacktestScreenState extends State<BacktestScreen> {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load strategy details');
+    }
+  }
+
+  Future<void> runBacktest() async {
+    setState(() {
+      _isBacktestLoading = true;
+      _backtestError = null;
+    });
+    final baseUrl = AppConfig.getAlgoApiBaseUrl();
+    final url = '$baseUrl/backtest';
+    final body = json.encode({
+      'strategy_name': widget.strategyName,
+      'start_date': _fromDateController.text,
+      'end_date': _toDateController.text,
+    });
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          _backtestResult = json.decode(response.body);
+        });
+      } else {
+        setState(() {
+          _backtestError = 'Failed to run backtest: \\${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _backtestError = 'Error: $e';
+      });
+    } finally {
+      setState(() {
+        _isBacktestLoading = false;
+      });
     }
   }
 
@@ -67,178 +110,537 @@ class _BacktestScreenState extends State<BacktestScreen> {
             '';
         return Scaffold(
           appBar: AppBar(title: Text('Backtest: $strategyDisplayName')),
-          body: Center(
-            child: Card(
-              color: Colors.grey[900],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Strategy Name
-                    const Text(
-                      'Strategy Name',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: TextEditingController(
-                        text: strategyDisplayName,
-                      ),
-                      readOnly: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    // Underlying Instrument
-                    const Text(
-                      'Underlying Instrument',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: TextEditingController(
-                        text: underlyingInstrument,
-                      ),
-                      readOnly: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    // Position Instruments
-                    const Text(
-                      'Position Instruments',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: TextEditingController(
-                        text: positionInstruments,
-                      ),
-                      readOnly: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Date Pickers
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'From Date',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _fromDateController,
-                                decoration: const InputDecoration(
-                                  hintText: 'YYYY-MM-DD',
-                                  border: OutlineInputBorder(),
-                                ),
-                                readOnly: true,
-                                onTap: () async {
-                                  DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2100),
-                                  );
-                                  if (picked != null) {
-                                    _fromDateController.text = picked
-                                        .toIso8601String()
-                                        .substring(0, 10);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'To Date',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _toDateController,
-                                decoration: const InputDecoration(
-                                  hintText: 'YYYY-MM-DD',
-                                  border: OutlineInputBorder(),
-                                ),
-                                readOnly: true,
-                                onTap: () async {
-                                  DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2100),
-                                  );
-                                  if (picked != null) {
-                                    _toDateController.text = picked
-                                        .toIso8601String()
-                                        .substring(0, 10);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    // Run Backtest Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Implement backtest action
-                          },
-                          icon: Icon(Icons.rocket_launch, color: Colors.white),
-                          label: const Text(
-                            'Run Backtest',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[900],
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                StrategyBacktestWidget(
+                  strategyDisplayName: strategyDisplayName,
+                  underlyingInstrument: underlyingInstrument,
+                  positionInstruments: positionInstruments,
+                  fromDateController: _fromDateController,
+                  toDateController: _toDateController,
+                  onRunBacktest: runBacktest,
+                  isBacktestLoading: _isBacktestLoading,
+                  backtestError: _backtestError,
                 ),
-              ),
+                if (_backtestResult != null) ...[
+                  if (_backtestResult!['summary'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: BacktestSummaryWidget(
+                        summary:
+                            _backtestResult!['summary'] as Map<String, dynamic>,
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: TradesTableWidget(
+                      trades: _backtestResult!['tradable']['trades'] as List,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class StrategyBacktestWidget extends StatelessWidget {
+  final String strategyDisplayName;
+  final String underlyingInstrument;
+  final String positionInstruments;
+  final TextEditingController fromDateController;
+  final TextEditingController toDateController;
+  final VoidCallback onRunBacktest;
+  final bool isBacktestLoading;
+  final String? backtestError;
+
+  const StrategyBacktestWidget({
+    Key? key,
+    required this.strategyDisplayName,
+    required this.underlyingInstrument,
+    required this.positionInstruments,
+    required this.fromDateController,
+    required this.toDateController,
+    required this.onRunBacktest,
+    required this.isBacktestLoading,
+    this.backtestError,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Card(
+        color: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Strategy Name
+              const Text(
+                'Strategy Name',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[700]!),
+                ),
+                child: Text(
+                  strategyDisplayName,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 18),
+              // Underlying Instrument
+              const Text(
+                'Underlying Instrument',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[700]!),
+                ),
+                child: Text(
+                  underlyingInstrument,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 18),
+              // Position Instruments
+              const Text(
+                'Position Instruments',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[700]!),
+                ),
+                child: Text(
+                  positionInstruments,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Date Pickers
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'From Date',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: fromDateController,
+                          decoration: const InputDecoration(
+                            hintText: 'YYYY-MM-DD',
+                            border: OutlineInputBorder(),
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              fromDateController.text = picked
+                                  .toIso8601String()
+                                  .substring(0, 10);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'To Date',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: toDateController,
+                          decoration: const InputDecoration(
+                            hintText: 'YYYY-MM-DD',
+                            border: OutlineInputBorder(),
+                          ),
+                          readOnly: true,
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              toDateController.text = picked
+                                  .toIso8601String()
+                                  .substring(0, 10);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Run Backtest Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: isBacktestLoading ? null : onRunBacktest,
+                    icon: Icon(Icons.rocket_launch, color: Colors.white),
+                    label: const Text(
+                      'Run Backtest',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[900],
+                      foregroundColor: Colors.white,
+                      elevation: 2,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (isBacktestLoading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              if (backtestError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    backtestError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TradesTableWidget extends StatelessWidget {
+  final List trades;
+  const TradesTableWidget({Key? key, required this.trades}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Card(
+        color: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Trades',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+                    (_) => Colors.deepPurple[700],
+                  ),
+                  dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => Colors.grey[850],
+                  ),
+                  columns: const [
+                    DataColumn(
+                      label: Text(
+                        'Entry Price',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Entry Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Exit Price',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Exit Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Profit',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Profit %',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'Quantity',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                  rows: List<DataRow>.generate(trades.length, (index) {
+                    final trade = trades[index];
+                    return DataRow(
+                      cells: [
+                        DataCell(
+                          Text(
+                            trade['entry_price'].toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            trade['entry_time'].toString(),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            trade['exit_price'].toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            trade['exit_time'].toString(),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            trade['profit'].toStringAsFixed(2),
+                            style: TextStyle(
+                              color: trade['profit'] >= 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            (trade['profit_percentage'] * 100).toStringAsFixed(
+                                  2,
+                                ) +
+                                '%',
+                            style: TextStyle(
+                              color: trade['profit_percentage'] >= 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            trade['quantity'].toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BacktestSummaryWidget extends StatelessWidget {
+  final Map<String, dynamic> summary;
+  const BacktestSummaryWidget({Key? key, required this.summary})
+    : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Extract values safely
+    final startDate = summary['start_date'] ?? '';
+    final endDate = summary['end_date'] ?? '';
+    final strategyName = summary['strategy_name'] ?? '';
+    final totalTrades = summary['total_trades_count']?.toString() ?? '0';
+    final winningTrades = summary['winning_trades_count']?.toString() ?? '0';
+    final losingTrades = summary['losing_trades_count']?.toString() ?? '0';
+    final winningStreak = summary['winning_streak']?.toString() ?? '0';
+    final losingStreak = summary['losing_streak']?.toString() ?? '0';
+    final maxGain = summary['max_gain']?.toString() ?? '0';
+    final maxLoss = summary['max_loss']?.toString() ?? '0';
+    final totalPnLPoints = summary['total_pnl_points']?.toString() ?? '0';
+    final totalPnLPercentage = summary['total_pnl_percentage'];
+
+    return Center(
+      child: Card(
+        color: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'Backtest Results',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '($startDate - $endDate)',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 32,
+                runSpacing: 12,
+                children: [
+                  _summaryItem('Strategy', strategyName),
+                  _summaryItem('Total Trades', totalTrades),
+                  _summaryItem(
+                    'Winning / Losing Trades',
+                    '$winningTrades / $losingTrades',
+                  ),
+                  _summaryItem(
+                    'Winning / Losing Streak',
+                    '$winningStreak / $losingStreak',
+                  ),
+                  _summaryItem('Max Gain (pts)', maxGain),
+                  _summaryItem('Max Loss (pts)', maxLoss),
+                  _summaryItem('Total PnL (pts)', totalPnLPoints),
+                  _summaryItem('Total PnL (%)', totalPnLPercentage),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _summaryItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15)),
+      ],
     );
   }
 }

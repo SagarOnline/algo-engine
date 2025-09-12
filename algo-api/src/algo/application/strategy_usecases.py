@@ -6,31 +6,19 @@ from algo.domain.strategy import Instrument, Strategy
 class InstrumentDTO:
     def __init__(self, instrument: Instrument):
         self._instrument = instrument
-
-    def get_type(self):
-        return self._instrument.type.name
-
-    def get_exchange(self):
-        return self._instrument.exchange.name
-
-    def get_instrument_key(self):
-        return getattr(self._instrument, 'instrument_key', None)
-
-    def get_expiry(self):
-        return self._instrument.expiry.name
-
-    def get_expiring(self):
-        return self._instrument.expiring.name
-
-    def get_atm(self):
-        return getattr(self._instrument, 'atm', None)
+        self.type = instrument.type.name if instrument.type else None
+        self.exchange = instrument.exchange.name if instrument.exchange else None
+        self.instrument_key = instrument.instrument_key
+        self.expiry = instrument.expiry.name if instrument.expiry else None
+        self.expiring = instrument.expiring.name if instrument.expiring else None
+        self.atm = instrument.atm
     
     def get_display_name(self):
-        key = self.get_instrument_key()
-        exchange = self.get_exchange()
-        expiring = self.get_expiring()
-        expiry = self.get_expiry()
-        atm = self.get_atm()
+        key = self.instrument_key
+        exchange = self.exchange
+        expiring = self.expiring
+        expiry = self.expiry
+        atm = self.atm
         parts = [f"{key}, {exchange}"]
         if expiring and expiry:
             parts.append(f", with {expiring} {expiry} expiry")
@@ -40,12 +28,12 @@ class InstrumentDTO:
 
     def to_dict(self):
         return {
-            "type": str(self.get_type()),
-            "exchange": str(self.get_exchange()),
-            "instrument_key": str(self.get_instrument_key()),
-            "expiry": str(self.get_expiry()),
-            "expiring": str(self.get_expiring()),
-            "atm": self.get_atm(),
+            "type": self.type,
+            "exchange": str(self.exchange),
+            "instrument_key": str(self.instrument_key),
+            "expiry": str(self.expiry),
+            "expiring": str(self.expiring),
+            "atm": self.atm,
             "display_name": self.get_display_name()
         }
 

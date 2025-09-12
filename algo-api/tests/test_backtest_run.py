@@ -67,7 +67,7 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
 
     # Additional BackTestReport method checks
     assert report.total_pnl_points() == 10
-    assert report.total_pnl_percentage() == pytest.approx(10/110*100)
+    assert report.total_pnl_percentage() == pytest.approx(10/110)
     assert report.winning_trades_count() == 1
     assert report.losing_trades_count() == 0
     assert report.total_trades_count() == 1
@@ -124,7 +124,7 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
 
     # Additional BackTestReport method checks
     assert report.total_pnl_points() == 20
-    assert report.total_pnl_percentage() == pytest.approx(20/210*100)
+    assert report.total_pnl_percentage() == pytest.approx(20/210)
     assert report.winning_trades_count() == 1
     assert report.losing_trades_count() == 0
     assert report.total_trades_count() == 1
