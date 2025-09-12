@@ -32,18 +32,31 @@ class BacktestSummaryWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Backtest Results',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        'Backtest Results',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'for $strategyName',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
                   Text(
-                    '($startDate - $endDate)',
+                    '($startDate to $endDate)',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 15,
@@ -58,7 +71,6 @@ class BacktestSummaryWidget extends StatelessWidget {
                 spacing: 32,
                 runSpacing: 12,
                 children: [
-                  _summaryItem('Strategy', strategyName),
                   _summaryItem('Total Trades', totalTrades),
                   _summaryItem(
                     'Winning / Losing Trades',
