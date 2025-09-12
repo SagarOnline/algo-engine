@@ -1,5 +1,5 @@
 from algo.application.strategy_usecases import InstrumentDTO
-from algo.application.util import fmt_currency, fmt_percent
+from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.engine import BacktestEngine
 from algo.domain.strategy import Strategy
 from datetime import date
@@ -29,9 +29,9 @@ class TradableDTO:
 class TradeDTO:
     def __init__(self, trade: Trade):
         self.entry_price = trade.entry_price
-        self.entry_time = trade.entry_time
+        self.entry_time = fmt_datetime(trade.entry_time)
         self.exit_price = trade.exit_price
-        self.exit_time = trade.exit_time
+        self.exit_time = fmt_datetime(trade.exit_time)
         self.profit = trade.profit()
         self.profit_percentage = trade.profit_percentage()
         self.profit_points = trade.profit_points()

@@ -1,15 +1,17 @@
 from datetime import date
 import pytest
 from algo.application.run_backtest_usecase import TradeDTO, TradableDTO, BackTestReportDTO
-from algo.application.util import fmt_currency
+from algo.application.util import fmt_currency, fmt_datetime
 from algo.domain.strategy import Exchange, Instrument, InstrumentType
+
+from datetime import datetime
 
 class MockTrade:
     def __init__(self):
         self.entry_price = 100.0
-        self.entry_time = '2025-09-12T09:15:00'
+        self.entry_time = datetime(2025, 9, 12, 9, 15, 0)
         self.exit_price = 110.0
-        self.exit_time = '2025-09-12T15:30:00'
+        self.exit_time = datetime(2025, 9, 12, 15, 30, 0)
         self.quantity = 10
     def profit(self):
         return 100.0
@@ -53,9 +55,9 @@ def test_trade_dto():
     dto = TradeDTO(trade)
     d = dto.to_dict()
     assert d['entry_price'] == 100.0
-    assert d['entry_time'] == '2025-09-12T09:15:00'
+    assert d['entry_time'] == fmt_datetime(datetime(2025, 9, 12, 9, 15, 0))
     assert d['exit_price'] == 110.0
-    assert d['exit_time'] == '2025-09-12T15:30:00'
+    assert d['exit_time'] == fmt_datetime(datetime(2025, 9, 12, 15, 30, 0))
     assert d['profit'] == 100.0
     assert d['profit_percentage'] == 0.10
     assert d['profit_points'] == 10.0
