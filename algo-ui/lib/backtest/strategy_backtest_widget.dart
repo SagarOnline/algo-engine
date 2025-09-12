@@ -21,7 +21,6 @@ class StrategyBacktestWidget extends StatelessWidget {
     required this.isBacktestLoading,
     this.backtestError,
   }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Center(
