@@ -127,7 +127,7 @@ class _BacktestScreenState extends State<BacktestScreen> {
                 if (_backtestResult != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
-                    child: BacktestResultWidget(
+                    child: TradesTableWidget(
                       trades: _backtestResult!['instrument']['trades'] as List,
                     ),
                   ),
@@ -367,10 +367,9 @@ class StrategyBacktestWidget extends StatelessWidget {
   }
 }
 
-class BacktestResultWidget extends StatelessWidget {
+class TradesTableWidget extends StatelessWidget {
   final List trades;
-  const BacktestResultWidget({Key? key, required this.trades})
-    : super(key: key);
+  const TradesTableWidget({Key? key, required this.trades}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
