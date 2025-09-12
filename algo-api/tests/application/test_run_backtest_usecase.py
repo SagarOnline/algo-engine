@@ -25,8 +25,21 @@ def test_execute_success(usecase, mock_strategy_repository, mock_historical_data
     }
     mock_strategy = MagicMock()
     mock_strategy_repository.get_strategy.return_value = mock_strategy
+    # Prepare mock_report with expected DTO fields
     mock_report = MagicMock()
-    mock_report.to_dict.return_value = {"result": "success"}
+    mock_report.start_date = "2023-01-01"
+    mock_report.end_date = "2023-01-10"
+    mock_report.strategy_name = strategy_name
+    mock_report.total_trades_count.return_value = 5
+    mock_report.winning_trades_count.return_value = 3
+    mock_report.losing_trades_count.return_value = 2
+    mock_report.winning_streak = 2
+    mock_report.losing_streak = 1
+    mock_report.max_gain = 100.0
+    mock_report.max_loss = -50.0
+    mock_report.total_pnl_points = 150.0
+    mock_report.total_pnl_percentage = 0.15
+    mock_report.tradable = MagicMock()
     usecase.engine.start = MagicMock(return_value=mock_report)
     input_obj = RunBacktestInput(
         strategy_name=strategy_name,
@@ -36,7 +49,18 @@ def test_execute_success(usecase, mock_strategy_repository, mock_historical_data
     result = usecase.execute(input_obj)
     mock_strategy_repository.get_strategy.assert_called_once_with(strategy_name)
     usecase.engine.start.assert_called_once_with(mock_strategy, ANY, ANY)
-    assert result == {"result": "success"}
+    # Assert result is a dict with expected keys and formatted dates
+    assert result["start_date"] == "01-Jan-2023"
+    assert result["end_date"] == "10-Jan-2023"
+    assert result["strategy_name"] == strategy_name
+    assert result["total_trades_count"] == 5
+    assert result["winning_trades_count"] == 3
+    assert result["losing_trades_count"] == 2
+    assert result["winning_streak"] == 2
+    assert result["max_gain"] == 100.0
+    assert result["max_loss"] == -50.0
+    assert result["total_pnl_points"] == 150.0
+    assert result["total_pnl_percentage"] == 0.15
 
 def test_execute_missing_fields(usecase):
     input_obj = RunBacktestInput(strategy_name=None, start_date="2023-01-01", end_date="2023-01-10")

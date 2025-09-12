@@ -16,12 +16,12 @@ def make_instrument():
 def test_instrument_dto_fields():
     instr = make_instrument()
     dto = InstrumentDTO(instr)
-    assert dto.get_type() == InstrumentType.FUTURE.name
-    assert dto.get_exchange() == Exchange.NSE.name
-    assert dto.get_instrument_key() == "NSE_INDEX|Nifty 50"
-    assert dto.get_expiry() == Expiry.MONTHLY.name
-    assert dto.get_expiring() == Expiring.NEXT.name
-    assert dto.get_atm() == -50
+    assert dto.type == InstrumentType.FUTURE.name
+    assert dto.exchange == Exchange.NSE.name
+    assert dto.instrument_key == "NSE_INDEX|Nifty 50"
+    assert dto.expiry == Expiry.MONTHLY.name
+    assert dto.expiring == Expiring.NEXT.name
+    assert dto.atm == -50
 
 def test_instrument_dto_display_name():
     instr = make_instrument()

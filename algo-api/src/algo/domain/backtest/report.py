@@ -73,8 +73,8 @@ class BackTestReport:
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):
         self.strategy_name = strategy_name
         self.tradable = tradable
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date: date = start_date
+        self.end_date: date = end_date
 
     def to_dict(self):
         return {
