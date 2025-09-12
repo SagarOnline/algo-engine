@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'app_config.dart';
-import 'backtest_screen.dart';
+import 'package:algo_ui/backtest/backtest_screen.dart';
 import 'dashboard_table.dart';
 
 class MyStrategiesPage extends StatefulWidget {

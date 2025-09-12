@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'app_config.dart';
 import 'my_strategies.dart';
 
 void main() {

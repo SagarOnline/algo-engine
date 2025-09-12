@@ -39,4 +39,4 @@ class BackTest:
                     raise ValueError(f"No execution candle found for exit at timestamp {candle['timestamp']}")
                 tradable.execute_order(exec_candle["timestamp"], exec_candle["close"], position.get_close_action(), 1)
 
-        return BackTestReport(self.strategy.get_name(), tradable, start_date=self.start_date, end_date=self.end_date)
+        return BackTestReport(self.strategy.get_display_name(), tradable, start_date=self.start_date, end_date=self.end_date)
