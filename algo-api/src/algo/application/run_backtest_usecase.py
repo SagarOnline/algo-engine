@@ -1,4 +1,5 @@
 from algo.application.strategy_usecases import InstrumentDTO
+from algo.application.util import fmt_currency, fmt_percent
 from algo.domain.backtest.engine import BacktestEngine
 from algo.domain.strategy import Strategy
 from datetime import date
@@ -58,10 +59,10 @@ class BackTestReportSummaryDTO:
         self.losing_trades_count = report.losing_trades_count()
         self.winning_streak = report.winning_streak()
         self.losing_streak = report.losing_streak()
-        self.max_gain = report.max_gain()
-        self.max_loss = report.max_loss()
-        self.total_pnl_points = report.total_pnl_points()
-        self.total_pnl_percentage = report.total_pnl_percentage()
+        self.max_gain = fmt_currency(report.max_gain())
+        self.max_loss = fmt_currency(report.max_loss())
+        self.total_pnl_points = fmt_currency(report.total_pnl_points())
+        self.total_pnl_percentage = fmt_percent(report.total_pnl_percentage())
 
     def to_dict(self):
         return {

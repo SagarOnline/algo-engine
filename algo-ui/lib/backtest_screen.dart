@@ -564,9 +564,7 @@ class BacktestSummaryWidget extends StatelessWidget {
     final maxGain = summary['max_gain']?.toString() ?? '0';
     final maxLoss = summary['max_loss']?.toString() ?? '0';
     final totalPnLPoints = summary['total_pnl_points']?.toString() ?? '0';
-    final totalPnLPercentage = summary['total_pnl_percentage'] != null
-        ? (summary['total_pnl_percentage'] * 100).toStringAsFixed(2) + '%'
-        : '0%';
+    final totalPnLPercentage = summary['total_pnl_percentage'];
 
     return Center(
       child: Card(
@@ -578,29 +576,45 @@ class BacktestSummaryWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Backtest Summary',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
+              Row(
+                children: [
+                  const Text(
+                    'Backtest Results',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '($startDate - $endDate)',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 12),
               Wrap(
                 spacing: 32,
                 runSpacing: 12,
                 children: [
                   _summaryItem('Strategy', strategyName),
-                  _summaryItem('Start Date', startDate),
-                  _summaryItem('End Date', endDate),
                   _summaryItem('Total Trades', totalTrades),
-                  _summaryItem('Winning Trades', winningTrades),
-                  _summaryItem('Losing Trades', losingTrades),
-                  _summaryItem('Winning Streak', winningStreak),
-                  _summaryItem('Losing Streak', losingStreak),
-                  _summaryItem('Max Gain', maxGain),
-                  _summaryItem('Max Loss', maxLoss),
+                  _summaryItem(
+                    'Winning / Losing Trades',
+                    '$winningTrades / $losingTrades',
+                  ),
+                  _summaryItem(
+                    'Winning / Losing Streak',
+                    '$winningStreak / $losingStreak',
+                  ),
+                  _summaryItem('Max Gain (pts)', maxGain),
+                  _summaryItem('Max Loss (pts)', maxLoss),
                   _summaryItem('Total PnL (pts)', totalPnLPoints),
                   _summaryItem('Total PnL (%)', totalPnLPercentage),
                 ],
