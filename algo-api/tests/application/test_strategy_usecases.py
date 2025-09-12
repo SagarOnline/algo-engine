@@ -1,6 +1,6 @@
 import pytest
-from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO
-from algo.domain.strategy import Instrument,InstrumentType,Exchange, Strategy
+from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO, InstrumentDTO
+from algo.domain.strategy import Instrument,InstrumentType,Exchange,Expiring, Expiry, Position, PositionAction, Strategy
 
 class DummyStrategy(Strategy):
     def __init__(self, strategy_name, display_name, description, instrument):
@@ -34,7 +34,7 @@ class DummyStrategy(Strategy):
         return ""
 
     def get_position(self):
-        return ""
+        return Position(action=PositionAction.BUY, instrument=self.get_instrument())
 
 class DummyRepository:
     def list_strategies(self):
@@ -44,8 +44,9 @@ class DummyRepository:
         ]
 
 def test_strategy_dto_to_dict():
-    instr = Instrument(type=InstrumentType.FUTURE, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT")
-    dto = StrategyDTO("strat1", "Strategy One", "First strategy", instr)
+    instr = Instrument(type=InstrumentType.FUTURE, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY,expiring=Expiring.CURRENT)
+    strategy = DummyStrategy("strat1", "Strategy One", "First strategy", instr)
+    dto = StrategyDTO(strategy)
     result = dto.to_dict()
     assert result["name"] == "strat1"
     assert result["display_name"] == "Strategy One"
@@ -60,4 +61,4 @@ def test_list_strategies_maps_domain_to_dto():
     assert dtos[0].name == "strat1"
     assert dtos[0].display_name == "Strategy One"
     assert dtos[0].description == "Strategy One"
-    assert isinstance(dtos[0].instrument, Instrument)
+    assert isinstance(dtos[0].instrument, InstrumentDTO)

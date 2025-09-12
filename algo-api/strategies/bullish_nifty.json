@@ -1,6 +1,7 @@
 {
   "name": "bullish_nifty",
   "display_name": "Bullish Nifty",
+  "description": "A simple bullish strategy for Nifty using EMA crossover.",
   "instrument": {
     "type": "FUTURE",
     "expiry": "MONTHLY",

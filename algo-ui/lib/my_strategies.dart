@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'app_config.dart';
+import 'backtest_screen.dart';
 
 class MyStrategiesPage extends StatefulWidget {
   const MyStrategiesPage({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class _MyStrategiesPageState extends State<MyStrategiesPage> {
 
   Future<List<Map<String, dynamic>>> fetchStrategies() async {
     final baseUrl = AppConfig.getAlgoApiBaseUrl();
-    final url = '$baseUrl/strategies';
+    final url = '$baseUrl/strategy';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -137,7 +138,7 @@ class _MyStrategiesPageState extends State<MyStrategiesPage> {
                       ),
                       DataCell(
                         Text(
-                          instrument['instrument_key'] ?? '',
+                          instrument['display_name'] ?? '',
                           style: const TextStyle(color: Colors.amber),
                         ),
                       ),
@@ -156,7 +157,17 @@ class _MyStrategiesPageState extends State<MyStrategiesPage> {
                               ),
                             ),
                             onPressed: () {
-                              // TODO: Implement backtest action
+                              final strategyName =
+                                  strategy['name'] ??
+                                  strategy['display_name'] ??
+                                  '';
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => BacktestScreen(
+                                    strategyName: strategyName,
+                                  ),
+                                ),
+                              );
                             },
                             child: const Text(
                               'Backtest',
