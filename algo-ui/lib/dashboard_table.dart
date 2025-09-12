@@ -15,11 +15,14 @@ class DashboardTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      color: theme.colorScheme.background,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Card(
         color: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         elevation: 8,
         child: DataTable2(
           headingRowColor: MaterialStateProperty.resolveWith<Color?>(
