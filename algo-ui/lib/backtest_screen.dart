@@ -136,7 +136,7 @@ class _BacktestScreenState extends State<BacktestScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: TradesTableWidget(
-                      trades: _backtestResult!['instrument']['trades'] as List,
+                      trades: _backtestResult!['tradable']['trades'] as List,
                     ),
                   ),
                 ],
@@ -556,9 +556,9 @@ class BacktestSummaryWidget extends StatelessWidget {
     final startDate = summary['start_date'] ?? '';
     final endDate = summary['end_date'] ?? '';
     final strategyName = summary['strategy_name'] ?? '';
-    final totalTrades = summary['total_trades']?.toString() ?? '0';
-    final winningTrades = summary['winning_trades']?.toString() ?? '0';
-    final losingTrades = summary['losing_trades']?.toString() ?? '0';
+    final totalTrades = summary['total_trades_count']?.toString() ?? '0';
+    final winningTrades = summary['winning_trades_count']?.toString() ?? '0';
+    final losingTrades = summary['losing_trades_count']?.toString() ?? '0';
     final winningStreak = summary['winning_streak']?.toString() ?? '0';
     final losingStreak = summary['losing_streak']?.toString() ?? '0';
     final maxGain = summary['max_gain']?.toString() ?? '0';
