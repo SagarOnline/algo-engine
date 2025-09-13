@@ -58,22 +58,7 @@ It provides a modern, cross-platform dashboard for visualizing strategy performa
 #### Web
 
 ```bash
-flutter run -d chrome
-```
-
-#### Desktop (Windows, macOS, Linux)
-
-```bash
-flutter run -d windows   # For Windows
-flutter run -d macos     # For macOS
-flutter run -d linux     # For Linux
-```
-
-#### Mobile (Android, iOS)
-
-```bash
-flutter run -d android
-flutter run -d ios
+flutter run -d chrome --dart-define=ALGO_API_BASE_URL=http://127.0.0.1:5000/api
 ```
 
 ---
@@ -91,11 +76,6 @@ flutter run -d ios
 
   ```bash
   flutter build web      # For web
-  flutter build windows  # For Windows
-  flutter build macos    # For macOS
-  flutter build linux    # For Linux
-  flutter build apk      # For Android
-  flutter build ios      # For iOS
   ```
 
 ---
