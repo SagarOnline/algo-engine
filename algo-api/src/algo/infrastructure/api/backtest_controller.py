@@ -41,7 +41,6 @@ def run_backtest():
             end_date=data.get("end_date")
         )
         report = use_case.execute(input_data)
-        print(report)
         return jsonify(report), 200
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400
