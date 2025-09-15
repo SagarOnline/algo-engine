@@ -3,6 +3,7 @@ from typing import Dict, Any
 from algo.domain.strategy import Instrument, Position, Strategy
 from algo.domain.strategy import RuleSet,Condition,Expression
 from algo.domain.timeframe import Timeframe
+from algo.domain.strategy import RiskManagement, StopLoss, StopLossType
 
 
 class JsonStrategy(Strategy):
@@ -18,6 +19,7 @@ class JsonStrategy(Strategy):
 
         self.entry_rules = self._parse_rules(json_data.get("entry_rules", {}))
         self.exit_rules = self._parse_rules(json_data.get("exit_rules", {}))
+        self.risk_management = self._parse_risk_management(json_data.get("risk_management"))
 
     def _parse_position(self, json_data):
         position_data = json_data.get("position", {})
@@ -55,6 +57,19 @@ class JsonStrategy(Strategy):
         conditions = [self._parse_condition(cond) for cond in condition_list]
         return RuleSet(logic, conditions)
 
+    def _parse_risk_management(self, rm_data):
+        if not rm_data or not isinstance(rm_data, dict):
+            return None
+        sl_data = rm_data.get("stop_loss")
+        if not sl_data:
+            return None
+        sl_type = sl_data.get("type")
+        sl_value = sl_data.get("value")
+        if sl_type and sl_value is not None:
+            stop_loss = StopLoss(float(sl_value), StopLossType[sl_type])
+            return RiskManagement(stop_loss)
+        return None
+
     def get_name(self) -> str:
         return self.name
 
@@ -81,3 +96,6 @@ class JsonStrategy(Strategy):
     
     def get_instrument(self) -> Instrument:
         return self.instrument
+    
+    def get_risk_management(self) -> RiskManagement:
+        return self.risk_management

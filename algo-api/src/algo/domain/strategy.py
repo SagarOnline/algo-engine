@@ -29,7 +29,19 @@ class PositionAction(Enum):
     BUY = "BUY"
     SELL = "SELL"
 
+class StopLossType(Enum):
+    POINTS = "POINTS"
+    PERCENTAGE = "PERCENTAGE"
 
+class StopLoss:
+    def __init__(self, value: float, type: StopLossType):
+        self.value = value
+        self.type = type
+
+class RiskManagement:
+    def __init__(self, stop_loss: StopLoss):
+        self.stop_loss = stop_loss
+        
 class Instrument:
     def __init__(self, 
         type: InstrumentType,
@@ -178,6 +190,10 @@ class Strategy(ABC):
     def get_position(self) -> Position:
         pass
 
+    @abstractmethod
+    def get_risk_management(self) -> Optional[RiskManagement]:
+        pass
+
     def get_required_history_start_date(self, start_date: date) -> date:
         entry_rules = self.get_entry_rules()
         exit_rules = self.get_exit_rules()
@@ -220,4 +236,6 @@ class Strategy(ABC):
         return exit_rules.apply_on(historical_data)
 
     # _evaluate_expression moved to Condition
+
+
 

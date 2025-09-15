@@ -23,6 +23,12 @@
       "exchange": "NSE"
     }
   },
+  "risk_management": {
+    "stop_loss": {
+      "type": "PERCENTAGE",
+      "value": 1
+    }
+  },
   "entry_rules": {
     "logic": "AND",
     "conditions": [
