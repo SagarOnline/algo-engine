@@ -1,13 +1,10 @@
 from algo.application.strategy_usecases import InstrumentDTO
 from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy import Strategy
 from datetime import date
-from typing import Optional
 from algo.domain.strategy_repository import StrategyRepository
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.backtest.report import BackTestReport, Position, TradableInstrument
-from algo.domain.backtest.trade import Trade
 
 class RunBacktestInput:
     def __init__(self, strategy_name: str, start_date: str, end_date: str):

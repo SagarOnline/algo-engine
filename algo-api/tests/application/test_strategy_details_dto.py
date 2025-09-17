@@ -1,5 +1,5 @@
 import pytest
-from algo.application.strategy_usecases import StrategyDetailsDTO, InstrumentDTO, PositionDTO
+from algo.application.strategy_usecases import PositionInstrumentDTO, StrategyDetailsDTO, InstrumentDTO
 from algo.domain.strategy import Instrument, InstrumentType, Exchange, Expiry, Expiring, PositionInstrument
 
 class DummyStrategy:
@@ -34,7 +34,7 @@ def test_strategy_details_dto_fields():
     assert isinstance(dto.instrument, InstrumentDTO)
     assert dto.timeframe == "15min"
     assert len(dto.positions) == 1
-    assert isinstance(dto.positions[0], PositionDTO)
+    assert isinstance(dto.positions[0], PositionInstrumentDTO)
     assert dto.positions[0].action == "BUY"
 
 def test_strategy_details_dto_to_dict():

@@ -67,6 +67,7 @@ class Instrument:
             "expiring": self.expiring.value if self.expiring else None,
             "atm": self.atm
         }
+        
 
     def __eq__(self, other):
         if not isinstance(other, Instrument):

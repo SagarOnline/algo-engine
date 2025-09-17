@@ -6,8 +6,6 @@ from algo.domain.backtest.historical_data_repository import HistoricalDataReposi
 from algo.domain.timeframe import Timeframe
 
 from algo.domain.backtest.report import BackTestReport
-from algo.domain.backtest.trade import Trade
-from algo.domain.market import Market
 from algo.domain.backtest.backtest_run import BackTest
 from algo.domain.backtest.historical_data import HistoricalData
 
