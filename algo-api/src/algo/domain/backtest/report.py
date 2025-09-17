@@ -53,10 +53,10 @@ class Position:
         # For LONG, stop loss triggers if price <= stop_loss
         # For SHORT, stop loss triggers if price >= stop_loss
         if self.position_type == PositionType.LONG and price <= self.stop_loss:
-            self.exit(price, time)
+            self.exit(self.stop_loss, time)
             return True
         elif self.position_type == PositionType.SHORT and price >= self.stop_loss:
-            self.exit(price, time)
+            self.exit(self.stop_loss, time)
             return True
         return False
 
@@ -180,6 +180,17 @@ class TradableInstrument:
 
     def is_any_position_open(self) -> bool:
         return any(p.is_open() for p in self.positions)
+
+    def process_stop_loss(self, price: float, time: datetime):
+        """
+        Runs process_stop_loss on all open positions. Returns True if any position was closed due to stop loss.
+        """
+        triggered = False
+        for position in self.positions:
+            if position.is_open():
+                if position.process_stop_loss(price, time):
+                    triggered = True
+        return triggered
 
     def __repr__(self):
         return f"TradableInstrument_2(instrument={self.instrument}, positions={self.positions})"

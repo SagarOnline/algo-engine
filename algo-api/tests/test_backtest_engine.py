@@ -84,6 +84,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     # Enter on the second candle, exit on the fourth
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False, False]
     mock_strategy.should_exit_trade.side_effect = [False, True, False]
+    mock_strategy.calculate_stop_loss_for.return_value = None
 
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
@@ -114,7 +115,7 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     # Only generate entry signal on 2023-01-03
     mock_strategy.should_enter_trade.side_effect = [True, False] # Corresponds to 3rd and 4th candle
     mock_strategy.should_exit_trade.side_effect = [True]
-
+    mock_strategy.calculate_stop_loss_for.return_value = None
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
     

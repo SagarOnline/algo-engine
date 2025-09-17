@@ -20,6 +20,7 @@ class BackTest:
             candle = self.underlying_instrument_hd.data[i]
             if candle['timestamp'].date() < self.start_date:
                 continue
+            tradable.process_stop_loss(candle['close'], candle['timestamp'])
             # Use hd for entry/exit logic, but use position_instrument_hd for execution
             if not tradable.is_any_position_open() and self.strategy.should_enter_trade(previous_candles):
                 exec_candle = self.position_instrument_hd.getCandleBy(
@@ -27,7 +28,8 @@ class BackTest:
                 )
                 if exec_candle is None:
                     raise ValueError(f"No execution candle found for entry at timestamp {candle['timestamp']}")
-                tradable.add_position(exec_candle["timestamp"], exec_candle["close"], position.action, 1)
+                stop_loss_price = self.strategy.calculate_stop_loss_for(exec_candle["close"])
+                tradable.add_position(exec_candle["timestamp"], exec_candle["close"], position.action, 1, stop_loss=stop_loss_price)
                 continue
                 
             if tradable.is_any_position_open() and self.strategy.should_exit_trade(previous_candles):
