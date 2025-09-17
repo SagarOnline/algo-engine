@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 from algo.domain.strategy import Instrument, PositionAction
-from algo.domain.backtest.report import Position, PositionType
+from algo.domain.backtest.report import Position, PositionExitType, PositionType
 
 def make_position_long(entry_price=100.0, stop_loss=95.0):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
@@ -21,6 +21,7 @@ def test_process_stop_loss_long_triggers():
     assert not pos.is_open()
     assert pos.exit_price() == 95.0
     assert pos.exit_time() == exit_time
+    assert pos.exit_type == PositionExitType.STOP_LOSS
 
 def test_process_stop_loss_long_not_triggered():
     pos = make_position_long()
@@ -29,6 +30,7 @@ def test_process_stop_loss_long_not_triggered():
     assert not triggered
     assert pos.is_open()
     assert pos.exit_price() is None
+    assert pos.exit_type is None
 
 def test_process_stop_loss_short_triggers():
     pos = make_position_short()
@@ -38,6 +40,7 @@ def test_process_stop_loss_short_triggers():
     assert not pos.is_open()
     assert pos.exit_price() == 105.0
     assert pos.exit_time() == exit_time
+    assert pos.exit_type == PositionExitType.STOP_LOSS
 
 def test_process_stop_loss_short_not_triggered():
     pos = make_position_short()
@@ -46,6 +49,7 @@ def test_process_stop_loss_short_not_triggered():
     assert not triggered
     assert pos.is_open()
     assert pos.exit_price() is None
+    assert pos.exit_type is None
 
 def test_process_stop_loss_no_stop_loss():
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
@@ -56,3 +60,4 @@ def test_process_stop_loss_no_stop_loss():
     assert not triggered
     assert pos.is_open()
     assert pos.exit_price() is None
+    assert pos.exit_type is None

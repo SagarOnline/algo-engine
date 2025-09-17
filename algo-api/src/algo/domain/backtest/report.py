@@ -22,6 +22,10 @@ class PositionType(Enum):
     LONG = "LONG"
     SHORT = "SHORT"
 
+class PositionExitType(Enum):
+    EXIT_RULES = "EXIT_RULES"
+    STOP_LOSS = "STOP_LOSS"
+
 class Position:
     def __init__(self, instrument: Instrument, position_type: PositionType, quantity: int, entry_price: float, entry_time: datetime, stop_loss: float = None):
         if entry_price == 0:
@@ -37,11 +41,13 @@ class Position:
         entry_action = PositionAction.BUY if position_type == PositionType.LONG else PositionAction.SELL
         entry_txn = Transaction(entry_time, entry_price, entry_action, quantity)
         self.transactions.append(entry_txn)
+        self.exit_type = None  # To track how the position was exited
 
-    def exit(self, exit_price: float, exit_time: datetime):
+    def exit(self, exit_price: float, exit_time: datetime, exit_type: PositionExitType = PositionExitType.EXIT_RULES):
         exit_action = PositionAction.SELL if self.position_type == PositionType.LONG else PositionAction.BUY
         exit_txn = Transaction(exit_time, exit_price, exit_action, self.quantity)
         self.transactions.append(exit_txn)
+        self.exit_type = exit_type  # Store exit type for reference
 
     def is_open(self) -> bool:
         # Position is open if only entry transaction exists
@@ -53,10 +59,10 @@ class Position:
         # For LONG, stop loss triggers if price <= stop_loss
         # For SHORT, stop loss triggers if price >= stop_loss
         if self.position_type == PositionType.LONG and price <= self.stop_loss:
-            self.exit(self.stop_loss, time)
+            self.exit(self.stop_loss, time, PositionExitType.STOP_LOSS)
             return True
         elif self.position_type == PositionType.SHORT and price >= self.stop_loss:
-            self.exit(self.stop_loss, time)
+            self.exit(self.stop_loss, time, PositionExitType.STOP_LOSS)
             return True
         return False
 
@@ -99,7 +105,7 @@ class Position:
         if self.is_open():
             return None
         return self.transactions[-1].time
-
+    
     def __repr__(self):
         return (f"Position(instrument={self.instrument}, position_type={self.position_type}, "
                 f"quantity={self.quantity}, stop_loss={self.stop_loss}, transactions={self.transactions})")
