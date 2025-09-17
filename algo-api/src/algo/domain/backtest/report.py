@@ -205,6 +205,14 @@ class Position:
             return 0.0
         # Use pnl_points for calculation
         return self.pnl_points() * self.quantity
+    
+    def pnl_percentage(self) -> float:
+        if self.is_open():
+            return 0.0
+        entry_txn = self.transactions[0]
+        if entry_txn.price == 0:
+            return 0.0
+        return (self.pnl_points() / entry_txn.price) * 100  
 
     def pnl_points(self) -> float:
         if self.is_open():
