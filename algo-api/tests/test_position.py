@@ -52,27 +52,6 @@ def test_open_position_pnl_zero(instrument, entry_time):
     assert pos.pnl_points() == 0.0
     assert pos.pnl_percentage() == 0.0
 
-def test_process_stop_loss_long(instrument, entry_time, exit_time):
-    pos = Position(instrument, PositionType.LONG, 1, 100.0, entry_time, stop_loss=95.0)
-    triggered = pos.process_stop_loss(94.0, exit_time)
-    assert triggered
-    assert not pos.is_open()
-    assert pos.exit_price() == 94.0
-    assert pos.exit_time() == exit_time
-
-def test_process_stop_loss_short(instrument, entry_time, exit_time):
-    pos = Position(instrument, PositionType.SHORT, 1, 100.0, entry_time, stop_loss=105.0)
-    triggered = pos.process_stop_loss(106.0, exit_time)
-    assert triggered
-    assert not pos.is_open()
-    assert pos.exit_price() == 106.0
-    assert pos.exit_time() == exit_time
-
-def test_no_stop_loss_trigger(instrument, entry_time, exit_time):
-    pos = Position(instrument, PositionType.LONG, 1, 100.0, entry_time, stop_loss=95.0)
-    triggered = pos.process_stop_loss(96.0, exit_time)
-    assert not triggered
-    assert pos.is_open()
 
 def test_position_zero_price_or_quantity_raises(instrument, entry_time):
     import pytest

@@ -33,6 +33,7 @@ class PositionDTO:
         self.profit_percentage = position.pnl_percentage()
         self.profit_points = position.pnl_points()
         self.quantity = position.quantity
+        self.exit_type = position.exit_type if hasattr(position, 'exit_type') else None
 
     def to_dict(self):
         return {
@@ -44,6 +45,7 @@ class PositionDTO:
             "profit_percentage": self.profit_percentage,
             "profit_points": self.profit_points,
             "quantity": self.quantity,
+            "exit_type": self.exit_type.name.replace("_", " ") if self.exit_type is not None else "",
         }
 
 class BackTestReportSummaryDTO:

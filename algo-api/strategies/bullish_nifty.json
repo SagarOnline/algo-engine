@@ -25,8 +25,8 @@
   },
   "risk_management": {
     "stop_loss": {
-      "type": "PERCENTAGE",
-      "value": 1
+      "type": "POINTS",
+      "value": 10
     }
   },
   "entry_rules": {

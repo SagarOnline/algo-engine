@@ -36,6 +36,7 @@ def historical_data():
 def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_data):
     mock_strategy.should_enter_trade.return_value = False
     mock_strategy.should_exit_trade.return_value = False
+    mock_strategy.calculate_stop_loss_for.return_value = None
     backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     report = backtest.run()
     assert isinstance(report, BackTestReport)
@@ -59,6 +60,7 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     # Enter on 2nd candle, exit on 4th
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False]
     mock_strategy.should_exit_trade.side_effect = [True, False]
+    mock_strategy.calculate_stop_loss_for.return_value = None
     backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     report = backtest.run()
     assert len(report.tradable.positions) == 1
@@ -85,6 +87,7 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     start_date = date(2023, 1, 3)
     mock_strategy.should_enter_trade.side_effect = [False, False, True, False]
     mock_strategy.should_exit_trade.side_effect = [True]
+    mock_strategy.calculate_stop_loss_for.return_value = None
     backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     # No changes needed, BackTest still expects a list of dicts for historical_data argument.
     report = backtest.run()
@@ -118,6 +121,7 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     # Entry on 9:30, exit on 10:00
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False]
     mock_strategy.should_exit_trade.side_effect = [False,True]
+    mock_strategy.calculate_stop_loss_for.return_value = None
     backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1), end_date=date(2023, 1, 1))
     report = backtest.run()
     assert len(report.tradable.positions) == 1
