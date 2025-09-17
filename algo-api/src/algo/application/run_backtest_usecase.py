@@ -45,7 +45,7 @@ class PositionDTO:
             "profit_percentage": self.profit_percentage,
             "profit_points": self.profit_points,
             "quantity": self.quantity,
-            "exit_type": self.exit_type,
+            "exit_type": self.exit_type.name.replace("_", " ") if self.exit_type is not None else "",
         }
 
 class BackTestReportSummaryDTO:

@@ -74,6 +74,15 @@ class PositionsTableWidget extends StatelessWidget {
                     ),
                     DataColumn(
                       label: Text(
+                        'Exit Type',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Text(
                         'Profit',
                         style: TextStyle(
                           color: Colors.white,
@@ -125,6 +134,12 @@ class PositionsTableWidget extends StatelessWidget {
                         DataCell(
                           Text(
                             position['exit_time'].toString(),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            position['exit_type'].toString(),
                             style: const TextStyle(color: Colors.white70),
                           ),
                         ),
