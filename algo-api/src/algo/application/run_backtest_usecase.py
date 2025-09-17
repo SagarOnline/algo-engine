@@ -1,13 +1,10 @@
 from algo.application.strategy_usecases import InstrumentDTO
 from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy import Strategy
 from datetime import date
-from typing import Optional
 from algo.domain.strategy_repository import StrategyRepository
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo.domain.backtest.report import BackTestReport, TradableInstrument
-from algo.domain.backtest.trade import Trade
+from algo.domain.backtest.report import BackTestReport, Position, TradableInstrument
 
 class RunBacktestInput:
     def __init__(self, strategy_name: str, start_date: str, end_date: str):
@@ -18,24 +15,24 @@ class RunBacktestInput:
 class TradableDTO:
     def __init__(self, tradable: TradableInstrument):
         self.instrument = InstrumentDTO(tradable.instrument)
-        self.trades = [TradeDTO(t) for t in tradable.trades]
+        self.positions = [PositionDTO(p) for p in tradable.positions]
 
     def to_dict(self):
         return {
             "instrument": self.instrument.to_dict(),
-            "trades": [t.to_dict() for t in self.trades],
+            "positions": [p.to_dict() for p in self.positions],
         }
 
-class TradeDTO:
-    def __init__(self, trade: Trade):
-        self.entry_price = trade.entry_price
-        self.entry_time = fmt_datetime(trade.entry_time)
-        self.exit_price = trade.exit_price
-        self.exit_time = fmt_datetime(trade.exit_time)
-        self.profit = trade.profit()
-        self.profit_percentage = trade.profit_percentage()
-        self.profit_points = trade.profit_points()
-        self.quantity = trade.quantity
+class PositionDTO:
+    def __init__(self, position: Position):
+        self.entry_price =  position.entry_price()
+        self.entry_time = fmt_datetime(position.entry_time())
+        self.exit_price = position.exit_price() if position.exit_price() is not None else ""
+        self.exit_time = fmt_datetime(position.exit_time()) if position.exit_time() is not None else ""
+        self.profit = position.pnl()
+        self.profit_percentage = position.pnl_percentage()
+        self.profit_points = position.pnl_points()
+        self.quantity = position.quantity
 
     def to_dict(self):
         return {

@@ -2,7 +2,7 @@ import pytest
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from algo.domain.indicators.registry import register_indicator, IndicatorRegistry
-from algo.domain.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, Position, InstrumentType, Exchange, PositionAction
+from algo.domain.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, InstrumentType, Exchange, PositionAction
 from datetime import date, timedelta
 
 # --- Mock domain classes ---
@@ -56,10 +56,12 @@ class DummyStrategy(Strategy):
 
     def get_exit_rules(self) -> RuleSet:
         return self._exit_rules
-    
-    def get_position(self) -> Position:
-        return Position(action=PositionAction.BUY, instrument=self.get_instrument())
 
+    def get_position_instrument(self) -> PositionInstrument:
+        return PositionInstrument(action=PositionAction.BUY, instrument=self.get_instrument())
+
+    def get_risk_management(self):
+        return None
 
 # --- Test cases ---
 def test_should_enter_trade_with_and_logic():

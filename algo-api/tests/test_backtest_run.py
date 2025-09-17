@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
-from algo.domain.strategy import Exchange, Instrument, InstrumentType, Strategy
+from algo.domain.strategy import Exchange, Instrument, InstrumentType, PositionAction, Strategy
 from algo.domain.backtest.report import BackTestReport
 
 from algo.domain.backtest.backtest_run import BackTest
@@ -15,6 +15,10 @@ def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "1d"
+    position_instrument = Mock()
+    position_instrument.action = PositionAction.BUY
+    position_instrument.get_close_action.return_value = PositionAction.SELL
+    strategy.get_position_instrument.return_value = position_instrument
     instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     strategy.get_required_history_start_date.return_value = date(2023, 1, 1)
@@ -36,7 +40,7 @@ def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_da
     report = backtest.run()
     assert isinstance(report, BackTestReport)
     assert report.total_pnl() == 0
-    assert len(report.tradable.trades) == 0
+    assert len(report.tradable.positions) == 0
     assert report.start_date == date(2023, 1, 1)
     assert report.end_date == date(2023, 1, 4)
 
@@ -57,10 +61,10 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     mock_strategy.should_exit_trade.side_effect = [True, False]
     backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     report = backtest.run()
-    assert len(report.tradable.trades) == 1
-    trade = report.tradable.trades[0]
-    assert trade.entry_price == 110
-    assert trade.exit_price == 120
+    assert len(report.tradable.positions) == 1
+    position = report.tradable.positions[0]
+    assert position.entry_price() == 110
+    assert position.exit_price()     == 120
     assert report.total_pnl() == 10
     assert report.start_date == date(2023, 1, 1)
     assert report.end_date == date(2023, 1, 4)
@@ -84,12 +88,12 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     backtest = BackTest(mock_strategy, historical_data, position_instrument_hd=historical_data, start_date=date(2023, 1, 1), end_date=date(2023, 1, 4))
     # No changes needed, BackTest still expects a list of dicts for historical_data argument.
     report = backtest.run()
-    assert len(report.tradable.trades) == 1
+    assert len(report.tradable.positions) == 1
     assert report.start_date == date(2023, 1, 1)
     assert report.end_date == date(2023, 1, 4)
-    trade = report.tradable.trades[0]
-    assert trade.entry_price == 120
-    assert trade.exit_price == 130
+    position = report.tradable.positions[0]
+    assert position.entry_price() == 120
+    assert position.exit_price() == 130
     assert report.total_pnl() == 10
 
 def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy):
@@ -116,10 +120,10 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     mock_strategy.should_exit_trade.side_effect = [False,True]
     backtest = BackTest(mock_strategy, underlying_hd, position_instrument_hd=position_hd, start_date=date(2023, 1, 1), end_date=date(2023, 1, 1))
     report = backtest.run()
-    assert len(report.tradable.trades) == 1
-    trade = report.tradable.trades[0]
-    assert trade.entry_price == 210  # from position_hd at 9:30
-    assert trade.exit_price == 230   # from position_hd at 10:00
+    assert len(report.tradable.positions) == 1
+    position = report.tradable.positions[0]
+    assert position.entry_price() == 210  # from position_hd at 9:30
+    assert position.exit_price() == 230   # from position_hd at 10:00
     assert report.total_pnl() == 20
 
     # Additional BackTestReport method checks

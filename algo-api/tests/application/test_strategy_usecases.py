@@ -1,6 +1,6 @@
 import pytest
 from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO, InstrumentDTO
-from algo.domain.strategy import Instrument,InstrumentType,Exchange,Expiring, Expiry, Position, PositionAction, Strategy
+from algo.domain.strategy import Instrument,InstrumentType,Exchange,Expiring, Expiry, PositionInstrument, PositionAction, Strategy
 
 class DummyStrategy(Strategy):
     def __init__(self, strategy_name, display_name, description, instrument):
@@ -33,9 +33,12 @@ class DummyStrategy(Strategy):
     def get_exit_rules(self):
         return ""
 
-    def get_position(self):
-        return Position(action=PositionAction.BUY, instrument=self.get_instrument())
+    def get_position_instrument(self):
+        return PositionInstrument(action=PositionAction.BUY, instrument=self.get_instrument())
 
+    def get_risk_management(self):
+        return None
+    
 class DummyRepository:
     def list_strategies(self):
         return [

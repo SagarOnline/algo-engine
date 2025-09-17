@@ -1,18 +1,13 @@
+from operator import is_
 from algo.domain.strategy import Instrument, PositionAction
+from enum import Enum
 
 from datetime import datetime, date
 from typing import List
-from algo.domain.backtest.trade import Trade
 
 
 # Transaction domain class
 class Transaction:
-    def get_position(self) -> float:
-        if self.action == PositionAction.BUY:
-            return self.quantity
-        elif self.action == PositionAction.SELL:
-            return -self.quantity
-        return 0.0
     def __init__(self, time: datetime, price: float, action: PositionAction, quantity: int):
         self.time = time
         self.price = price
@@ -22,54 +17,174 @@ class Transaction:
     def __repr__(self):
         return f"Transaction(time={self.time}, price={self.price}, action={self.action}, quantity={self.quantity})"
 
-# InstrumentTransactions domain class
-class TradableInstrument:
 
+class PositionType(Enum):
+    LONG = "LONG"
+    SHORT = "SHORT"
+
+class Position:
+    def __init__(self, instrument: Instrument, position_type: PositionType, quantity: int, entry_price: float, entry_time: datetime, stop_loss: float = None):
+        if entry_price == 0:
+            raise ValueError("Entry price cannot be zero.")
+        if quantity == 0:
+            raise ValueError("Quantity cannot be zero.")
+        self.instrument = instrument
+        self.position_type = position_type
+        self.quantity = quantity
+        self.stop_loss = stop_loss
+        self.transactions: List[Transaction] = []
+        # Create the entry transaction
+        entry_action = PositionAction.BUY if position_type == PositionType.LONG else PositionAction.SELL
+        entry_txn = Transaction(entry_time, entry_price, entry_action, quantity)
+        self.transactions.append(entry_txn)
+
+    def exit(self, exit_price: float, exit_time: datetime):
+        exit_action = PositionAction.SELL if self.position_type == PositionType.LONG else PositionAction.BUY
+        exit_txn = Transaction(exit_time, exit_price, exit_action, self.quantity)
+        self.transactions.append(exit_txn)
+
+    def is_open(self) -> bool:
+        # Position is open if only entry transaction exists
+        return len(self.transactions) == 1
+
+    def process_stop_loss(self, price: float, time: datetime):
+        if not self.is_open() or self.stop_loss is None:
+            return False
+        # For LONG, stop loss triggers if price <= stop_loss
+        # For SHORT, stop loss triggers if price >= stop_loss
+        if self.position_type == PositionType.LONG and price <= self.stop_loss:
+            self.exit(price, time)
+            return True
+        elif self.position_type == PositionType.SHORT and price >= self.stop_loss:
+            self.exit(price, time)
+            return True
+        return False
+
+    def pnl(self) -> float:
+        if self.is_open():
+            return 0.0
+        # Use pnl_points for calculation
+        return self.pnl_points() * self.quantity
+    
+    def pnl_percentage(self) -> float:
+        if self.is_open():
+            return 0.0
+        entry_txn = self.transactions[0]
+        return (self.pnl_points() / entry_txn.price) * 100  
+
+    def pnl_points(self) -> float:
+        if self.is_open():
+            return 0.0
+        entry_txn = self.transactions[0]
+        exit_txn = self.transactions[-1]
+        # For LONG: exit - entry
+        # For SHORT: entry - exit
+        if self.position_type == PositionType.LONG:
+            return exit_txn.price - entry_txn.price
+        else:
+            return entry_txn.price - exit_txn.price
+
+    def entry_price(self) -> float:
+        return self.transactions[0].price if self.transactions else None
+
+    def entry_time(self) -> datetime:
+        return self.transactions[0].time if self.transactions else None
+
+    def exit_price(self) -> float:
+        if self.is_open():
+            return None
+        return self.transactions[-1].price
+
+    def exit_time(self) -> datetime:
+        if self.is_open():
+            return None
+        return self.transactions[-1].time
+
+    def __repr__(self):
+        return (f"Position(instrument={self.instrument}, position_type={self.position_type}, "
+                f"quantity={self.quantity}, stop_loss={self.stop_loss}, transactions={self.transactions})")
+
+class TradableInstrument:
     def __init__(self, instrument: Instrument):
         self.instrument = instrument
-        self.transactions: list[Transaction] = []
-        self.trades: list[Trade] = []
-        self.open_positions: list[Transaction] = []   # keeps unmatched transactions
+        self.positions: List[Position] = []  # List of Position objects (open and closed)
 
-    def execute_order(self, time: datetime, price: float, action: PositionAction, quantity: int):
-        txn = Transaction(time, price, action, quantity)
-        self.transactions.append(txn)
+    def add_position(self, time: datetime, price: float, action: PositionAction, quantity: int, stop_loss: float = None):
+        # Determine position type from action
+        position_type = PositionType.LONG if action == PositionAction.BUY else PositionType.SHORT
+        position = Position(self.instrument, position_type, quantity, price, time, stop_loss)
+        self.positions.append(position)
 
-        # Try to match against an open position
-        if self.open_positions:
-            last_open = self.open_positions[-1]
+    def exit_position(self, time: datetime, price: float, action: PositionAction, quantity: int):
+        # Find last open position
+        open_positions = [p for p in self.positions if p.is_open()]
+        if not open_positions:
+            raise RuntimeError("No open position to exit.")
+        position = open_positions[-1]
+        position.exit(price, time)
 
-            # Check if this closes the position
-            if last_open.action != txn.action and last_open.quantity == txn.quantity:
-                trade = Trade(
-                    entry_time=last_open.time,
-                    entry_price=last_open.price,
-                    exit_time=txn.time,
-                    exit_price=txn.price,
-                    quantity=txn.quantity
-                )
-                self.trades.append(trade)
-                self.open_positions.pop()  # remove the matched open txn
-                return
+    def total_pnl_points(self) -> float:
+        return sum(p.pnl_points() for p in self.positions if not p.is_open())
 
-        # If no match, treat this as a new open position
-        self.open_positions.append(txn)
-        
-    def is_trade_open(self) -> bool:
-        """
-        Returns True if there are still open positions.
-        """
-        return len(self.open_positions) > 0
-    
-    
+    def total_pnl(self) -> float:
+        return sum(p.pnl() for p in self.positions if not p.is_open())
+
+    def total_pnl_percentage(self) -> float:
+        total_buy = sum(p.transactions[0].price * p.quantity for p in self.positions if not p.is_open())
+        total_sell = sum(p.transactions[-1].price * p.quantity for p in self.positions if not p.is_open())
+        return ((total_sell - total_buy) / total_buy) if total_buy != 0 else 0
+
+    # Number of Winning Trades
+    def winning_trades_count(self) -> int:
+        return sum(1 for p in self.positions if not p.is_open() and p.pnl() > 0)
+
+    # Number of Losing Trades
+    def losing_trades_count(self) -> int:
+        return sum(1 for p in self.positions if not p.is_open() and p.pnl() < 0)
+
+    # Total Number of Trades executed
+    def total_trades_count(self) -> int:
+        return sum(1 for p in self.positions if not p.is_open())
+
+    # Winning Streak (longest consecutive winning trades)
+    def winning_streak(self) -> int:
+        max_streak = streak = 0
+        for p in self.positions:
+            if not p.is_open() and p.pnl() > 0:
+                streak += 1
+                max_streak = max(max_streak, streak)
+            else:
+                streak = 0
+        return max_streak
+
+    # Losing Streak (longest consecutive losing trades)
+    def losing_streak(self) -> int:
+        max_streak = streak = 0
+        for p in self.positions:
+            if not p.is_open() and p.pnl() < 0:
+                streak += 1
+                max_streak = max(max_streak, streak)
+            else:
+                streak = 0
+        return max_streak
+
+    # Maximum Gain achieved in a trade
+    def max_gain(self) -> float:
+        closed_pnls = [p.pnl() for p in self.positions if not p.is_open()]
+        return max(closed_pnls) if closed_pnls else 0
+
+    # Maximum Loss incurred in a trade
+    def max_loss(self) -> float:
+        closed_pnls = [p.pnl() for p in self.positions if not p.is_open()]
+        return min(closed_pnls) if closed_pnls else 0
+
+    def is_any_position_open(self) -> bool:
+        return any(p.is_open() for p in self.positions)
 
     def __repr__(self):
-        return f"TradableInstrument(instrument={self.instrument}, transactions={self.transactions})"
-        
+        return f"TradableInstrument_2(instrument={self.instrument}, positions={self.positions})"
+
 class BackTestReport:
-    def __repr__(self):
-        return self.to_dict().__repr__()
-    
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):
         self.strategy_name = strategy_name
         self.tradable = tradable
@@ -78,9 +193,9 @@ class BackTestReport:
 
     def to_dict(self):
         return {
-            "instrument":{
+            "instrument": {
                 "name": self.tradable.instrument.to_dict(),
-                 "trades": [trade.to_dict() for trade in self.tradable.trades]  
+                "positions": [repr(pos) for pos in self.tradable.positions]
             },
             "summary": {
                 "strategy": self.strategy_name,
@@ -98,64 +213,35 @@ class BackTestReport:
             }
         }
 
-    # Profit and Loss in points
-    def total_pnl_points(self) -> float:
-        # Treat transactions as a ledger: BUY is negative, SELL is positive
-        return sum(trade.profit_points() for trade in self.tradable.trades)
+    def __repr__(self):
+        return self.to_dict().__repr__()
     
     def total_pnl(self) -> float:
-        # Treat transactions as a ledger: BUY is negative, SELL is positive
-        return sum(trade.profit() for trade in self.tradable.trades)
+        return self.tradable.total_pnl()
+    
+    def total_pnl_points(self) -> float:
+        return self.tradable.total_pnl_points()
 
-    # Profit and Loss in percentage
     def total_pnl_percentage(self) -> float:
-        total_buy = sum(trade.entry_price * trade.quantity for trade in self.tradable.trades if trade.entry_price > 0)
-        total_sell = sum(trade.exit_price * trade.quantity for trade in self.tradable.trades if trade.exit_price > 0)
-        total_pnl_percentage = ((total_sell - total_buy) / total_buy) if total_buy != 0 else 0
-        return total_pnl_percentage
+        return self.tradable.total_pnl_percentage()
 
-    # Number of Winning Trades
     def winning_trades_count(self) -> int:
-        return sum(1 for trade in self.tradable.trades if trade.profit() > 0)
+        return self.tradable.winning_trades_count()
 
-    # Number of Losing Trades
     def losing_trades_count(self) -> int:
-        return sum(1 for trade in self.tradable.trades if trade.profit() < 0)
+        return self.tradable.losing_trades_count()
 
-    # Total Number of Trades executed
     def total_trades_count(self) -> int:
-        return len(self.tradable.trades)
+        return self.tradable.total_trades_count()
 
-    # Winning Streak (longest consecutive winning trades)
     def winning_streak(self) -> int:
-        max_streak = streak = 0
-        for trade in self.tradable.trades:
-            if trade.profit() > 0:
-                streak += 1
-                max_streak = max(max_streak, streak)
-            else:
-                streak = 0
-        return max_streak
+        return self.tradable.winning_streak()
 
-    # Losing Streak (longest consecutive losing trades)
     def losing_streak(self) -> int:
-        max_streak = streak = 0
-        for trade in self.tradable.trades:
-            if trade.profit() < 0:
-                streak += 1
-                max_streak = max(max_streak, streak)
-            else:
-                streak = 0
-        return max_streak
+        return self.tradable.losing_streak()
 
-    # Maximum Gain achieved in a trade
     def max_gain(self) -> float:
-        if not self.tradable.trades:
-            return 0
-        return max(trade.profit() for trade in self.tradable.trades)
+        return self.tradable.max_gain()
 
-    # Maximum Loss incurred in a trade
     def max_loss(self) -> float:
-        if not self.tradable.trades:
-            return 0
-        return min(trade.profit() for trade in self.tradable.trades)
+        return self.tradable.max_loss()

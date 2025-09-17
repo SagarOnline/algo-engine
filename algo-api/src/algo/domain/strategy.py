@@ -29,7 +29,19 @@ class PositionAction(Enum):
     BUY = "BUY"
     SELL = "SELL"
 
+class StopLossType(Enum):
+    POINTS = "POINTS"
+    PERCENTAGE = "PERCENTAGE"
 
+class StopLoss:
+    def __init__(self, value: float, type: StopLossType):
+        self.value = value
+        self.type = type
+
+class RiskManagement:
+    def __init__(self, stop_loss: StopLoss):
+        self.stop_loss = stop_loss
+        
 class Instrument:
     def __init__(self, 
         type: InstrumentType,
@@ -55,6 +67,7 @@ class Instrument:
             "expiring": self.expiring.value if self.expiring else None,
             "atm": self.atm
         }
+        
 
     def __eq__(self, other):
         if not isinstance(other, Instrument):
@@ -69,7 +82,7 @@ class Instrument:
         )
 
 
-class Position:
+class PositionInstrument:
     def __init__(self, action: PositionAction, instrument: Instrument):
         self.action = PositionAction(action)
         self.instrument = instrument
@@ -175,7 +188,11 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def get_position(self) -> Position:
+    def get_position_instrument(self) -> PositionInstrument:
+        pass
+
+    @abstractmethod
+    def get_risk_management(self) -> Optional[RiskManagement]:
         pass
 
     def get_required_history_start_date(self, start_date: date) -> date:
@@ -219,5 +236,17 @@ class Strategy(ABC):
         exit_rules = self.get_exit_rules()
         return exit_rules.apply_on(historical_data)
 
-    # _evaluate_expression moved to Condition
+    def calculate_stop_loss_for(self, price: float) -> Optional[float]:
+        risk_management = self.get_risk_management()
+        if not risk_management or not risk_management.stop_loss:
+            return None
+        stop_loss = risk_management.stop_loss
+        if stop_loss.type == StopLossType.POINTS:
+            return price - stop_loss.value
+        elif stop_loss.type == StopLossType.PERCENTAGE:
+            return price * (1 - stop_loss.value / 100)
+        else:
+            return None
+
+
 

@@ -1,6 +1,6 @@
 from typing import List
 from algo.domain.strategy_repository import StrategyRepository
-from algo.domain.strategy import Instrument, Strategy
+from algo.domain.strategy import Instrument, PositionInstrument, Strategy
 
 
 class InstrumentDTO:
@@ -53,8 +53,8 @@ class StrategyDTO:
             "instrument": self.instrument.to_dict() if hasattr(self.instrument, 'to_dict') else str(self.instrument)
         }
 
-class PositionDTO:
-    def __init__(self, position):
+class PositionInstrumentDTO:
+    def __init__(self, position: PositionInstrument):
         self.action = position.action.name if position and hasattr(position.action, 'name') else str(position.action)
         self.instrument = InstrumentDTO(position.instrument)
 
@@ -71,11 +71,11 @@ class StrategyDetailsDTO:
         self.description = strategy.get_description()
         self.instrument = InstrumentDTO(strategy.get_instrument())
         self.timeframe = str(getattr(strategy.get_timeframe(), "value", strategy.get_timeframe()))
-        position = strategy.get_position()
+        position = strategy.get_position_instrument()
         if isinstance(position, list):
-            self.positions = [PositionDTO(pos) for pos in position]
+            self.positions = [PositionInstrumentDTO(pos) for pos in position]
         else:
-            self.positions = [PositionDTO(position)]
+            self.positions = [PositionInstrumentDTO(position)]
 
     def to_dict(self):
         return {
