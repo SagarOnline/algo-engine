@@ -20,15 +20,15 @@ class TradableDTO:
     def to_dict(self):
         return {
             "instrument": self.instrument.to_dict(),
-            "positions": [t.to_dict() for t in self.positions],
+            "positions": [p.to_dict() for p in self.positions],
         }
 
 class PositionDTO:
     def __init__(self, position: Position):
-        self.entry_price = position.entry_price()
+        self.entry_price =  position.entry_price()
         self.entry_time = fmt_datetime(position.entry_time())
-        self.exit_price = position.exit_price()
-        self.exit_time = fmt_datetime(position.exit_time())
+        self.exit_price = position.exit_price() if position.exit_price() is not None else ""
+        self.exit_time = fmt_datetime(position.exit_time()) if position.exit_time() is not None else ""
         self.profit = position.pnl()
         self.profit_percentage = position.pnl_percentage()
         self.profit_points = position.pnl_points()

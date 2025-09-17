@@ -3,6 +3,7 @@ import os
 from datetime import datetime, date
 from dotenv import load_dotenv, find_dotenv
 import json
+from algo.application.run_backtest_usecase import BackTestReportDTO
 from algo.domain.backtest.engine import BacktestEngine
 from algo.infrastructure.json_backtest_report_repository import JsonBacktestReportRepository
 from algo.infrastructure.jsonstrategy import JsonStrategy
@@ -42,12 +43,12 @@ def main():
         # Initialize and run backtest engine
         engine = BacktestEngine(historical_data_repository)
         start_date = "2025-08-01"
-        end_date = "2025-08-14"
+        end_date = "2025-08-13"
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
 
         backtest_report = engine.start(strategy, start_date_obj, end_date_obj)
-        print(backtest_report)
+        print(BackTestReportDTO(backtest_report).to_dict())
     except InvalidStrategyConfiguration as e:
         print(f"InvalidStrategyConfiguration: {e}")
 

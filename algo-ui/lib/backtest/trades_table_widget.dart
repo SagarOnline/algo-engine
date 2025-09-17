@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-class TradesTableWidget extends StatelessWidget {
-  final List trades;
-  const TradesTableWidget({Key? key, required this.trades}) : super(key: key);
+class PositionsTableWidget extends StatelessWidget {
+  final List positions;
+  const PositionsTableWidget({Key? key, required this.positions})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class TradesTableWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Trades',
+                'Positions',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -99,39 +100,39 @@ class TradesTableWidget extends StatelessWidget {
                       ),
                     ),
                   ],
-                  rows: List<DataRow>.generate(trades.length, (index) {
-                    final trade = trades[index];
+                  rows: List<DataRow>.generate(positions.length, (index) {
+                    final position = positions[index];
                     return DataRow(
                       cells: [
                         DataCell(
                           Text(
-                            trade['entry_price'].toString(),
+                            position['entry_price'].toString(),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
                         DataCell(
                           Text(
-                            trade['entry_time'].toString(),
+                            position['entry_time'].toString(),
                             style: const TextStyle(color: Colors.white70),
                           ),
                         ),
                         DataCell(
                           Text(
-                            trade['exit_price'].toString(),
+                            position['exit_price'].toString(),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
                         DataCell(
                           Text(
-                            trade['exit_time'].toString(),
+                            position['exit_time'].toString(),
                             style: const TextStyle(color: Colors.white70),
                           ),
                         ),
                         DataCell(
                           Text(
-                            trade['profit'].toStringAsFixed(2),
+                            position['profit'].toStringAsFixed(2),
                             style: TextStyle(
-                              color: trade['profit'] >= 0
+                              color: position['profit'] >= 0
                                   ? Colors.green
                                   : Colors.red,
                             ),
@@ -139,12 +140,11 @@ class TradesTableWidget extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            (trade['profit_percentage'] * 100).toStringAsFixed(
-                                  2,
-                                ) +
+                            (position['profit_percentage'] * 100)
+                                    .toStringAsFixed(2) +
                                 '%',
                             style: TextStyle(
-                              color: trade['profit_percentage'] >= 0
+                              color: position['profit_percentage'] >= 0
                                   ? Colors.green
                                   : Colors.red,
                             ),
@@ -152,7 +152,7 @@ class TradesTableWidget extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            trade['quantity'].toString(),
+                            position['quantity'].toString(),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),

@@ -137,8 +137,9 @@ class _BacktestScreenState extends State<BacktestScreen> {
                     ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
-                    child: TradesTableWidget(
-                      trades: _backtestResult!['tradable']['trades'] as List,
+                    child: PositionsTableWidget(
+                      positions:
+                          _backtestResult!['tradable']['positions'] as List,
                     ),
                   ),
                 ],
