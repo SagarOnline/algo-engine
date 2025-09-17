@@ -1,6 +1,6 @@
 import pytest
 from algo.application.strategy_usecases import StrategyDetailsDTO, InstrumentDTO, PositionDTO
-from algo.domain.strategy import Instrument, InstrumentType, Exchange, Expiry, Expiring, Position
+from algo.domain.strategy import Instrument, InstrumentType, Exchange, Expiry, Expiring, PositionInstrument
 
 class DummyStrategy:
     def get_name(self):
@@ -23,8 +23,8 @@ class DummyStrategy:
         class TF:
             value = "15min"
         return TF()
-    def get_position(self):
-        return Position("BUY", self.get_instrument())
+    def get_position_instrument(self):
+        return PositionInstrument("BUY", self.get_instrument())
 
 def test_strategy_details_dto_fields():
     strat = DummyStrategy()

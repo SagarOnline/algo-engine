@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy import InstrumentType, Strategy,Instrument,Exchange,Position,PositionAction
+from algo.domain.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,PositionAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.timeframe import Timeframe
 
@@ -17,8 +17,8 @@ def mock_strategy():
     
     instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
-    position= Position(PositionAction.BUY,instrument)
-    strategy.get_position.return_value = position
+    position= PositionInstrument(PositionAction.BUY,instrument)
+    strategy.get_position_instrument.return_value = position
 
     # Default behavior: no trading signals
     strategy.should_enter_trade.return_value = False
@@ -63,7 +63,7 @@ def test_run_with_no_data(mock_strategy: Strategy, backtest_engine: BacktestEngi
     
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     assert report.total_pnl() == 0
-    assert len(report.tradable.trades) == 0
+    assert len(report.tradable.positions) == 0
     
 
 
@@ -87,10 +87,10 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
 
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
-    assert len(report.tradable.trades) == 1
-    trade = report.tradable.trades[0]
-    assert trade.entry_price == 110
-    assert trade.exit_price == 105
+    assert len(report.tradable.positions) == 1
+    position = report.tradable.positions[0]
+    assert position.entry_price() == 110
+    assert position.exit_price() == 105
     assert report.total_pnl() == -5
 
 
@@ -120,7 +120,7 @@ def test_run_respects_start_date(backtest_engine: BacktestEngine, mock_strategy:
     
     # should_enter_trade is called for each candle after the first one
     # but the engine's logic should prevent entering a trade before start_date
-    assert len(report.tradable.trades) == 1
+    assert len(report.tradable.positions) == 1
     
     # The first call to should_enter_trade corresponds to the candle on 2023-01-03
     # as the loop inside `run` starts trading after `start_date`

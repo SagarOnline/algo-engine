@@ -143,13 +143,13 @@ def test_instrument_required_only(strategy_required_only):
 
 
 def test_position(strategy):
-    assert strategy.get_position().action == PositionAction.BUY
-    assert strategy.get_position().instrument.type == InstrumentType.PE
-    assert strategy.get_position().instrument.atm == -50
-    assert strategy.get_position().instrument.exchange == Exchange.NSE
-    assert strategy.get_position().instrument.expiry == Expiry.MONTHLY
-    assert strategy.get_position().instrument.expiring == Expiring.NEXT
-    assert strategy.get_position().instrument.instrument_key == "NIFTY"
+    assert strategy.get_position_instrument().action == PositionAction.BUY
+    assert strategy.get_position_instrument().instrument.type == InstrumentType.PE
+    assert strategy.get_position_instrument().instrument.atm == -50
+    assert strategy.get_position_instrument().instrument.exchange == Exchange.NSE
+    assert strategy.get_position_instrument().instrument.expiry == Expiry.MONTHLY
+    assert strategy.get_position_instrument().instrument.expiring == Expiring.NEXT
+    assert strategy.get_position_instrument().instrument.instrument_key == "NIFTY"
 
 
 def test_entry_rules(strategy):

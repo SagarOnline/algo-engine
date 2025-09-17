@@ -31,7 +31,7 @@ class BacktestEngine:
         return historical_data
     
     def _get_position_historical_data(self, strategy:Strategy, start_date: date, end_date: date) -> HistoricalData:
-        instrument = strategy.get_position().instrument
+        instrument = strategy.get_position_instrument().instrument
         timeframe = Timeframe(strategy.get_timeframe())
         historical_data = self.historical_data_repository.get_historical_data(instrument, start_date, end_date, timeframe)
         return historical_data

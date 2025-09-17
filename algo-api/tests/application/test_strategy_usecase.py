@@ -9,11 +9,12 @@ class DummyStrategy(Strategy):
     def get_description(self): return "Test Description"
     def get_instrument(self): return Instrument(type=InstrumentType.FUTURE, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY, expiring=Expiring.CURRENT)
     def get_timeframe(self): return "1d"
-    def get_position(self): return []
+    def get_position_instrument(self): return []
     def get_capital(self): return 10000
     def get_entry_rules(self): return []
     def get_exit_rules(self): return []
-
+    def get_risk_management(self): return None
+    
 class DummyRepository(StrategyRepository):
     def __init__(self, strategies):
         self._strategies = {s.get_name(): s for s in strategies}

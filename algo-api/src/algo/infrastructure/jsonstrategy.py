@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Any
-from algo.domain.strategy import Instrument, Position, Strategy
+from algo.domain.strategy import Instrument, PositionInstrument, Strategy
 from algo.domain.strategy import RuleSet,Condition,Expression
 from algo.domain.timeframe import Timeframe
 from algo.domain.strategy import RiskManagement, StopLoss, StopLossType
@@ -24,7 +24,7 @@ class JsonStrategy(Strategy):
     def _parse_position(self, json_data):
         position_data = json_data.get("position", {})
         instrument = self._get_parsed_instrument(position_data.get("instrument", {})) 
-        self.position = Position(
+        self.position = PositionInstrument(
             action=position_data.get("action"),
             instrument=instrument
         )
@@ -91,7 +91,7 @@ class JsonStrategy(Strategy):
     def get_exit_rules(self) -> RuleSet:
         return self.exit_rules
     
-    def get_position(self) -> Position:
+    def get_position_instrument(self) -> PositionInstrument:
         return self.position
     
     def get_instrument(self) -> Instrument:

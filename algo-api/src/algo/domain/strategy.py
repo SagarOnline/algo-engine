@@ -81,7 +81,7 @@ class Instrument:
         )
 
 
-class Position:
+class PositionInstrument:
     def __init__(self, action: PositionAction, instrument: Instrument):
         self.action = PositionAction(action)
         self.instrument = instrument
@@ -187,7 +187,7 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def get_position(self) -> Position:
+    def get_position_instrument(self) -> PositionInstrument:
         pass
 
     @abstractmethod
@@ -235,7 +235,17 @@ class Strategy(ABC):
         exit_rules = self.get_exit_rules()
         return exit_rules.apply_on(historical_data)
 
-    # _evaluate_expression moved to Condition
+    def calculate_stop_loss_for(self, price: float) -> Optional[float]:
+        risk_management = self.get_risk_management()
+        if not risk_management or not risk_management.stop_loss:
+            return None
+        stop_loss = risk_management.stop_loss
+        if stop_loss.type == StopLossType.POINTS:
+            return price - stop_loss.value
+        elif stop_loss.type == StopLossType.PERCENTAGE:
+            return price * (1 - stop_loss.value / 100)
+        else:
+            return None
 
 
 
