@@ -15,8 +15,8 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const AlgoApp());
-    expect(find.text('Sattva'), findsWidgets); // AppBar and NavigationRail
-    expect(find.text('Welcome to Sattva Home!'), findsOneWidget);
+    expect(find.text('Sutram'), findsWidgets); // AppBar and NavigationRail
+    expect(find.text('Welcome to Sutram Home!'), findsOneWidget);
   });
 
   testWidgets('NavigationRail toggles and navigates (desktop)', (
@@ -35,7 +35,7 @@ void main() {
     await tester.tap(find.text('My Strategies'));
     await tester.pump();
     expect(find.text('My Strategies'), findsWidgets);
-    expect(find.text('Welcome to Sattva Home!'), findsNothing);
+    expect(find.text('Welcome to Sutram Home!'), findsNothing);
     // Reset window size
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);

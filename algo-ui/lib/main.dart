@@ -11,7 +11,7 @@ class AlgoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sattva',
+      title: 'Sutram',
       theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.dark(
           primary: Colors.deepPurple,
@@ -41,7 +41,7 @@ class _AlgoHomeState extends State<AlgoHome> {
       case 0:
         return const Center(
           child: Text(
-            'Welcome to Sattva Home!',
+            'Welcome to Sutram Home!',
             style: TextStyle(fontSize: 24),
           ),
         );
@@ -83,7 +83,7 @@ class _AlgoHomeState extends State<AlgoHome> {
                         const SizedBox(height: 8),
                         if (_isRailExtended)
                           const Text(
-                            'Sattva',
+                            'Sutram',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -123,7 +123,7 @@ class _AlgoHomeState extends State<AlgoHome> {
                 ? _getContent(_selectedIndex)
                 : Scaffold(
                     appBar: AppBar(
-                      title: const Text('Sattva'),
+                      title: const Text('Sutram'),
                       backgroundColor: Colors.grey[900],
                     ),
                     drawer: Drawer(
@@ -141,7 +141,7 @@ class _AlgoHomeState extends State<AlgoHome> {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Sattva',
+                            'Sutram',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
