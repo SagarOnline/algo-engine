@@ -62,14 +62,47 @@ resource "oci_core_network_security_group_security_rule" "vm_nsg_ssh" {
   }
 }
 
+resource "oci_core_network_security_group_security_rule" "alb_vm_8008" {
+  network_security_group_id = oci_core_network_security_group.vm_nsg.id
+  direction                 = "INGRESS"
+  protocol                  = "6" # TCP
+  source                    = oci_core_network_security_group.alb_nsg.id
+  source_type               = "NETWORK_SECURITY_GROUP"
+  tcp_options {
+    destination_port_range {
+      min = 8008
+      max = 8008
+    }
+  }
+}
+
+resource "oci_core_network_security_group_security_rule" "alb_vm_443" {
+  network_security_group_id = oci_core_network_security_group.vm_nsg.id
+  direction                 = "INGRESS"
+  protocol                  = "6" # TCP
+  source                    = oci_core_network_security_group.alb_nsg.id
+  source_type               = "NETWORK_SECURITY_GROUP"
+  tcp_options {
+    destination_port_range {
+      min = 443
+      max = 443
+    }
+  }
+}
+
 # Run shell script on algo_vm after creation
 
 # Wait for SSH to be available on the VM
 resource "null_resource" "wait_for_ssh" {
   depends_on = [oci_core_instance.algo_vm]
+
+  triggers = {
+    instance_id = oci_core_instance.algo_vm.id
+  }
+
   provisioner "local-exec" {
     command = <<EOT
-      for i in {1..30}; do
+      for i in {1..60}; do
         nc -zv ${oci_core_instance.algo_vm.public_ip} 22 && exit 0
         sleep 10
       done
