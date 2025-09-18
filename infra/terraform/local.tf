@@ -20,6 +20,8 @@ locals {
     git_repository = "SagarOnline/algo-engine"
     api_port       = 5000
     ui_port        = 8008
+    domain_name    = "sutram.duckdns.org"
+    admin_email    = "chopade.sagar@gmail.com"
   }
 
 }

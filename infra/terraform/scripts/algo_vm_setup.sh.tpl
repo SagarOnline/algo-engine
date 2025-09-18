@@ -230,24 +230,81 @@ copy_algo_ui() {
     
 }
 
-configure_algo_ui() {
+configure_nginx_http() {
     CONF_FILE="/etc/nginx/conf.d/algo-ui.conf"
 
-    sudo cp  /tmp/algo-ui.conf $CONF_FILE
-    sudo dos2unix $CONF_FILE
-    sudo nginx -t
-    sudo systemctl restart nginx
-    echo "✅ Nginx configuration reloaded."
+    echo "🔧 Updating Nginx configuration: $CONF_FILE"
+    sudo cp /tmp/algo-ui.conf "$CONF_FILE"
+    sudo dos2unix "$CONF_FILE"
+    if sudo nginx -t; then
+        sudo systemctl restart nginx
+        echo "✅ Nginx configuration reloaded."
+    else
+        echo "❌ Nginx configuration test failed. Not restarting."
+        return 1
+    fi
+}
+
+configure_nginx_https() {
+    CONF_FILE="/etc/nginx/conf.d/algo-ui.conf"
+
+    echo "🔧 Updating Nginx configuration: $CONF_FILE"
+    sudo cp /tmp/algo-ui.ssl.conf "$CONF_FILE"
+    sudo dos2unix "$CONF_FILE"
+    if sudo nginx -t; then
+        sudo systemctl restart nginx
+        echo "✅ Nginx configuration reloaded."
+    else
+        echo "❌ Nginx configuration test failed. Not restarting."
+        return 1
+    fi
+}
+
+wait_for_domain() {
+    local domain=$1
+    echo "⏳ Waiting for domain $domain to become accessible..."
+
+    for i in {1..30}; do
+        if curl -Is "http://$domain" >/dev/null 2>&1; then
+            echo "✅ Domain $domain is accessible."
+            return 0
+        fi
+        echo "Retry $i: Domain not accessible yet. Waiting..."
+        sleep 10
+    done
+
+    echo "❌ Timeout: $domain not accessible after several attempts."
+    exit 1
+}
+
+configure_nginx() {
+    CERT_DIR="/etc/letsencrypt/live"
+
+    if [ ! -d "$CERT_DIR" ]; then
+        echo "🔧 Configuring Nginx..."
+        configure_nginx_http || return 1
+        
+        wait_for_domain ${algo_domain_name} || return 1
+        
+        echo "🔑 Requesting certificate with certbot..."
+        sudo certbot certonly --webroot -w /var/www/algo-ui -d ${algo_domain_name} -n --agree-tos --email ${admin_email}
+        configure_nginx_https || return 1
+    else
+        echo "Nginx already configured, skipping nginx configuration."
+    fi
 }
 
 
 # Function to deploy algo UI
 setup_algo_ui() {
     install_nginx
+    install_certbot
     download_github_artifact "${git_repository}" "${release_version}" "algo_ui"
     copy_algo_ui
-    configure_algo_ui
     open_firewall_port ${algo_ui_port}
+    open_firewall_port 443
+    configure_nginx
+    
 }
 
 download_github_artifact() {
@@ -288,6 +345,20 @@ download_github_artifact() {
    rm -rf $asset_name
    # Unzip asset
    unzip -o "$asset_name.zip" -d "/tmp/"
+}
+
+install_certbot() {
+    if [ ! -d "/opt/certbot/" ]; then
+        echo "🔧 Creating Python virtual environment for certbot..."
+        sudo python -m venv /opt/certbot/
+        sudo /opt/certbot/bin/pip install --upgrade pip
+        sudo /opt/certbot/bin/pip install certbot certbot-nginx
+        sudo ln -sf /opt/certbot/bin/certbot /usr/bin/certbot
+        sudo certbot --version
+    else
+        echo "✅ /opt/certbot/ already exists. Skipping installation."
+        sudo certbot --version
+    fi
 }
 
 # --- Main Script ---

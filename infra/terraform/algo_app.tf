@@ -27,12 +27,17 @@ resource "oci_core_network_security_group_security_rule" "vm_algo_ui" {
 }
 
 resource "null_resource" "algo_api_setup" {
-  depends_on = [null_resource.wait_for_ssh]
+  depends_on = [null_resource.wait_for_ssh,
+    oci_network_load_balancer_listener.algo_nlb_listener_http,
+    oci_network_load_balancer_listener.algo_nlb_listener_https
+  ]
   triggers = {
     scripts_hash = sha1(join("", [
       for f in fileset("${path.module}/scripts", "**") :
       filesha1("${path.module}/scripts/${f}")
     ]))
+    parent_trigger = null_resource.wait_for_ssh.id
+
     release_version = var.release_version
     algo_api_port   = local.algo.api_port
     algo_ui_port    = local.algo.ui_port
@@ -40,10 +45,12 @@ resource "null_resource" "algo_api_setup" {
 
   provisioner "file" {
     content = templatefile("${path.module}/scripts/algo_vm_setup.sh.tpl", {
-      git_repository  = local.algo.git_repository,
-      release_version = var.release_version
-      algo_api_port   = local.algo.api_port
-      algo_ui_port    = local.algo.ui_port
+      git_repository   = local.algo.git_repository,
+      release_version  = var.release_version
+      algo_api_port    = local.algo.api_port
+      algo_ui_port     = local.algo.ui_port
+      algo_domain_name = local.algo.domain_name
+      admin_email      = local.algo.admin_email
     })
     destination = "/tmp/algo_vm_setup.sh"
     connection {
@@ -74,6 +81,21 @@ resource "null_resource" "algo_api_setup" {
       algo_ui_port = local.algo.ui_port
     })
     destination = "/tmp/algo-ui.conf"
+    connection {
+      type        = "ssh"
+      host        = oci_core_instance.algo_vm.public_ip
+      user        = "opc"
+      private_key = file("${path.module}/${var.vm_ssh_private_key}")
+      timeout     = "2m"
+    }
+  }
+
+  provisioner "file" {
+    content = templatefile("${path.module}/scripts/algo-ui.conf.ssl.tpl", {
+      algo_ui_port     = local.algo.ui_port
+      algo_domain_name = local.algo.domain_name
+    })
+    destination = "/tmp/algo-ui.ssl.conf"
     connection {
       type        = "ssh"
       host        = oci_core_instance.algo_vm.public_ip
