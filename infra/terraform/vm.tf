@@ -103,8 +103,13 @@ resource "null_resource" "wait_for_ssh" {
   provisioner "local-exec" {
     command = <<EOT
       for i in {1..60}; do
-        nc -zv ${oci_core_instance.algo_vm.public_ip} 22 && exit 0
-        sleep 10
+        if nc -z ${oci_core_instance.algo_vm.public_ip} 22; then
+          echo "✅ SSH is available on ${oci_core_instance.algo_vm.public_ip}"
+          exit 0
+        else
+          echo "⏳ Attempt $i: SSH not ready yet..."
+          sleep 10
+        fi
       done
       echo "Timeout waiting for SSH on VM" >&2
       exit 1
