@@ -1,5 +1,5 @@
 from datetime import date
-from algo.domain.strategy import Strategy
+from algo.domain.strategy.strategy import Strategy
 from algo.domain.backtest.report import BackTestReport, BackTestReport, TradableInstrument
 from algo.domain.backtest.historical_data import HistoricalData
 class BackTest:

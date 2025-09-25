@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy import Instrument, InstrumentType, PositionAction
+from algo.domain.strategy.strategy import Instrument, InstrumentType, PositionAction
 from algo.domain.backtest.report import TradableInstrument
 
 def make_instrument():

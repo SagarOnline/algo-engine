@@ -1,6 +1,6 @@
 import pytest
 from datetime import date, datetime, timedelta
-from algo.domain.strategy import Instrument, PositionAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
+from algo.domain.strategy.strategy import Instrument, PositionAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
 from algo.domain.backtest.report import BackTestReport, PositionType, TradableInstrument, Position
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.backtest_run import BackTest

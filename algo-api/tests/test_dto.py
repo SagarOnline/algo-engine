@@ -3,7 +3,7 @@ import pytest
 from algo.application.run_backtest_usecase import TradableDTO,PositionDTO, BackTestReportDTO
 from algo.application.util import fmt_currency, fmt_datetime
 from algo.domain.backtest.report import BackTestReport, Position, PositionType, TradableInstrument
-from algo.domain.strategy import Exchange, Instrument, InstrumentType, PositionAction
+from algo.domain.strategy.strategy import Exchange, Instrument, InstrumentType, PositionAction
 
 from datetime import datetime
 

@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, date
 from algo.domain.backtest.report import BackTestReport, TradableInstrument
-from algo.domain.strategy import PositionAction
+from algo.domain.strategy.strategy import PositionAction
 
 
 class DummyInstrument:

@@ -4,7 +4,7 @@ from datetime import datetime,date
 from typing import Tuple
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo.domain.strategy import Instrument
+from algo.domain.strategy.strategy import Instrument
 from algo.domain.timeframe import Timeframe
 
 

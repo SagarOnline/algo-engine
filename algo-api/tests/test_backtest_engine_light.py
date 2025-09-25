@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy import Strategy
+from algo.domain.strategy.strategy import Strategy
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.backtest.report_repository import BacktestReportRepository
 from algo.domain.timeframe import Timeframe

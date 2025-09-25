@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, PositionAction
 from algo.domain.backtest.report import Position, PositionExitType, PositionType
 
 def make_position_long(entry_price=100.0, stop_loss=95.0):

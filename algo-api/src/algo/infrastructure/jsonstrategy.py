@@ -1,9 +1,9 @@
 import json
 from typing import Dict, Any
-from algo.domain.strategy import Instrument, PositionInstrument, Strategy
-from algo.domain.strategy import RuleSet,Condition,Expression
+from algo.domain.strategy.strategy import Instrument, PositionInstrument, Strategy
+from algo.domain.strategy.strategy import RuleSet,Condition,Expression
 from algo.domain.timeframe import Timeframe
-from algo.domain.strategy import RiskManagement, StopLoss, StopLossType
+from algo.domain.strategy.strategy import RiskManagement, StopLoss, StopLossType
 
 
 class JsonStrategy(Strategy):

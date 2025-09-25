@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
-from algo.domain.strategy import Exchange, Instrument, InstrumentType, PositionAction, Strategy
+from algo.domain.strategy.strategy import Exchange, Instrument, InstrumentType, PositionAction, Strategy
 from algo.domain.backtest.report import BackTestReport
 
 from algo.domain.backtest.backtest_run import BackTest

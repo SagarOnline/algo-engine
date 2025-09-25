@@ -1,9 +1,9 @@
 from operator import is_
-from algo.domain.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, PositionAction
 from enum import Enum
 
 from datetime import datetime, date
-from typing import List
+from typing import List, Optional
 
 
 # Transaction domain class

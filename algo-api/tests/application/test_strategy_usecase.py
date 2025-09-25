@@ -1,7 +1,7 @@
 import pytest
 from algo.application.strategy_usecases import StrategyUseCase, StrategyNotFound, StrategyDetailsDTO
 from algo.domain.strategy_repository import StrategyRepository
-from algo.domain.strategy import Exchange, Expiring, Expiry, InstrumentType, Strategy, Instrument
+from algo.domain.strategy.strategy import Exchange, Expiring, Expiry, InstrumentType, Strategy, Instrument
 
 class DummyStrategy(Strategy):
     def get_name(self): return "test_strategy"

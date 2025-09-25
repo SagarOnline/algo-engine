@@ -1,7 +1,7 @@
 import json
 import os
 from algo.domain.strategy_repository import StrategyRepository
-from algo.domain.strategy import Strategy
+from algo.domain.strategy.strategy import Strategy
 from algo.infrastructure.jsonstrategy import JsonStrategy
 from algo.config_context import get_config
 

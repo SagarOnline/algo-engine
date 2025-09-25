@@ -1,5 +1,5 @@
 import pytest
-from algo.domain.strategy import Strategy, RiskManagement, StopLoss, StopLossType
+from algo.domain.strategy.strategy import Strategy, RiskManagement, StopLoss, StopLossType
 
 class DummyStrategy(Strategy):
     def __init__(self, stop_loss_type=None, stop_loss_value=None):

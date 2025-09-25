@@ -4,7 +4,7 @@ from algo.domain.timeframe import Timeframe
 from unittest.mock import patch, MagicMock
 from datetime import date
 from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
-from algo.domain.strategy import Exchange, Instrument, InstrumentType
+from algo.domain.strategy.strategy import Exchange, Instrument, InstrumentType
 from algo.domain.timeframe import Timeframe
 from algo.domain.backtest.historical_data import HistoricalData
 
