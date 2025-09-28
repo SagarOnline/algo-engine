@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart'; // <-- added
 import 'my_strategies.dart';
+
+// GoogleSignIn instance
+final GoogleSignIn _googleSignIn = GoogleSignIn(); // <-- added
 
 void main() {
   runApp(const AlgoApp());
@@ -19,11 +23,103 @@ class AlgoApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const AlgoHome(),
+      home: const LoginPage(), // <-- changed from AlgoHome to LoginPage
       debugShowCheckedModeBanner: false,
     );
   }
 }
+
+// --- Added LoginPage for Google Sign-In ---
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _isSigningIn = false;
+  String? _error;
+
+  Future<void> _handleSignIn() async {
+    setState(() {
+      _isSigningIn = true;
+      _error = null;
+    });
+    try {
+      final account = await _googleSignIn.signIn();
+      if (account != null) {
+        // Successful sign in, navigate to AlgoHome
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AlgoHome()),
+        );
+      } else {
+        setState(() {
+          _error = "Sign in aborted by user.";
+        });
+      }
+    } catch (error) {
+      setState(() {
+        _error = "Sign in failed: $error";
+      });
+    } finally {
+      setState(() {
+        _isSigningIn = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.show_chart, color: Colors.deepPurple, size: 64),
+              const SizedBox(height: 24),
+              const Text(
+                'Welcome to Sutram',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 32),
+              _isSigningIn
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                      icon: Image.asset(
+                        'assets/images/google_logo.png',
+                        height: 24,
+                        width: 24,
+                      ),
+                      label: const Text('Sign-in with Google'),
+                      onPressed: _handleSignIn,
+                    ),
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+// --- End LoginPage ---
 
 class AlgoHome extends StatefulWidget {
   const AlgoHome({super.key});
