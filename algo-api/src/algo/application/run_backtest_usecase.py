@@ -4,6 +4,7 @@ from algo.domain.backtest.engine import BacktestEngine
 from datetime import date
 from algo.domain.strategy_repository import StrategyRepository
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
+from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.backtest.report import BackTestReport, Position, TradableInstrument
 
 class RunBacktestInput:
@@ -90,8 +91,8 @@ class BackTestReportDTO:
         }
 
 class RunBacktestUseCase:
-    def __init__(self, historical_data_repository: HistoricalDataRepository, strategy_repository: StrategyRepository):
-        self.engine = BacktestEngine(historical_data_repository)
+    def __init__(self, historical_data_repository: HistoricalDataRepository, tradable_instrument_repository: TradableInstrumentRepository, strategy_repository: StrategyRepository):
+        self.engine = BacktestEngine(historical_data_repository, tradable_instrument_repository)
         self.strategy_repository = strategy_repository
 
     def execute(self, input_data: 'RunBacktestInput') -> dict:

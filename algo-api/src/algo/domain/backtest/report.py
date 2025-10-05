@@ -199,7 +199,7 @@ class TradableInstrument:
         return triggered
 
     def __repr__(self):
-        return f"TradableInstrument_2(instrument={self.instrument}, positions={self.positions})"
+        return f"TradableInstrument(instrument={self.instrument}, positions={self.positions})"
 
 class BackTestReport:
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):

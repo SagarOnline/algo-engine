@@ -6,6 +6,7 @@ from typing import Dict, Any, List
 from algo.domain.backtest.engine import BacktestEngine
 from algo.domain.strategy.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,PositionAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
+from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
 
 @pytest.fixture
@@ -45,11 +46,25 @@ def mock_historical_data_repository():
     repo.get_historical_data.return_value = HistoricalData([])
     return repo
 
+@pytest.fixture
+def mock_tradable_instrument_repository():
+    from algo.domain.backtest.report import TradableInstrument
+    repo = Mock(spec=TradableInstrumentRepository)
+    
+    # Create a real TradableInstrument using the same instrument from mock_strategy
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    real_tradable_instrument = TradableInstrument(instrument)
+    
+    # Mock the repository to return the saved instrument
+    repo.get_tradable_instruments.return_value = [real_tradable_instrument]
+    
+    return repo
+
 
 
 @pytest.fixture
-def backtest_engine(mock_historical_data_repository):
-    return BacktestEngine(mock_historical_data_repository)
+def backtest_engine(mock_historical_data_repository, mock_tradable_instrument_repository):
+    return BacktestEngine(mock_historical_data_repository, mock_tradable_instrument_repository)
 
 
 def generate_candle(timestamp_str: str, close_price: float) -> Dict[str, Any]:

@@ -1,43 +1,92 @@
 from datetime import date
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Strategy
-from algo.domain.backtest.report import BackTestReport, BackTestReport, TradableInstrument
-from algo.domain.backtest.historical_data import HistoricalData
+from algo.domain.backtest.report import BackTestReport, TradableInstrument
+from algo.domain.strategy.strategy_evaluator import StrategyEvaluator
+from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
+from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
+from algo.domain.timeframe import Timeframe
+
 class BackTest:
 
-    def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, start_date: date, end_date: date):
+    def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, 
+                 tradable_instrument_repository: TradableInstrumentRepository, start_date: date, end_date: date):
         self.strategy = strategy
         self.historical_data_repository = historical_data_repository
+        self.tradable_instrument_repository = tradable_instrument_repository
         self.start_date = start_date
         self.end_date = end_date
 
     def run(self) -> BackTestReport:
+        """
+        Run the backtest using StrategyEvaluator and BackTestTradeExecutor.
         
-        # tradable = TradableInstrument(self.strategy.get_instrument())
-        # position = self.strategy.get_position_instrument()
-        # for i in range(0, len(self.underlying_instrument_hd.data)):
-        #     previous_candles = self.underlying_instrument_hd.data[:i+1]
-        #     candle = self.underlying_instrument_hd.data[i]
-        #     if candle['timestamp'].date() < self.start_date:
-        #         continue
-        #     tradable.process_stop_loss(candle['close'], candle['timestamp'])
-        #     # Use hd for entry/exit logic, but use position_instrument_hd for execution
-        #     if not tradable.is_any_position_open() and self.strategy.should_enter_trade(previous_candles):
-        #         exec_candle = self.position_instrument_hd.getCandleBy(
-        #             candle['timestamp'].isoformat() if hasattr(candle['timestamp'], 'isoformat') else str(candle['timestamp'])
-        #         )
-        #         if exec_candle is None:
-        #             raise ValueError(f"No execution candle found for entry at timestamp {candle['timestamp']}")
-        #         stop_loss_price = self.strategy.calculate_stop_loss_for(exec_candle["close"])
-        #         tradable.add_position(exec_candle["timestamp"], exec_candle["close"], position.action, 1, stop_loss=stop_loss_price)
-        #         continue
-                
-        #     if tradable.is_any_position_open() and self.strategy.should_exit_trade(previous_candles):
-        #         exec_candle = self.position_instrument_hd.getCandleBy(
-        #             candle['timestamp'].isoformat() if hasattr(candle['timestamp'], 'isoformat') else str(candle['timestamp'])
-        #         )
-        #         if exec_candle is None:
-        #             raise ValueError(f"No execution candle found for exit at timestamp {candle['timestamp']}")
-        #         tradable.exit_position(exec_candle["timestamp"], exec_candle["close"], position.get_close_action(), 1)
+        Returns:
+            BackTestReport: The backtest results
+        """
+        # Create and save TradableInstrument for the strategy's PositionInstrument
+        position_instrument = self.strategy.get_position_instrument()
+        tradable_instrument = TradableInstrument(position_instrument)
+        self.tradable_instrument_repository.save_tradable_instrument(
+            self.strategy.get_name(), 
+            tradable_instrument
+        )
+        
+        # Initialize components
+        strategy_evaluator = StrategyEvaluator(
+            self.strategy, 
+            self.historical_data_repository, 
+            self.tradable_instrument_repository
+        )
+        
+        trade_executor = BackTestTradeExecutor(
+            self.tradable_instrument_repository,
+            self.historical_data_repository,
+            self.strategy.get_name()
+        )
+        
 
-        return BackTestReport(self.strategy.get_display_name(), tradable, start_date=self.start_date, end_date=self.end_date)
+        
+        # Get historical data for the underlying instrument over the entire backtest period
+        underlying_instrument = self.strategy.get_instrument()
+        timeframe = Timeframe(self.strategy.get_timeframe())
+        
+        # Get extended historical data to ensure strategy has enough history for evaluation
+        extended_start_date = self.strategy.get_required_history_start_date(self.start_date)
+        historical_data = self.historical_data_repository.get_historical_data(
+            underlying_instrument, 
+            extended_start_date, 
+            self.end_date, 
+            timeframe
+        )
+        
+        # Process each candle in the historical data
+        for i, candle in enumerate(historical_data.data):
+            candle_date = candle['timestamp'].date()
+            
+            # Skip candles before the backtest start date
+            if candle_date < self.start_date:
+                continue
+                
+            # Skip candles after the backtest end date
+            if candle_date > self.end_date:
+                break
+                
+            # Evaluate strategy to generate trade signals
+            trade_signal = strategy_evaluator.evaluate(candle)
+            
+            # Execute trade signal if generated
+            if trade_signal is not None:
+                trade_executor.execute(trade_signal)
+        
+        # Get the final state of the tradable instrument (it should exist since we created it at the start)
+        tradables = self.tradable_instrument_repository.get_tradable_instruments(self.strategy.get_name())
+        tradable = tradables[0]  # We know it exists since we created it at the beginning
+
+        # Create and return the backtest report
+        return BackTestReport(
+            self.strategy.get_display_name(), 
+            tradable, 
+            start_date=self.start_date, 
+            end_date=self.end_date
+        )

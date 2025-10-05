@@ -1,6 +1,7 @@
 from algo.application.run_backtest_usecase import RunBacktestUseCase
 from algo.config_context import get_config
 from algo.domain.config import HistoricalDataBackend
+from algo.infrastructure.cached_upstox_historical_data_repository import CachedUpstoxHistoricalDataRepository
 from algo.infrastructure.json_strategy_repository import JsonStrategyRepository
 from algo.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
 from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
@@ -14,7 +15,7 @@ backtest_bp = Blueprint('backtest', __name__)
 def get_historical_data_repository():
     config = get_config()
     if config.backtest_engine.historical_data_backend == HistoricalDataBackend.UPSTOX_API:
-        historical_data_repository = UpstoxHistoricalDataRepository()
+        historical_data_repository = CachedUpstoxHistoricalDataRepository(UpstoxHistoricalDataRepository())
     else:
          historical_data_repository = ParquetHistoricalDataRepository(config.backtest_engine.parquet_files_base_dir)
     return historical_data_repository
