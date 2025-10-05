@@ -47,7 +47,7 @@ def main():
 
         # Initialize and run backtest engine
         engine = BacktestEngine(historical_data_repository, tradable_instrument_repository)
-        start_date = "2025-08-12"
+        start_date = "2025-08-01"
         end_date = "2025-08-13"
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()

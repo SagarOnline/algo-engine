@@ -67,8 +67,8 @@ def backtest_engine(mock_historical_data_repository, mock_tradable_instrument_re
     return BacktestEngine(mock_historical_data_repository, mock_tradable_instrument_repository)
 
 
-def generate_candle(timestamp_str: str, close_price: float) -> Dict[str, Any]:
-    return {"timestamp": datetime.fromisoformat(timestamp_str), "close": close_price}
+def generate_candle(timestamp_str: str, open_price: float, close_price: float) -> Dict[str, Any]:
+    return {"timestamp": datetime.fromisoformat(timestamp_str), "open": open_price, "close": close_price}
 
 
 
@@ -88,25 +88,25 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     
     from algo.domain.backtest.historical_data import HistoricalData
     historical_data = [
-        generate_candle("2023-01-01T09:15:00", 100),
-        generate_candle("2023-01-02T09:15:00", 110), # Entry signal
-        generate_candle("2023-01-03T09:15:00", 120),
-        generate_candle("2023-01-04T09:15:00", 105), # Exit signal
-        generate_candle("2023-01-05T09:15:00", 115),
+        generate_candle("2023-01-01T09:15:00", 100, 100),
+        generate_candle("2023-01-02T09:15:00", 105, 110), # Entry signal
+        generate_candle("2023-01-03T09:15:00", 110, 120), # Entry executed at open=110
+        generate_candle("2023-01-04T09:15:00", 120, 105), # Exit signal  
+        generate_candle("2023-01-05T09:15:00", 105, 115), # Exit executed at open=105
     ]
     mock_historical_data_repository.get_historical_data.return_value = HistoricalData(historical_data)
     
     # Enter on the second candle, exit on the fourth
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False, False]
-    mock_strategy.should_exit_trade.side_effect = [False, True, False]
+    mock_strategy.should_exit_trade.side_effect = [False, False, False, True, False]
     mock_strategy.calculate_stop_loss_for.return_value = None
 
     report = backtest_engine.start(mock_strategy, start_date, end_date)
     
     assert len(report.tradable.positions) == 1
     position = report.tradable.positions[0]
-    assert position.entry_price() == 110
-    assert position.exit_price() == 105
+    assert position.entry_price() == 110  # Open of next candle after entry signal
+    assert position.exit_price() == 105   # Open of next candle after exit signal
     assert report.total_pnl() == -5
 
 
@@ -117,7 +117,7 @@ def test_run_respects_start_date():
     from algo.infrastructure.in_memory_tradable_instrument_repository import InMemoryTradableInstrumentRepository
     
     start_date = date(2023, 1, 3)
-    end_date = date(2023, 1, 5)
+    end_date = date(2023, 1, 5)  # Extended to include exit execution
     
     # Create real strategy with required methods
     strategy = Mock(spec=Strategy)
@@ -135,8 +135,8 @@ def test_run_respects_start_date():
     strategy.get_position_instrument.return_value = position
     
     # Trading signal behavior
-    strategy.should_enter_trade.side_effect = [True, False]  # Corresponds to 3rd and 4th candle
-    strategy.should_exit_trade.side_effect = [True]
+    strategy.should_enter_trade.side_effect = [True, False, False]  # Entry signal on 3rd candle
+    strategy.should_exit_trade.side_effect = [False, True, False]          # Exit signal on 4th candle
     strategy.calculate_stop_loss_for.return_value = None
     
     # Create real historical data repository
@@ -148,10 +148,11 @@ def test_run_respects_start_date():
             return HistoricalData(self.test_data)
     
     historical_data = [
-        generate_candle("2023-01-01T09:15:00", 100), # Should be ignored for trading
-        generate_candle("2023-01-02T09:15:00", 110), # Should be ignored for trading
-        generate_candle("2023-01-03T09:15:00", 120), # Entry signal
-        generate_candle("2023-01-04T09:15:00", 130), # Exit signal
+        generate_candle("2023-01-01T09:15:00", 100, 100), # Should be ignored for trading
+        generate_candle("2023-01-02T09:15:00", 110, 110), # Should be ignored for trading  
+        generate_candle("2023-01-03T09:15:00", 120, 120), # Entry signal
+        generate_candle("2023-01-04T09:15:00", 120, 130), # Entry executed at open=120, Exit signal
+        generate_candle("2023-01-05T09:15:00", 130, 135), # Exit executed at open=130
     ]
     
     # Use real repositories
@@ -170,12 +171,12 @@ def test_run_respects_start_date():
     # Get the position and verify trade execution details
     position = report.tradable.positions[0]
     
-    # Verify entry details - should enter on 2023-01-03 at price 120
-    assert position.entry_time().date() == date(2023, 1, 3)
+    # Verify entry details - should enter on 2023-01-04 at open price 120 (next day after entry signal on 2023-01-03)
+    assert position.entry_time().date() == date(2023, 1, 4)
     assert position.entry_price() == 120
     
-    # Verify exit details - should exit on 2023-01-04 at price 130
-    assert position.exit_time().date() == date(2023, 1, 4)
+    # Verify exit details - should exit on 2023-01-05 at open price 130 (next day after exit signal on 2023-01-04)  
+    assert position.exit_time().date() == date(2023, 1, 5)
     assert position.exit_price() == 130
     
     # Verify PnL - should be profitable (130 - 120 = 10 points profit)

@@ -9,14 +9,15 @@ from algo.domain.timeframe import Timeframe
 
 
 class TradeSignal:
-    def __init__(self, instrument: Instrument, action: PositionAction, quantity: int, timestamp: datetime):
+    def __init__(self, instrument: Instrument, action: PositionAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe):
         self.instrument = instrument
         self.action = action
         self.quantity = quantity
         self.timestamp = timestamp
+        self.timeframe = timeframe
 
     def __repr__(self):
-        return f"TradeSignal(instrument={self.instrument}, action={self.action}, quantity={self.quantity})"
+        return f"TradeSignal(instrument={self.instrument.instrument_key}, action={self.action}, quantity={self.quantity}, timestamp={self.timestamp}, timeframe={self.timeframe})"
 
 class StrategyEvaluator:
     def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, tradable_instrument_repository: TradableInstrumentRepository):
@@ -26,18 +27,23 @@ class StrategyEvaluator:
 
     def evaluate(self, candle: Dict[str, Any]) -> Optional[TradeSignal]:
         historical_data = self._get_historical_data(self.strategy, candle['timestamp'].date())
+        strategy_timeframe = Timeframe(self.strategy.get_timeframe())
         tradable_instruments = self.tradable_instrument_repository.get_tradable_instruments(self.strategy.get_name())
         for tradable in tradable_instruments:
-            if not tradable.is_any_position_open() and self.strategy.should_enter_trade(historical_data.data):
+            should_enter_trade = self.strategy.should_enter_trade(historical_data.data)
+            should_exit_trade = self.strategy.should_exit_trade(historical_data.data)
+            enter = not tradable.is_any_position_open() and should_enter_trade
+            exit = tradable.is_any_position_open() and should_exit_trade
+            if enter:
                 # Return a trade signal for entering a position
                 position = self.strategy.get_position_instrument()
-                timestamp = self._get_next_candle_timestamp(candle['timestamp'], self.strategy.get_timeframe())
-                return TradeSignal(tradable.instrument, position.action, 1, timestamp)
-            if tradable.is_any_position_open() and self.strategy.should_exit_trade(historical_data.data):
+                timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
+                return TradeSignal(tradable.instrument, position.action, 1, timestamp, strategy_timeframe)
+            if exit:
                 # Return a trade signal for exiting a position
                 position = self.strategy.get_position_instrument()
-                timestamp = self._get_next_candle_timestamp(candle['timestamp'], self.strategy.get_timeframe())
-                return TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp)
+                timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
+                return TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp, strategy_timeframe)
         return None
     
     def _get_historical_data(self, strategy: Strategy, end_date: date) -> HistoricalData:

@@ -37,7 +37,8 @@ def sample_trade_signal(sample_instrument):
         instrument=sample_instrument,
         action=PositionAction.BUY,
         quantity=10,
-        timestamp=datetime(2025, 9, 17, 9, 15, 0)
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min")
     )
 
 
@@ -103,7 +104,7 @@ def test_execute_buy_signal_success(executor, sample_trade_signal, sample_tradab
     
     # Verify add_position was called with correct parameters
     sample_tradable_instrument.add_position.assert_called_once_with(
-        sample_trade_signal.timestamp, sample_candle['close'], sample_trade_signal.action, sample_trade_signal.quantity
+        sample_trade_signal.timestamp, sample_candle['open'], sample_trade_signal.action, sample_trade_signal.quantity
     )
     
     # Verify tradable instrument repository was called to save
@@ -121,7 +122,8 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
         instrument=sample_instrument,
         action=PositionAction.SELL,
         quantity=10,
-        timestamp=datetime(2025, 9, 17, 9, 15, 0)
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min")
     )
     
     # Setup mocks
@@ -136,7 +138,7 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
     
     # Verify exit_position was called
     sample_tradable_instrument.exit_position.assert_called_once_with(
-        sell_signal.timestamp, sample_candle['close'], sell_signal.action, sell_signal.quantity
+        sell_signal.timestamp, sample_candle['open'], sell_signal.action, sell_signal.quantity
     )
 
 
@@ -267,7 +269,8 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
         instrument=sample_instrument,
         action=PositionAction.BUY,  # String instead of enum
         quantity=10,
-        timestamp=datetime(2025, 9, 17, 9, 15, 0)
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min")
     )
     
     # Setup mocks

@@ -153,6 +153,7 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
     assert result.instrument == sample_tradable_instrument.instrument
     assert result.action == PositionAction.BUY
     assert result.quantity == 1
+    assert result.timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_historical_data,
@@ -174,6 +175,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     assert result.instrument == sample_tradable_instrument.instrument
     assert result.action == PositionAction.SELL
     assert result.quantity == 1
+    assert result.timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_calls_strategy_methods_correctly(evaluator, sample_candle, sample_historical_data,
@@ -308,10 +310,12 @@ def test_trade_signal_creation_with_timestamp(evaluator, sample_candle, sample_h
     # Execute
     result = evaluator.evaluate(sample_candle)
     
-    # Verify TradeSignal has timestamp
+    # Verify TradeSignal has timestamp and timeframe
     assert result is not None
     assert hasattr(result, 'timestamp')
     assert result.timestamp is not None
+    assert hasattr(result, 'timeframe')
+    assert result.timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_handles_empty_historical_data(evaluator, sample_candle, sample_tradable_instrument,

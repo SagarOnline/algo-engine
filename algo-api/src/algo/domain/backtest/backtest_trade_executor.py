@@ -17,13 +17,12 @@ class BackTestTradeExecutor(TradeExecutor):
         """Execute the given trade signal in a backtest environment."""
         tradable_instruments = self.tradable_instrument_repository.get_tradable_instruments(self.strategy_name)
         
-        # Get the candle data for the trade signal
-        timeframe = Timeframe("5min")  # Default timeframe, should be passed from strategy
+        # Get the candle data for the trade signal using the timeframe from the signal
         historical_data = self.historical_data_repository.get_historical_data(
             trade_signal.instrument, 
             trade_signal.timestamp.date(), 
             trade_signal.timestamp.date(), 
-            timeframe
+            trade_signal.timeframe
         )
         
         # Find the specific candle at the trade signal timestamp
@@ -31,7 +30,7 @@ class BackTestTradeExecutor(TradeExecutor):
         if candle is None:
             raise ValueError(f"No candle found for timestamp {trade_signal.timestamp}")
         
-        execution_price = candle['close']
+        execution_price = candle['open']
         execution_time = trade_signal.timestamp
         
         # Find the matching tradable instrument

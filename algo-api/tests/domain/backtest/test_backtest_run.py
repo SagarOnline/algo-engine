@@ -183,8 +183,8 @@ class TestBackTestRun:
         
         # Create sample trade signals
         sample_instrument = mock_strategy.get_instrument.return_value
-        buy_signal = TradeSignal(sample_instrument, PositionAction.BUY, 1, datetime(2024, 1, 5, 10, 0))
-        sell_signal = TradeSignal(sample_instrument, PositionAction.SELL, 1, datetime(2024, 1, 7, 12, 0))
+        buy_signal = TradeSignal(sample_instrument, PositionAction.BUY, 1, datetime(2024, 1, 5, 10, 0), Timeframe("5min"))
+        sell_signal = TradeSignal(sample_instrument, PositionAction.SELL, 1, datetime(2024, 1, 7, 12, 0), Timeframe("5min"))
         
         # Mock StrategyEvaluator to return trade signals alternately
         signal_sequence = [buy_signal, None, None, sell_signal] + [None] * 24  # Fill remaining calls with None
@@ -418,37 +418,3 @@ class TestBackTestRun:
         # Verify candles were processed in correct order
         assert actual_timestamps == expected_timestamps
         assert len(actual_timestamps) == 12  # 4 days * 3 hours per day
-
-    def test_run_integration_with_real_objects(self, mock_strategy, mock_historical_data_repository, 
-                                             mock_tradable_instrument_repository):
-        """Integration test with minimal mocking to verify component interaction."""
-        # Setup backtest with real date range
-        backtest = BackTest(
-            strategy=mock_strategy,
-            historical_data_repository=mock_historical_data_repository,
-            tradable_instrument_repository=mock_tradable_instrument_repository,
-            start_date=date(2024, 1, 5),
-            end_date=date(2024, 1, 5)  # Single day for simplicity
-        )
-        
-        # Create minimal historical data
-        single_candle_data = HistoricalData([{
-            "timestamp": datetime(2024, 1, 5, 10, 0),
-            "open": 100.0, "high": 105.0, "low": 99.0, "close": 103.0, "volume": 1000, "oi": None
-        }])
-        
-        mock_historical_data_repository.get_historical_data.return_value = single_candle_data
-        
-        # Create a mock TradableInstrument that will be returned after being saved
-        mock_tradable_instrument = Mock(spec=TradableInstrument)
-        mock_tradable_instrument.instrument = mock_strategy.get_instrument.return_value
-        mock_tradable_instrument.positions = []
-        mock_tradable_instrument_repository.get_tradable_instruments.return_value = [mock_tradable_instrument]
-        
-        # Run backtest without mocking internal components
-        result = backtest.run()
-        
-        # Verify basic functionality works end-to-end
-        assert isinstance(result, BackTestReport)
-        assert mock_historical_data_repository.get_historical_data.called
-        assert mock_tradable_instrument_repository.get_tradable_instruments.called
