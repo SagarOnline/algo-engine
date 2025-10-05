@@ -80,10 +80,26 @@ class BacktestSummaryWidget extends StatelessWidget {
                     'Winning / Losing Streak',
                     '$winningStreak / $losingStreak',
                   ),
-                  _summaryItem('Max Gain (pts)', maxGain),
-                  _summaryItem('Max Loss (pts)', maxLoss),
-                  _summaryItem('Total PnL (pts)', totalPnLPoints),
-                  _summaryItem('Total PnL (%)', totalPnLPercentage),
+                  _summaryItem(
+                    'Max Gain (pts)',
+                    maxGain,
+                    _getColorForValue(maxGain),
+                  ),
+                  _summaryItem(
+                    'Max Loss (pts)',
+                    maxLoss,
+                    _getColorForValue(maxLoss),
+                  ),
+                  _summaryItem(
+                    'Total PnL (pts)',
+                    totalPnLPoints,
+                    _getColorForValue(totalPnLPoints),
+                  ),
+                  _summaryItem(
+                    'Total PnL (%)',
+                    totalPnLPercentage?.toString() ?? '0',
+                    _getColorForValue(totalPnLPercentage?.toString() ?? '0'),
+                  ),
                 ],
               ),
             ],
@@ -93,7 +109,7 @@ class BacktestSummaryWidget extends StatelessWidget {
     );
   }
 
-  Widget _summaryItem(String label, String value) {
+  Widget _summaryItem(String label, String value, [Color? valueColor]) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,8 +122,29 @@ class BacktestSummaryWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 15)),
+        Text(
+          value,
+          style: TextStyle(color: valueColor ?? Colors.white, fontSize: 15),
+        ),
       ],
     );
+  }
+
+  Color _getColorForValue(String value) {
+    // Remove any formatting characters and parse the numeric value
+    String cleanValue = value.replaceAll(RegExp(r'[^\d.-]'), '');
+    double? numValue = double.tryParse(cleanValue);
+
+    if (numValue == null) {
+      return Colors.white; // Default color if parsing fails
+    }
+
+    if (numValue < 0) {
+      return Colors.red;
+    } else if (numValue > 0) {
+      return Colors.green;
+    } else {
+      return Colors.white; // Neutral color for zero
+    }
   }
 }

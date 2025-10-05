@@ -1,7 +1,7 @@
 from datetime import date
 import pytest
 from algo.application.run_backtest_usecase import TradableDTO,PositionDTO, BackTestReportDTO
-from algo.application.util import fmt_currency, fmt_datetime
+from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.report import BackTestReport, Position, PositionType, TradableInstrument
 from algo.domain.strategy.strategy import Exchange, Instrument, InstrumentType, PositionAction
 
@@ -23,12 +23,12 @@ def mock_backtest_report(mock_tradable):
 def test_position_dto(mock_tradable):
     dto = PositionDTO(mock_tradable.positions[0])
     d = dto.to_dict()
-    assert d['entry_price'] == 100.0
+    assert d['entry_price'] == fmt_currency(100.0)
     assert d['entry_time'] == fmt_datetime(datetime(2025, 9, 12, 9, 15, 0))
-    assert d['exit_price'] == 110.0
+    assert d['exit_price'] == fmt_currency(110.0)
     assert d['exit_time'] == fmt_datetime(datetime(2025, 9, 12, 15, 30, 0))
-    assert d['profit'] == 100.0
-    assert d['profit_percentage'] == 10.0
+    assert d['profit'] == fmt_currency(100.0)
+    assert d['profit_percentage'] == fmt_percent(0.1)
     assert d['profit_points'] == 10.0
     assert d['quantity'] == 10
 
@@ -53,4 +53,4 @@ def test_backtest_report_dto(mock_backtest_report):
     assert summary['max_gain'] == fmt_currency(100.0)
     assert d['tradable']['instrument']['instrument_key'] == 'NSE_INE869I01013'
     assert len(d['tradable']['positions']) == 1
-    assert d['tradable']['positions'][0]['entry_price'] == 100.0
+    assert d['tradable']['positions'][0]['entry_price'] == fmt_currency(100.0)
