@@ -16,16 +16,26 @@ def client(app):
 def test_run_backtest_success(client):
     mock_report = {'result': 'success'}
     with patch('algo.infrastructure.api.backtest_controller.RunBacktestUseCase') as MockUseCase:
-        instance = MockUseCase.return_value
-        instance.execute.return_value = mock_report
-        payload = {
-            'strategy_name': 'test_strategy',
-            'start_date': '2023-01-01',
-            'end_date': '2023-01-31'
-        }
-        response = client.post('/api/backtest', data=json.dumps(payload), content_type='application/json')
-        assert response.status_code == 200
-        assert response.get_json() == mock_report
+        with patch('algo.infrastructure.api.backtest_controller.get_historical_data_repository') as mock_hist_repo:
+            with patch('algo.infrastructure.api.backtest_controller.get_tradable_instrument_repository') as mock_tradable_repo:
+                with patch('algo.infrastructure.api.backtest_controller.get_strategy_repository') as mock_strategy_repo:
+                    instance = MockUseCase.return_value
+                    instance.execute.return_value = mock_report
+                    payload = {
+                        'strategy_name': 'test_strategy',
+                        'start_date': '2023-01-01',
+                        'end_date': '2023-01-31'
+                    }
+                    response = client.post('/api/backtest', data=json.dumps(payload), content_type='application/json')
+                    
+                    # Verify the constructor was called with all three repositories
+                    MockUseCase.assert_called_once_with(
+                        mock_hist_repo.return_value,
+                        mock_tradable_repo.return_value,
+                        mock_strategy_repo.return_value
+                    )
+                    assert response.status_code == 200
+                    assert response.get_json() == mock_report
 
 def test_run_backtest_invalid_json(client):
     response = client.post('/api/backtest', data='not a json', content_type='application/json')

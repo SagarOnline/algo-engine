@@ -5,6 +5,7 @@ from algo.infrastructure.cached_upstox_historical_data_repository import CachedU
 from algo.infrastructure.json_strategy_repository import JsonStrategyRepository
 from algo.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
 from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
+from algo.infrastructure.in_memory_tradable_instrument_repository import InMemoryTradableInstrumentRepository
 from flask import Blueprint, request, jsonify
 
 from algo.application.run_backtest_usecase import RunBacktestInput
@@ -23,6 +24,9 @@ def get_historical_data_repository():
 def get_strategy_repository():
     return JsonStrategyRepository()
 
+def get_tradable_instrument_repository():
+    return InMemoryTradableInstrumentRepository()
+
 @backtest_bp.route('/api/backtest', methods=['POST'])
 def run_backtest():
     try:
@@ -34,6 +38,7 @@ def run_backtest():
 
         use_case = RunBacktestUseCase(
             get_historical_data_repository(),
+            get_tradable_instrument_repository(),
             get_strategy_repository()
         )
         input_data = RunBacktestInput(
