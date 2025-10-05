@@ -26,12 +26,12 @@ class TradableDTO:
 
 class PositionDTO:
     def __init__(self, position: Position):
-        self.entry_price =  position.entry_price()
-        self.entry_time = fmt_datetime(position.entry_time())
-        self.exit_price = position.exit_price() if position.exit_price() is not None else ""
+        self.entry_price =  fmt_currency(position.entry_price()) if position.entry_price() is not None else ""
+        self.entry_time = fmt_datetime(position.entry_time()) if position.entry_time() is not None else ""
+        self.exit_price = fmt_currency(position.exit_price()) if position.exit_price() is not None else ""
         self.exit_time = fmt_datetime(position.exit_time()) if position.exit_time() is not None else ""
-        self.profit = position.pnl()
-        self.profit_percentage = position.pnl_percentage()
+        self.profit = fmt_currency(position.pnl()) if position.pnl() is not None else ""
+        self.profit_percentage = fmt_percent(position.pnl_percentage())
         self.profit_points = position.pnl_points()
         self.quantity = position.quantity
         self.exit_type = position.exit_type if hasattr(position, 'exit_type') else None

@@ -76,7 +76,7 @@ class Position:
         if self.is_open():
             return 0.0
         entry_txn = self.transactions[0]
-        return (self.pnl_points() / entry_txn.price) * 100  
+        return (self.pnl_points() / entry_txn.price) 
 
     def pnl_points(self) -> float:
         if self.is_open():

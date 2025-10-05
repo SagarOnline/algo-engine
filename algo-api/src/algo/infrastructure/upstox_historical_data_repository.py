@@ -2,6 +2,8 @@ import datetime
 import os
 from datetime import datetime, date, timedelta
 from typing import Tuple, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Instrument
@@ -108,6 +110,32 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
         ]
         return data
     
+    def _fetch_segment_with_metadata(self, args: Tuple[Instrument, date, date, Timeframe]) -> Tuple[date, List[dict]]:
+        """Wrapper for _fetch_historical_data_segment that returns metadata for sorting."""
+        instrument, start_date, end_date, timeframe = args
+        data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
+        return (start_date, data)
+    
+    def _fetch_segment_with_retry(self, args: Tuple[Instrument, date, date, Timeframe], max_retries: int = 3) -> Tuple[date, List[dict]]:
+        """Fetch segment data with retry logic for failed attempts."""
+        instrument, start_date, end_date, timeframe = args
+        last_exception = None
+        
+        for attempt in range(max_retries):
+            try:
+                data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
+                return (start_date, data)
+            except Exception as exc:
+                last_exception = exc
+                if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                    # Exponential backoff: wait 1s, 2s, 4s between retries
+                    wait_time = 2 ** attempt
+                    time.sleep(wait_time)
+                    continue
+        
+        # If we reach here, all retries failed
+        raise RuntimeError(f"Failed to fetch segment {start_date} to {end_date} after {max_retries} attempts. Last error: {last_exception}")
+    
     
     def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> HistoricalData:
         try:
@@ -122,15 +150,56 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
                 data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
                 return HistoricalData(data)
             else:
-                # Split into multiple segments and merge results
+                # Split into multiple segments and make parallel API calls
                 segments = self._split_date_range(start_date, end_date, max_days)
-                all_data = []
                 
-                for segment_start, segment_end in segments:
-                    segment_data = self._fetch_historical_data_segment(instrument, segment_start, segment_end, timeframe)
+                # Prepare arguments for parallel execution
+                segment_args = [(instrument, segment_start, segment_end, timeframe) 
+                               for segment_start, segment_end in segments]
+                
+                # Execute API calls in parallel with retry logic
+                all_segment_data = []
+                failed_segments = []
+                
+                with ThreadPoolExecutor(max_workers=min(len(segments), 5)) as executor:
+                    # Submit all tasks
+                    future_to_segment = {
+                        executor.submit(self._fetch_segment_with_retry, args): args 
+                        for args in segment_args
+                    }
+                    
+                    # Collect results as they complete
+                    for future in as_completed(future_to_segment):
+                        args = future_to_segment[future]
+                        segment_start, segment_end = args[1], args[2]
+                        
+                        try:
+                            start_date_segment, segment_data = future.result()
+                            all_segment_data.append((start_date_segment, segment_data))
+                        except Exception as exc:
+                            failed_segments.append({
+                                'start_date': segment_start,
+                                'end_date': segment_end,
+                                'error': str(exc)
+                            })
+                
+                # Check if any segments failed
+                if failed_segments:
+                    error_details = "; ".join([
+                        f"Segment {seg['start_date']} to {seg['end_date']}: {seg['error']}" 
+                        for seg in failed_segments
+                    ])
+                    raise RuntimeError(f"Failed to fetch {len(failed_segments)} out of {len(segments)} segments. Details: {error_details}")
+                
+                # Sort segments by start date to ensure chronological order
+                all_segment_data.sort(key=lambda x: x[0])
+                
+                # Flatten all data and sort by timestamp
+                all_data = []
+                for _, segment_data in all_segment_data:
                     all_data.extend(segment_data)
                 
-                # Sort by timestamp to ensure chronological order
+                # Sort by timestamp to ensure chronological order within segments
                 all_data.sort(key=lambda x: x["timestamp"])
                 
                 return HistoricalData(all_data)

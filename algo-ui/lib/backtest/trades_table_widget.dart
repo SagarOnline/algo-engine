@@ -145,23 +145,24 @@ class PositionsTableWidget extends StatelessWidget {
                         ),
                         DataCell(
                           Text(
-                            position['profit'].toStringAsFixed(2),
+                            position['profit'],
                             style: TextStyle(
-                              color: position['profit'] >= 0
-                                  ? Colors.green
-                                  : Colors.red,
+                              color: position['profit'].toString().contains('-')
+                                  ? Colors.red
+                                  : Colors.green,
                             ),
                           ),
                         ),
                         DataCell(
                           Text(
-                            (position['profit_percentage'] * 100)
-                                    .toStringAsFixed(2) +
-                                '%',
+                            (position['profit_percentage']),
                             style: TextStyle(
-                              color: position['profit_percentage'] >= 0
-                                  ? Colors.green
-                                  : Colors.red,
+                              color:
+                                  position['profit_percentage']
+                                      .toString()
+                                      .contains('-')
+                                  ? Colors.red
+                                  : Colors.green,
                             ),
                           ),
                         ),
