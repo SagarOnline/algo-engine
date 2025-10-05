@@ -26,7 +26,7 @@ class BackTest:
         """
         # Create and save TradableInstrument for the strategy's PositionInstrument
         position_instrument = self.strategy.get_position_instrument()
-        tradable_instrument = TradableInstrument(position_instrument)
+        tradable_instrument = TradableInstrument(position_instrument.instrument)
         self.tradable_instrument_repository.save_tradable_instrument(
             self.strategy.get_name(), 
             tradable_instrument
