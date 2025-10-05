@@ -1,9 +1,9 @@
 from operator import is_
-from algo.domain.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, PositionAction
 from enum import Enum
 
 from datetime import datetime, date
-from typing import List
+from typing import List, Optional
 
 
 # Transaction domain class
@@ -76,7 +76,7 @@ class Position:
         if self.is_open():
             return 0.0
         entry_txn = self.transactions[0]
-        return (self.pnl_points() / entry_txn.price) * 100  
+        return (self.pnl_points() / entry_txn.price) 
 
     def pnl_points(self) -> float:
         if self.is_open():
@@ -199,7 +199,7 @@ class TradableInstrument:
         return triggered
 
     def __repr__(self):
-        return f"TradableInstrument_2(instrument={self.instrument}, positions={self.positions})"
+        return f"TradableInstrument(instrument={self.instrument}, positions={self.positions})"
 
 class BackTestReport:
     def __init__(self, strategy_name: str, tradable: TradableInstrument, start_date: date, end_date: date):

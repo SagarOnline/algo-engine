@@ -1,6 +1,6 @@
 {
   "backtest_engine": {
-    "historical_data_backend": "PARQUET_FILES",
+    "historical_data_backend": "UPSTOX_API",
     "reports_dir": "./reports/",
     "parquet_files_base_dir": "./historical-data/",
     "strategy_json_config_dir": "./strategies/"

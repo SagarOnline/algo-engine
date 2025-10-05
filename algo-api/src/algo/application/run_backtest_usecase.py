@@ -4,6 +4,7 @@ from algo.domain.backtest.engine import BacktestEngine
 from datetime import date
 from algo.domain.strategy_repository import StrategyRepository
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
+from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.backtest.report import BackTestReport, Position, TradableInstrument
 
 class RunBacktestInput:
@@ -25,12 +26,12 @@ class TradableDTO:
 
 class PositionDTO:
     def __init__(self, position: Position):
-        self.entry_price =  position.entry_price()
-        self.entry_time = fmt_datetime(position.entry_time())
-        self.exit_price = position.exit_price() if position.exit_price() is not None else ""
+        self.entry_price =  fmt_currency(position.entry_price()) if position.entry_price() is not None else ""
+        self.entry_time = fmt_datetime(position.entry_time()) if position.entry_time() is not None else ""
+        self.exit_price = fmt_currency(position.exit_price()) if position.exit_price() is not None else ""
         self.exit_time = fmt_datetime(position.exit_time()) if position.exit_time() is not None else ""
-        self.profit = position.pnl()
-        self.profit_percentage = position.pnl_percentage()
+        self.profit = fmt_currency(position.pnl()) if position.pnl() is not None else ""
+        self.profit_percentage = fmt_percent(position.pnl_percentage())
         self.profit_points = position.pnl_points()
         self.quantity = position.quantity
         self.exit_type = position.exit_type if hasattr(position, 'exit_type') else None
@@ -90,8 +91,8 @@ class BackTestReportDTO:
         }
 
 class RunBacktestUseCase:
-    def __init__(self, historical_data_repository: HistoricalDataRepository, strategy_repository: StrategyRepository):
-        self.engine = BacktestEngine(historical_data_repository)
+    def __init__(self, historical_data_repository: HistoricalDataRepository, tradable_instrument_repository: TradableInstrumentRepository, strategy_repository: StrategyRepository):
+        self.engine = BacktestEngine(historical_data_repository, tradable_instrument_repository)
         self.strategy_repository = strategy_repository
 
     def execute(self, input_data: 'RunBacktestInput') -> dict:

@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy import Instrument, PositionAction
+from algo.application.util import fmt_currency
+from algo.domain.strategy.strategy import Instrument, PositionAction
 from algo.domain.backtest.report import Position, PositionType
 from algo.application.run_backtest_usecase import PositionDTO
 
@@ -26,7 +27,7 @@ def test_positiondto_all_fields_present():
     exit_time = datetime(2025, 9, 17, 15, 30)
     pos = make_position(entry_price=100.0, entry_time=entry_time, exit_price=110.0, exit_time=exit_time)
     dto = PositionDTO(pos)
-    assert dto.entry_price == 100.0
-    assert dto.exit_price == 110.0
+    assert dto.entry_price == fmt_currency(100.0)
+    assert dto.exit_price == fmt_currency(110.0)
     assert dto.entry_time != ""
     assert dto.exit_time != ""

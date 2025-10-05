@@ -1,6 +1,6 @@
 from typing import List
 from algo.domain.strategy_repository import StrategyRepository
-from algo.domain.strategy import Instrument, PositionInstrument, Strategy
+from algo.domain.strategy.strategy import Instrument, PositionInstrument, Strategy
 
 
 class InstrumentDTO:

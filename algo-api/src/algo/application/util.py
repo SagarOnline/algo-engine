@@ -29,7 +29,7 @@ def fmt_percent(value, locale='en_IN'):
         str: The formatted percentage string.
     """
     from babel.numbers import format_percent
-    return format_percent(value, locale=locale)
+    return format_percent(value, format='#,##0.00%', locale=locale)
 
 def fmt_datetime(dt: datetime, fmt: str = "EEE, dd MMM yyyy HH:mm") -> str:
     """

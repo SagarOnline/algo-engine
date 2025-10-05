@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
-from algo.domain.strategy import Strategy
+from algo.domain.strategy.strategy import Strategy
 
-import os
-import json
-from algo.domain.strategy import Strategy
 
 class StrategyRepository(ABC):
     @abstractmethod

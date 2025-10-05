@@ -19,16 +19,11 @@
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,
-      "instrument_key": "NSE_FO|64103",
+      "instrument_key": "NSE_INDEX|Nifty 50",
       "exchange": "NSE"
     }
   },
-  "risk_management": {
-    "stop_loss": {
-      "type": "POINTS",
-      "value": 10
-    }
-  },
+  
   "entry_rules": {
     "logic": "AND",
     "conditions": [

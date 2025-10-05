@@ -10,17 +10,22 @@ def mock_historical_data_repository():
     return MagicMock()
 
 @pytest.fixture
+def mock_tradable_instrument_repository():
+    return MagicMock()
+
+@pytest.fixture
 def mock_strategy_repository():
     return MagicMock()
 
 @pytest.fixture
-def usecase(mock_historical_data_repository, mock_strategy_repository):
+def usecase(mock_historical_data_repository, mock_tradable_instrument_repository, mock_strategy_repository):
     return RunBacktestUseCase(
         historical_data_repository=mock_historical_data_repository,
+        tradable_instrument_repository=mock_tradable_instrument_repository,
         strategy_repository=mock_strategy_repository
     )
 
-def test_execute_success(usecase, mock_strategy_repository, mock_historical_data_repository):
+def test_execute_success(usecase, mock_strategy_repository, mock_historical_data_repository, mock_tradable_instrument_repository):
     strategy_name = "test_strategy"
     payload = {
         "strategy_name": strategy_name

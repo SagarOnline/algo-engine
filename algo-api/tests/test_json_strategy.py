@@ -1,6 +1,8 @@
 import pytest
 from algo.infrastructure.jsonstrategy import JsonStrategy
-from algo.domain.strategy import (
+import pytest
+import json
+from algo.domain.strategy.strategy import (
     RuleSet,
     Condition,
     Expression,
