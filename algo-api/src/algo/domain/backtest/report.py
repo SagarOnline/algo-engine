@@ -176,12 +176,12 @@ class TradableInstrument:
 
     # Maximum Gain achieved in a trade
     def max_gain(self) -> float:
-        closed_pnls = [p.pnl() for p in self.positions if not p.is_open()]
+        closed_pnls = [p.pnl() for p in self.positions if not p.is_open() and p.pnl() > 0]
         return max(closed_pnls) if closed_pnls else 0
 
     # Maximum Loss incurred in a trade
     def max_loss(self) -> float:
-        closed_pnls = [p.pnl() for p in self.positions if not p.is_open()]
+        closed_pnls = [p.pnl() for p in self.positions if not p.is_open() and p.pnl() < 0]
         return min(closed_pnls) if closed_pnls else 0
 
     def is_any_position_open(self) -> bool:
