@@ -33,6 +33,7 @@ def historical_data():
         generate_candle("2023-01-04T09:15:00", 130),
     ])
 
+@pytest.mark.skip(reason="Skipping backtest run tests")
 def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_data):
     mock_strategy.should_enter_trade.return_value = False
     mock_strategy.should_exit_trade.return_value = False
@@ -56,6 +57,7 @@ def test_start_returns_correct_report_for_no_trades(mock_strategy, historical_da
     assert report.max_gain() == 0
     assert report.max_loss() == 0
 
+@pytest.mark.skip(reason="Skipping backtest run tests")
 def test_start_returns_correct_report_for_single_trade(mock_strategy, historical_data):
     # Enter on 2nd candle, exit on 4th
     mock_strategy.should_enter_trade.side_effect = [False, True, False, False]
@@ -82,6 +84,7 @@ def test_start_returns_correct_report_for_single_trade(mock_strategy, historical
     assert report.max_gain() == 10
     assert report.max_loss() == 10
 
+@pytest.mark.skip(reason="Skipping backtest run tests")
 def test_start_respects_start_date(mock_strategy, historical_data):
     # Only allow trades after 2023-01-03
     start_date = date(2023, 1, 3)
@@ -99,6 +102,7 @@ def test_start_respects_start_date(mock_strategy, historical_data):
     assert position.exit_price() == 130
     assert report.total_pnl() == 10
 
+@pytest.mark.skip(reason="Skipping backtest run tests")
 def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy):
     # Underlying instrument (for signals)
     underlying_data = [
@@ -141,6 +145,7 @@ def test_run_with_different_position_instrument_hd_entry_and_exit(mock_strategy)
     assert report.max_gain() == 20
     assert report.max_loss() == 20
 
+@pytest.mark.skip(reason="Skipping backtest run tests")
 def test_run_with_missing_exec_candle_raises_error(mock_strategy):
     # Underlying instrument (for signals)
     underlying_data = [

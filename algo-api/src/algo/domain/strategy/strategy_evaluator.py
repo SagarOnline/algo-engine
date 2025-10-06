@@ -1,6 +1,7 @@
 from datetime import date
 import datetime
 from typing import Any, Dict, Optional
+from enum import Enum
 from .strategy import Strategy, Instrument, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
@@ -8,16 +9,22 @@ from .tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
 
 
+class PositionAction(Enum):
+    ADD = "ADD"
+    EXIT = "EXIT"
+
+
 class TradeSignal:
-    def __init__(self, instrument: Instrument, action: TradeAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe):
+    def __init__(self, instrument: Instrument, action: TradeAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe, position_action: PositionAction):
         self.instrument = instrument
         self.action = action
         self.quantity = quantity
         self.timestamp = timestamp
         self.timeframe = timeframe
+        self.position_action = position_action
 
     def __repr__(self):
-        return f"TradeSignal(instrument={self.instrument.instrument_key}, action={self.action}, quantity={self.quantity}, timestamp={self.timestamp}, timeframe={self.timeframe})"
+        return f"TradeSignal(instrument={self.instrument.instrument_key}, action={self.action}, quantity={self.quantity}, timestamp={self.timestamp}, timeframe={self.timeframe}, position_action={self.position_action})"
 
 class StrategyEvaluator:
     def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, tradable_instrument_repository: TradableInstrumentRepository):
@@ -38,12 +45,12 @@ class StrategyEvaluator:
                 # Return a trade signal for entering a position
                 position = self.strategy.get_position_instrument()
                 timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
-                return TradeSignal(tradable.instrument, position.action, 1, timestamp, strategy_timeframe)
+                return TradeSignal(tradable.instrument, position.action, 1, timestamp, strategy_timeframe, PositionAction.ADD)
             if exit:
                 # Return a trade signal for exiting a position
                 position = self.strategy.get_position_instrument()
                 timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
-                return TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp, strategy_timeframe)
+                return TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp, strategy_timeframe, PositionAction.EXIT)
         return None
     
     def _get_historical_data(self, strategy: Strategy, end_date: date) -> HistoricalData:

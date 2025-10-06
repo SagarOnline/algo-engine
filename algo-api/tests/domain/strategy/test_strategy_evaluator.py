@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime, date, timedelta
 from unittest.mock import Mock, MagicMock, ANY
 
-from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal
+from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
 from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
@@ -152,6 +152,7 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
     assert isinstance(result, TradeSignal)
     assert result.instrument == sample_tradable_instrument.instrument
     assert result.action == TradeAction.BUY
+    assert result.position_action == PositionAction.ADD
     assert result.quantity == 1
     assert result.timeframe == Timeframe.FIVE_MINUTES
 
@@ -174,6 +175,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     assert isinstance(result, TradeSignal)
     assert result.instrument == sample_tradable_instrument.instrument
     assert result.action == TradeAction.SELL
+    assert result.position_action == PositionAction.EXIT
     assert result.quantity == 1
     assert result.timeframe == Timeframe.FIVE_MINUTES
 
