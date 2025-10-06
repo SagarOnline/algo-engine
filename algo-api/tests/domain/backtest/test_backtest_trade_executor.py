@@ -1,7 +1,7 @@
 import unittest
 import pytest
 from datetime import datetime, date
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
@@ -288,3 +288,123 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
     
     # Verify add_position was called
     sample_tradable_instrument.add_position.assert_called_once()
+
+
+def test_execute_uses_position_action_add(executor, sample_instrument, sample_tradable_instrument,
+                                         sample_historical_data, mock_tradable_instrument_repository,
+                                         mock_historical_data_repository):
+    """Test that execute method uses position_action ADD to determine add_position call."""
+    # Create a trade signal with ADD position action
+    add_signal = TradeSignal(
+        instrument=sample_instrument,
+        action=TradeAction.SELL,  # Note: action is SELL but position_action is ADD
+        quantity=10,
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.ADD
+    )
+    
+    # Use real TradableInstrument instead of mock
+    real_tradable_instrument = TradableInstrument(sample_instrument)
+    
+    # Setup mocks for repositories only
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [real_tradable_instrument]
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Add spy to verify method calls on the real object
+    real_tradable_instrument.add_position = Mock()
+    real_tradable_instrument.exit_position = Mock()
+    
+    # Execute the trade signal
+    executor.execute(add_signal)
+    
+    # Verify add_position was called (because position_action is ADD)
+    real_tradable_instrument.add_position.assert_called_once_with(
+        add_signal.timestamp, 100.0, TradeAction.SELL, 10
+    )
+    real_tradable_instrument.exit_position.assert_not_called()
+    
+    # Verify the tradable instrument was saved
+    mock_tradable_instrument_repository.save_tradable_instrument.assert_called_once_with(
+        "test_strategy", real_tradable_instrument
+    )
+
+
+def test_execute_uses_position_action_exit(executor, sample_instrument, sample_tradable_instrument,
+                                          sample_historical_data, mock_tradable_instrument_repository,
+                                          mock_historical_data_repository):
+    """Test that execute method uses position_action EXIT to determine exit_position call."""
+    # Create a trade signal with EXIT position action
+    exit_signal = TradeSignal(
+        instrument=sample_instrument,
+        action=TradeAction.BUY,  # Note: action is BUY but position_action is EXIT
+        quantity=10,
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.EXIT
+    )
+    
+    # Use real TradableInstrument instead of mock
+    real_tradable_instrument = TradableInstrument(sample_instrument)
+    
+    # Setup mocks for repositories only
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [real_tradable_instrument]
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Add spy to verify method calls on the real object
+    real_tradable_instrument.add_position = Mock()
+    real_tradable_instrument.exit_position = Mock()
+    
+    # Execute the trade signal
+    executor.execute(exit_signal)
+    
+    # Verify exit_position was called (because position_action is EXIT)
+    real_tradable_instrument.exit_position.assert_called_once_with(
+        exit_signal.timestamp, 100.0, TradeAction.BUY, 10
+    )
+    real_tradable_instrument.add_position.assert_not_called()
+    
+    # Verify the tradable instrument was saved
+    mock_tradable_instrument_repository.save_tradable_instrument.assert_called_once_with(
+        "test_strategy", real_tradable_instrument
+    )
+
+
+def test_execute_position_action_overrides_trade_action(executor, sample_instrument,
+                                                       sample_historical_data, mock_tradable_instrument_repository,
+                                                       mock_historical_data_repository):
+    """Test that position_action takes precedence over trade action for determining operation type."""
+    # Create signal where action and position_action seem contradictory
+    contradictory_signal = TradeSignal(
+        instrument=sample_instrument,
+        action=TradeAction.SELL,  # Normally associated with exit
+        quantity=5,
+        timestamp=datetime(2025, 9, 17, 9, 15, 0),
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.ADD  # But position_action says ADD
+    )
+    
+    # Use real TradableInstrument instead of mock
+    real_tradable_instrument = TradableInstrument(sample_instrument)
+    
+    # Setup mocks for repositories only
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [real_tradable_instrument]
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Add spy to verify method calls on the real object
+    real_tradable_instrument.add_position = Mock()
+    real_tradable_instrument.exit_position = Mock()
+    
+    # Execute the trade signal
+    executor.execute(contradictory_signal)
+    
+    # Verify that position_action (ADD) takes precedence over action (SELL)
+    real_tradable_instrument.add_position.assert_called_once_with(
+        contradictory_signal.timestamp, 100.0, TradeAction.SELL, 5  # Uses original action for the call
+    )
+    real_tradable_instrument.exit_position.assert_not_called()
+    
+    # Verify the tradable instrument was saved
+    mock_tradable_instrument_repository.save_tradable_instrument.assert_called_once_with(
+        "test_strategy", real_tradable_instrument
+    )

@@ -7,7 +7,7 @@
   },
   "broker_api":{
     "upstox":{
-        "access_token": ""
+        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OGUzZDc4MWY3ZTcxYzJmYWM0NjYyZWIiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc1OTc2MjMwNSwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzU5Nzg4MDAwfQ.qWcBGesbblyuU-AgjB-l2_tMfHAYM8JjJ7xZvfoxCAQ"
     }
   }
 }
