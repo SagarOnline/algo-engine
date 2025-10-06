@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.strategy_evaluator import TradeSignal
-from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, PositionAction
+from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.report import TradableInstrument
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.timeframe import Timeframe
@@ -35,7 +35,7 @@ def sample_tradable_instrument(sample_instrument):
 def sample_trade_signal(sample_instrument):
     return TradeSignal(
         instrument=sample_instrument,
-        action=PositionAction.BUY,
+        action=TradeAction.BUY,
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min")
@@ -120,7 +120,7 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
     # Create a SELL trade signal
     sell_signal = TradeSignal(
         instrument=sample_instrument,
-        action=PositionAction.SELL,
+        action=TradeAction.SELL,
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min")
@@ -267,7 +267,7 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
     # Create trade signals with string actions (as the code checks for "buy" and "sell" strings)
     buy_signal = TradeSignal(
         instrument=sample_instrument,
-        action=PositionAction.BUY,  # String instead of enum
+        action=TradeAction.BUY,  # String instead of enum
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min")

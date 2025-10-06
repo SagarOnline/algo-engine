@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,PositionAction
+from algo.domain.strategy.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,TradeAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
@@ -18,7 +18,7 @@ def mock_strategy():
     
     instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
-    position= PositionInstrument(PositionAction.BUY,instrument)
+    position= PositionInstrument(TradeAction.BUY,instrument)
     strategy.get_position_instrument.return_value = position
 
     # Default behavior: no trading signals
@@ -131,7 +131,7 @@ def test_run_respects_start_date():
     # Use real domain objects
     instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
-    position = PositionInstrument(PositionAction.BUY, instrument)
+    position = PositionInstrument(TradeAction.BUY, instrument)
     strategy.get_position_instrument.return_value = position
     
     # Trading signal behavior

@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 from algo.application.util import fmt_currency
-from algo.domain.strategy.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, TradeAction
 from algo.domain.backtest.report import Position, PositionType
 from algo.application.run_backtest_usecase import PositionDTO
 

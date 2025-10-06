@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, TradeAction
 from algo.domain.backtest.report import Position, PositionType
 
 @pytest.fixture

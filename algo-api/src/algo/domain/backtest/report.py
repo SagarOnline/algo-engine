@@ -1,5 +1,5 @@
 from operator import is_
-from algo.domain.strategy.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, TradeAction
 from enum import Enum
 
 from datetime import datetime, date
@@ -8,7 +8,7 @@ from typing import List, Optional
 
 # Transaction domain class
 class Transaction:
-    def __init__(self, time: datetime, price: float, action: PositionAction, quantity: int):
+    def __init__(self, time: datetime, price: float, action: TradeAction, quantity: int):
         self.time = time
         self.price = price
         self.action = action
@@ -38,13 +38,13 @@ class Position:
         self.stop_loss = stop_loss
         self.transactions: List[Transaction] = []
         # Create the entry transaction
-        entry_action = PositionAction.BUY if position_type == PositionType.LONG else PositionAction.SELL
+        entry_action = TradeAction.BUY if position_type == PositionType.LONG else TradeAction.SELL
         entry_txn = Transaction(entry_time, entry_price, entry_action, quantity)
         self.transactions.append(entry_txn)
         self.exit_type = None  # To track how the position was exited
 
     def exit(self, exit_price: float, exit_time: datetime, exit_type: PositionExitType = PositionExitType.EXIT_RULES):
-        exit_action = PositionAction.SELL if self.position_type == PositionType.LONG else PositionAction.BUY
+        exit_action = TradeAction.SELL if self.position_type == PositionType.LONG else TradeAction.BUY
         exit_txn = Transaction(exit_time, exit_price, exit_action, self.quantity)
         self.transactions.append(exit_txn)
         self.exit_type = exit_type  # Store exit type for reference
@@ -115,13 +115,13 @@ class TradableInstrument:
         self.instrument = instrument
         self.positions: List[Position] = []  # List of Position objects (open and closed)
 
-    def add_position(self, time: datetime, price: float, action: PositionAction, quantity: int, stop_loss: float = None):
+    def add_position(self, time: datetime, price: float, action: TradeAction, quantity: int, stop_loss: float = None):
         # Determine position type from action
-        position_type = PositionType.LONG if action == PositionAction.BUY else PositionType.SHORT
+        position_type = PositionType.LONG if action == TradeAction.BUY else PositionType.SHORT
         position = Position(self.instrument, position_type, quantity, price, time, stop_loss)
         self.positions.append(position)
 
-    def exit_position(self, time: datetime, price: float, action: PositionAction, quantity: int):
+    def exit_position(self, time: datetime, price: float, action: TradeAction, quantity: int):
         # Find last open position
         open_positions = [p for p in self.positions if p.is_open()]
         if not open_positions:

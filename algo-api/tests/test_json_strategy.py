@@ -6,7 +6,7 @@ from algo.domain.strategy.strategy import (
     RuleSet,
     Condition,
     Expression,
-    PositionAction,
+    TradeAction,
     InstrumentType,
     Exchange,
     Expiry,
@@ -145,7 +145,7 @@ def test_instrument_required_only(strategy_required_only):
 
 
 def test_position(strategy):
-    assert strategy.get_position_instrument().action == PositionAction.BUY
+    assert strategy.get_position_instrument().action == TradeAction.BUY
     assert strategy.get_position_instrument().instrument.type == InstrumentType.PE
     assert strategy.get_position_instrument().instrument.atm == -50
     assert strategy.get_position_instrument().instrument.exchange == Exchange.NSE

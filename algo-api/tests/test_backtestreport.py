@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, date
 from algo.domain.backtest.report import BackTestReport, TradableInstrument
-from algo.domain.strategy.strategy import PositionAction
+from algo.domain.strategy.strategy import TradeAction
 
 
 class DummyInstrument:
@@ -16,20 +16,20 @@ class DummyInstrument:
 def sample_tradable():
     instr = DummyInstrument('AAPL')
     tradable = TradableInstrument(instr)
-    tradable.add_position(datetime(2023,1,1,9,15), 100, PositionAction.BUY, 1) # buy 1 @100
-    tradable.exit_position(datetime(2023,1,1,10,0), 110, PositionAction.SELL, 1) # buy 1 @110
+    tradable.add_position(datetime(2023,1,1,9,15), 100, TradeAction.BUY, 1) # buy 1 @100
+    tradable.exit_position(datetime(2023,1,1,10,0), 110, TradeAction.SELL, 1) # buy 1 @110
         
-    tradable.add_position(datetime(2023,1,2,9,15), 110, PositionAction.BUY, 1) # buy 1 @100
-    tradable.exit_position( datetime(2023,1,2,10,0), 105, PositionAction.SELL, 1) # buy 1 @110
+    tradable.add_position(datetime(2023,1,2,9,15), 110, TradeAction.BUY, 1) # buy 1 @100
+    tradable.exit_position( datetime(2023,1,2,10,0), 105, TradeAction.SELL, 1) # buy 1 @110
         
-    tradable.add_position(datetime(2023,1,3,9,15), 105, PositionAction.BUY, 1) # buy 1 @100
-    tradable.exit_position(datetime(2023,1,3,10,0), 120, PositionAction.SELL, 1) # buy 1 @110
+    tradable.add_position(datetime(2023,1,3,9,15), 105, TradeAction.BUY, 1) # buy 1 @100
+    tradable.exit_position(datetime(2023,1,3,10,0), 120, TradeAction.SELL, 1) # buy 1 @110
         
-    tradable.add_position(datetime(2023,1,4,9,15), 120, PositionAction.BUY, 1) # buy 1 @100
-    tradable.exit_position(datetime(2023,1,4,10,0), 115, PositionAction.SELL, 1) # buy 1 @110
+    tradable.add_position(datetime(2023,1,4,9,15), 120, TradeAction.BUY, 1) # buy 1 @100
+    tradable.exit_position(datetime(2023,1,4,10,0), 115, TradeAction.SELL, 1) # buy 1 @110
         
-    tradable.add_position(datetime(2023,1,5,9,15), 115, PositionAction.BUY, 1) # buy 1 @100
-    tradable.exit_position(datetime(2023,1,5,10,0), 130, PositionAction.SELL, 1) # buy 1 @110
+    tradable.add_position(datetime(2023,1,5,9,15), 115, TradeAction.BUY, 1) # buy 1 @100
+    tradable.exit_position(datetime(2023,1,5,10,0), 130, TradeAction.SELL, 1) # buy 1 @110
     return tradable
     
 
