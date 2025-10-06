@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from algo.domain.strategy.strategy import PositionAction
+from algo.domain.strategy.strategy import TradeAction
 from algo.domain.strategy.strategy_evaluator import TradeSignal
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.strategy.trade_executor import TradeExecutor
@@ -37,10 +37,10 @@ class BackTestTradeExecutor(TradeExecutor):
         for tradable in tradable_instruments:
             if tradable.instrument.instrument_key == trade_signal.instrument.instrument_key:
                 # Add position or exit position based on action
-                if trade_signal.action == PositionAction.BUY:
+                if trade_signal.action == TradeAction.BUY:
                     # Add new position
                     tradable.add_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity)
-                elif trade_signal.action == PositionAction.SELL:
+                elif trade_signal.action == TradeAction.SELL:
                     # Exit existing position
                     tradable.exit_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity)
                 

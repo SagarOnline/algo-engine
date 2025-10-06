@@ -1,7 +1,7 @@
 from datetime import date
 import datetime
 from typing import Any, Dict, Optional
-from .strategy import Strategy, Instrument, PositionAction
+from .strategy import Strategy, Instrument, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from .tradable_instrument_repository import TradableInstrumentRepository
@@ -9,7 +9,7 @@ from algo.domain.timeframe import Timeframe
 
 
 class TradeSignal:
-    def __init__(self, instrument: Instrument, action: PositionAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe):
+    def __init__(self, instrument: Instrument, action: TradeAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe):
         self.instrument = instrument
         self.action = action
         self.quantity = quantity

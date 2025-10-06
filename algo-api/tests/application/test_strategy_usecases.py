@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from algo.domain.strategy.strategy import Instrument,InstrumentType,Exchange,Expiring, Expiry, PositionInstrument, PositionAction, Strategy
+from algo.domain.strategy.strategy import Instrument,InstrumentType,Exchange,Expiring, Expiry, PositionInstrument, TradeAction, Strategy
 from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO, InstrumentDTO
 
 class DummyStrategy(Strategy):
@@ -35,7 +35,7 @@ class DummyStrategy(Strategy):
         return ""
 
     def get_position_instrument(self):
-        return PositionInstrument(action=PositionAction.BUY, instrument=self.get_instrument())
+        return PositionInstrument(action=TradeAction.BUY, instrument=self.get_instrument())
 
     def get_risk_management(self):
         return None

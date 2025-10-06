@@ -2,7 +2,7 @@ import pytest
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from algo.domain.indicators.registry import register_indicator, IndicatorRegistry
-from algo.domain.strategy.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, InstrumentType, Exchange, PositionAction
+from algo.domain.strategy.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, InstrumentType, Exchange, TradeAction
 from datetime import date, timedelta
 
 # --- Mock domain classes ---
@@ -58,7 +58,7 @@ class DummyStrategy(Strategy):
         return self._exit_rules
 
     def get_position_instrument(self) -> PositionInstrument:
-        return PositionInstrument(action=PositionAction.BUY, instrument=self.get_instrument())
+        return PositionInstrument(action=TradeAction.BUY, instrument=self.get_instrument())
 
     def get_risk_management(self):
         return None

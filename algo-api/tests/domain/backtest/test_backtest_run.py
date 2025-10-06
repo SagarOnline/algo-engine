@@ -5,7 +5,7 @@ from algo.domain.backtest.backtest import BackTest
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.backtest.report import BackTestReport, TradableInstrument
-from algo.domain.strategy.strategy import Strategy, Instrument, PositionAction, PositionInstrument, InstrumentType, Exchange
+from algo.domain.strategy.strategy import Strategy, Instrument, TradeAction, PositionInstrument, InstrumentType, Exchange
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
@@ -24,7 +24,7 @@ def create_test_instrument():
 def create_test_position_instrument():
     """Create a real PositionInstrument object for testing."""
     instrument = create_test_instrument()
-    return PositionInstrument(PositionAction.BUY, instrument)
+    return PositionInstrument(TradeAction.BUY, instrument)
 
 
 def create_test_tradable_instrument():
@@ -183,8 +183,8 @@ class TestBackTestRun:
         
         # Create sample trade signals
         sample_instrument = mock_strategy.get_instrument.return_value
-        buy_signal = TradeSignal(sample_instrument, PositionAction.BUY, 1, datetime(2024, 1, 5, 10, 0), Timeframe("5min"))
-        sell_signal = TradeSignal(sample_instrument, PositionAction.SELL, 1, datetime(2024, 1, 7, 12, 0), Timeframe("5min"))
+        buy_signal = TradeSignal(sample_instrument, TradeAction.BUY, 1, datetime(2024, 1, 5, 10, 0), Timeframe("5min"))
+        sell_signal = TradeSignal(sample_instrument, TradeAction.SELL, 1, datetime(2024, 1, 7, 12, 0), Timeframe("5min"))
         
         # Mock StrategyEvaluator to return trade signals alternately
         signal_sequence = [buy_signal, None, None, sell_signal] + [None] * 24  # Fill remaining calls with None

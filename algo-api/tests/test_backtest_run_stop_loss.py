@@ -1,6 +1,6 @@
 import pytest
 from datetime import date, datetime, timedelta
-from algo.domain.strategy.strategy import Instrument, PositionAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
+from algo.domain.strategy.strategy import Instrument, TradeAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
 from algo.domain.backtest.report import BackTestReport, PositionType, TradableInstrument, Position
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.backtest_run import BackTest
@@ -22,7 +22,7 @@ class DummyStrategy(Strategy):
     def get_exit_rules(self): return None
     
     def get_position_instrument(self):
-        return PositionInstrument(PositionAction.BUY, self._instrument)
+        return PositionInstrument(TradeAction.BUY, self._instrument)
     def get_risk_management(self):
         return RiskManagement(StopLoss(self._stop_loss_in_points, StopLossType.POINTS)) if self._stop_loss_in_points else None
     def should_enter_trade(self, historical_data):

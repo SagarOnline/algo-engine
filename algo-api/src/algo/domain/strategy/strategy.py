@@ -25,7 +25,7 @@ class Expiring(Enum):
     CURRENT = "CURRENT"
     NEXT = "NEXT"
 
-class PositionAction(Enum):
+class TradeAction(Enum):
     BUY = "BUY"
     SELL = "SELL"
 
@@ -83,12 +83,12 @@ class Instrument:
 
 
 class PositionInstrument:
-    def __init__(self, action: PositionAction, instrument: Instrument):
-        self.action = PositionAction(action)
+    def __init__(self, action: TradeAction, instrument: Instrument):
+        self.action = TradeAction(action)
         self.instrument = instrument
         
-    def get_close_action(self) -> PositionAction:
-        return PositionAction.SELL if self.action == PositionAction.BUY else PositionAction.BUY
+    def get_close_action(self) -> TradeAction:
+        return TradeAction.SELL if self.action == TradeAction.BUY else TradeAction.BUY
 
 class Expression:
     def __init__(self, expr_type: str, params: Dict):

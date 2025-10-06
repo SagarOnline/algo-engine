@@ -1,20 +1,20 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy.strategy import Instrument, PositionAction
+from algo.domain.strategy.strategy import Instrument, TradeAction
 from algo.domain.backtest.report import Position, PositionType, TradableInstrument
 
 def make_tradable_with_long_position(entry_price=100.0, stop_loss=95.0):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
     tradable = TradableInstrument(instrument)
     entry_time = datetime(2025, 9, 17, 9, 15)
-    tradable.add_position(entry_time, entry_price, PositionAction.BUY, 1, stop_loss=stop_loss)
+    tradable.add_position(entry_time, entry_price, TradeAction.BUY, 1, stop_loss=stop_loss)
     return tradable
 
 def make_tradable_with_short_position(entry_price=100.0, stop_loss=105.0):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
     tradable = TradableInstrument(instrument)
     entry_time = datetime(2025, 9, 17, 9, 15)
-    tradable.add_position(entry_time, entry_price, PositionAction.SELL, 1, stop_loss=stop_loss)
+    tradable.add_position(entry_time, entry_price, TradeAction.SELL, 1, stop_loss=stop_loss)
     return tradable
 
 def test_process_stop_loss_long_triggers():
@@ -55,7 +55,7 @@ def test_process_stop_loss_multiple_positions():
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
     tradable = TradableInstrument(instrument)
     entry_time = datetime(2025, 9, 17, 9, 15)
-    tradable.add_position(entry_time, 100.0, PositionAction.BUY, 1, stop_loss=95.0)
+    tradable.add_position(entry_time, 100.0, TradeAction.BUY, 1, stop_loss=95.0)
     
     exit_time = datetime(2025, 9, 17, 15, 30)
     triggered = tradable.process_stop_loss(94.0, exit_time)

@@ -3,7 +3,7 @@ from datetime import datetime, date, timedelta
 from unittest.mock import Mock, MagicMock, ANY
 
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal
-from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, PositionAction
+from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
@@ -24,8 +24,8 @@ def mock_strategy():
     
     # Mock position instrument
     position_instrument = Mock()
-    position_instrument.action = PositionAction.BUY
-    position_instrument.get_close_action.return_value = PositionAction.SELL
+    position_instrument.action = TradeAction.BUY
+    position_instrument.get_close_action.return_value = TradeAction.SELL
     strategy.get_position_instrument.return_value = position_instrument
     
     return strategy
@@ -151,7 +151,7 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
     assert result is not None
     assert isinstance(result, TradeSignal)
     assert result.instrument == sample_tradable_instrument.instrument
-    assert result.action == PositionAction.BUY
+    assert result.action == TradeAction.BUY
     assert result.quantity == 1
     assert result.timeframe == Timeframe.FIVE_MINUTES
 
@@ -173,7 +173,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     assert result is not None
     assert isinstance(result, TradeSignal)
     assert result.instrument == sample_tradable_instrument.instrument
-    assert result.action == PositionAction.SELL
+    assert result.action == TradeAction.SELL
     assert result.quantity == 1
     assert result.timeframe == Timeframe.FIVE_MINUTES
 
@@ -356,4 +356,4 @@ def test_evaluate_entry_and_exit_priority(evaluator, sample_candle, sample_histo
     
     # Verify entry signal is returned (not exit signal)
     assert result is not None
-    assert result.action == PositionAction.BUY  # Entry action
+    assert result.action == TradeAction.BUY  # Entry action
