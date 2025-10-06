@@ -63,17 +63,24 @@ def sample_historical_data(sample_candle):
 
 
 @pytest.fixture
-def executor(mock_tradable_instrument_repository, mock_historical_data_repository):
+def mock_strategy():
+    strategy = Mock()
+    strategy.get_name.return_value = "test_strategy"
+    return strategy
+
+
+@pytest.fixture
+def executor(mock_tradable_instrument_repository, mock_historical_data_repository, mock_strategy):
     return BackTestTradeExecutor(
         tradable_instrument_repository=mock_tradable_instrument_repository,
         historical_data_repository=mock_historical_data_repository,
-        strategy_name="test_strategy"
+        strategy=mock_strategy
     )
 
 
 def test_executor_initialization(executor):
     """Test that executor is properly initialized."""
-    assert executor.strategy_name == "test_strategy"
+    assert executor.strategy.get_name() == "test_strategy"
     assert executor.tradable_instrument_repository is not None
     assert executor.historical_data_repository is not None
 

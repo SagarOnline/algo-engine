@@ -304,7 +304,7 @@ class TestBackTestRun:
         mock_executor_init.assert_called_once_with(
             mock_tradable_instrument_repository,
             mock_historical_data_repository,
-            mock_strategy.get_name.return_value
+            mock_strategy
         )
 
     def test_run_handles_timeframe_conversion(self, backtest_instance, mock_strategy,

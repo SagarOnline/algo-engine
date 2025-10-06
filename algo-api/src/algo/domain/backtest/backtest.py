@@ -42,7 +42,7 @@ class BackTest:
         trade_executor = BackTestTradeExecutor(
             self.tradable_instrument_repository,
             self.historical_data_repository,
-            self.strategy.get_name()
+            self.strategy
         )
         
 
