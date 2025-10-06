@@ -4,7 +4,7 @@ from datetime import datetime, date
 from unittest.mock import Mock, MagicMock
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
-from algo.domain.strategy.strategy_evaluator import TradeSignal
+from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
 from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.report import TradableInstrument
 from algo.domain.backtest.historical_data import HistoricalData
@@ -38,7 +38,8 @@ def sample_trade_signal(sample_instrument):
         action=TradeAction.BUY,
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
-        timeframe=Timeframe("5min")
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.ADD
     )
 
 
@@ -123,7 +124,8 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
         action=TradeAction.SELL,
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
-        timeframe=Timeframe("5min")
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.EXIT
     )
     
     # Setup mocks
@@ -270,7 +272,8 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
         action=TradeAction.BUY,  # String instead of enum
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
-        timeframe=Timeframe("5min")
+        timeframe=Timeframe("5min"),
+        position_action=PositionAction.ADD
     )
     
     # Setup mocks
