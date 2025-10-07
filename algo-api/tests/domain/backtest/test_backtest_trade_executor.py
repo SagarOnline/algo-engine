@@ -4,7 +4,7 @@ from datetime import datetime, date
 from unittest.mock import Mock, MagicMock, patch
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
-from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
+from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction, TriggerType
 from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.report import TradableInstrument
 from algo.domain.backtest.historical_data import HistoricalData
@@ -39,7 +39,8 @@ def sample_trade_signal(sample_instrument):
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD, 
+        trigger_type=TriggerType.ENTRY_RULES
     )
 
 
@@ -133,7 +134,8 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.EXIT
+        position_action=PositionAction.EXIT,
+        trigger_type=TriggerType.EXIT_RULES
     )
     
     # Setup mocks
@@ -281,7 +283,8 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD,
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Setup mocks
@@ -309,7 +312,8 @@ def test_execute_uses_position_action_add(executor, sample_instrument, sample_tr
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD,
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Use real TradableInstrument instead of mock
@@ -349,7 +353,8 @@ def test_execute_uses_position_action_exit(executor, sample_instrument, sample_t
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.EXIT
+        position_action=PositionAction.EXIT,
+        trigger_type=TriggerType.EXIT_RULES
     )
     
     # Use real TradableInstrument instead of mock
@@ -389,7 +394,8 @@ def test_execute_position_action_overrides_trade_action(executor, sample_instrum
         quantity=5,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD  # But position_action says ADD
+        position_action=PositionAction.ADD,  # But position_action says ADD
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Use real TradableInstrument instead of mock

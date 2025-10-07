@@ -14,17 +14,24 @@ class PositionAction(Enum):
     EXIT = "EXIT"
 
 
+class TriggerType(Enum):
+    ENTRY_RULES = "ENTRY_RULES"
+    EXIT_RULES = "EXIT_RULES"
+    STOP_LOSS = "STOP_LOSS"
+
+
 class TradeSignal:
-    def __init__(self, instrument: Instrument, action: TradeAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe, position_action: PositionAction):
+    def __init__(self, instrument: Instrument, action: TradeAction, quantity: int, timestamp: datetime.datetime, timeframe: Timeframe, position_action: PositionAction, trigger_type: TriggerType):
         self.instrument = instrument
         self.action = action
         self.quantity = quantity
         self.timestamp = timestamp
         self.timeframe = timeframe
         self.position_action = position_action
+        self.trigger_type = trigger_type
 
     def __repr__(self):
-        return f"TradeSignal(instrument={self.instrument.instrument_key}, action={self.action}, quantity={self.quantity}, timestamp={self.timestamp}, timeframe={self.timeframe}, position_action={self.position_action})"
+        return f"TradeSignal(instrument={self.instrument.instrument_key}, action={self.action}, quantity={self.quantity}, timestamp={self.timestamp}, timeframe={self.timeframe}, position_action={self.position_action}, trigger_type={self.trigger_type})"
 
 class StrategyEvaluator:
     def __init__(self, strategy: Strategy, historical_data_repository: HistoricalDataRepository, tradable_instrument_repository: TradableInstrumentRepository):
@@ -57,14 +64,14 @@ class StrategyEvaluator:
                 # Create a trade signal for entering a position
                 position = self.strategy.get_position_instrument()
                 timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
-                trade_signal = TradeSignal(tradable.instrument, position.action, 1, timestamp, strategy_timeframe, PositionAction.ADD)
+                trade_signal = TradeSignal(tradable.instrument, position.action, 1, timestamp, strategy_timeframe, PositionAction.ADD, TriggerType.ENTRY_RULES)
                 trade_signals.append(trade_signal)
                 
             elif exit:
                 # Create a trade signal for exiting a position
                 position = self.strategy.get_position_instrument()
                 timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
-                trade_signal = TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp, strategy_timeframe, PositionAction.EXIT)
+                trade_signal = TradeSignal(tradable.instrument, position.get_close_action(), 1, timestamp, strategy_timeframe, PositionAction.EXIT, TriggerType.EXIT_RULES)
                 trade_signals.append(trade_signal)
                 
         return trade_signals

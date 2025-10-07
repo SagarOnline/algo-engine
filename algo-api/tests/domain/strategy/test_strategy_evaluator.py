@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime, date, timedelta
 from unittest.mock import Mock, MagicMock, ANY
 
-from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
+from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction, TriggerType
 from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
@@ -157,6 +157,7 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
     assert signal.position_action == PositionAction.ADD
     assert signal.quantity == 1
     assert signal.timeframe == Timeframe.FIVE_MINUTES
+    assert signal.trigger_type == TriggerType.ENTRY_RULES
 
 
 def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_historical_data,
@@ -182,6 +183,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     assert signal.position_action == PositionAction.EXIT
     assert signal.quantity == 1
     assert signal.timeframe == Timeframe.FIVE_MINUTES
+    assert signal.trigger_type == TriggerType.EXIT_RULES
 
 
 def test_evaluate_calls_strategy_methods_correctly(evaluator, sample_candle, sample_historical_data,
