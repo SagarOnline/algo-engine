@@ -38,8 +38,10 @@ class BackTestTradeExecutor(TradeExecutor):
             if tradable.instrument.instrument_key == trade_signal.instrument.instrument_key:
                 # Add position or exit position based on position_action
                 if trade_signal.position_action == PositionAction.ADD:
-                    # Add new position
-                    tradable.add_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity)
+                    # Calculate stop loss using strategy
+                    stop_loss = self.strategy.calculate_stop_loss_for(execution_price)
+                    # Add new position with stop loss
+                    tradable.add_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity, stop_loss)
                 elif trade_signal.position_action == PositionAction.EXIT:
                     # Exit existing position
                     tradable.exit_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity)

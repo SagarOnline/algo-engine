@@ -53,15 +53,38 @@ class Position:
         # Position is open if only entry transaction exists
         return len(self.transactions) == 1
 
-    def process_stop_loss(self, price: float, time: datetime):
+    def has_stop_loss_hit(self, price: float) -> bool:
+        """
+        Check if the stop loss should be triggered based on the current price.
+        
+        Args:
+            price: Current market price
+            
+        Returns:
+            bool: True if stop loss should be triggered, False otherwise
+        """
         if not self.is_open() or self.stop_loss is None:
             return False
         # For LONG, stop loss triggers if price <= stop_loss
         # For SHORT, stop loss triggers if price >= stop_loss
         if self.position_type == PositionType.LONG and price <= self.stop_loss:
-            self.exit(self.stop_loss, time, PositionExitType.STOP_LOSS)
             return True
         elif self.position_type == PositionType.SHORT and price >= self.stop_loss:
+            return True
+        return False
+
+    def process_stop_loss(self, price: float, time: datetime):
+        """
+        Process stop loss if it should be triggered.
+        
+        Args:
+            price: Current market price
+            time: Current timestamp
+            
+        Returns:
+            bool: True if position was closed due to stop loss, False otherwise
+        """
+        if self.has_stop_loss_hit(price):
             self.exit(self.stop_loss, time, PositionExitType.STOP_LOSS)
             return True
         return False
