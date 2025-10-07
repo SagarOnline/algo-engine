@@ -2,10 +2,11 @@ from algo.application.strategy_usecases import InstrumentDTO
 from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.engine import BacktestEngine
 from datetime import date
+from algo.domain.strategy.tradable_instrument import Position, TradableInstrument
 from algo.domain.strategy_repository import StrategyRepository
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
-from algo.domain.backtest.report import BackTestReport, Position, TradableInstrument
+from algo.domain.backtest.report import BackTestReport
 
 class RunBacktestInput:
     def __init__(self, strategy_name: str, start_date: str, end_date: str):
@@ -34,7 +35,7 @@ class PositionDTO:
         self.profit_percentage = fmt_percent(position.pnl_percentage())
         self.profit_points = position.pnl_points()
         self.quantity = position.quantity
-        self.exit_type = position.exit_type if hasattr(position, 'exit_type') else None
+        self.exit_type = position.exit_trigger_type if hasattr(position, 'exit_trigger_type') else None
 
     def to_dict(self):
         return {

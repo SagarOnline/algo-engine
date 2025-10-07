@@ -2,8 +2,9 @@ import pytest
 from datetime import datetime
 from algo.application.util import fmt_currency
 from algo.domain.strategy.strategy import Instrument, TradeAction
-from algo.domain.backtest.report import Position, PositionType
+from algo.domain.strategy.tradable_instrument import Position
 from algo.application.run_backtest_usecase import PositionDTO
+from algo.domain.strategy.tradable_instrument import PositionType
 
 def make_position(entry_price=None, entry_time=None, exit_price=None, exit_time=None):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")

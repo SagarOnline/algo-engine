@@ -1,7 +1,8 @@
 import pytest
 from datetime import datetime, date
-from algo.domain.backtest.report import BackTestReport, TradableInstrument
+from algo.domain.backtest.report import BackTestReport
 from algo.domain.strategy.strategy import TradeAction
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 
 
 class DummyInstrument:

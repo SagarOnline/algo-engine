@@ -1,9 +1,10 @@
 from datetime import date
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Strategy
-from algo.domain.backtest.report import BackTestReport, TradableInstrument
+from algo.domain.backtest.report import BackTestReport
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
 
@@ -42,7 +43,7 @@ class BackTest:
         trade_executor = BackTestTradeExecutor(
             self.tradable_instrument_repository,
             self.historical_data_repository,
-            self.strategy.get_name()
+            self.strategy
         )
         
 
@@ -73,10 +74,10 @@ class BackTest:
                 break
                 
             # Evaluate strategy to generate trade signals
-            trade_signal = strategy_evaluator.evaluate(candle)
+            trade_signals = strategy_evaluator.evaluate(candle)
             
-            # Execute trade signal if generated
-            if trade_signal is not None:
+            # Execute each trade signal
+            for trade_signal in trade_signals:
                 trade_executor.execute(trade_signal)
         
         # Get the final state of the tradable instrument (it should exist since we created it at the start)

@@ -1,7 +1,8 @@
 from datetime import date
 from algo.domain.strategy.strategy import Strategy
-from algo.domain.backtest.report import BackTestReport, BackTestReport, TradableInstrument
+from algo.domain.backtest.report import BackTestReport, BackTestReport
 from algo.domain.backtest.historical_data import HistoricalData
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 class BackTest:
 
     def __init__(self, strategy: Strategy, underlying_instrument_hd: HistoricalData, position_instrument_hd: HistoricalData, start_date: date, end_date: date):

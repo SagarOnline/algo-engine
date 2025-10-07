@@ -6,7 +6,7 @@ from unittest.mock import Mock, MagicMock, patch
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
 from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, TradeAction
-from algo.domain.backtest.report import TradableInstrument
+from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.timeframe import Timeframe
 
@@ -39,7 +39,8 @@ def sample_trade_signal(sample_instrument):
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD, 
+        trigger_type=TriggerType.ENTRY_RULES
     )
 
 
@@ -63,17 +64,25 @@ def sample_historical_data(sample_candle):
 
 
 @pytest.fixture
-def executor(mock_tradable_instrument_repository, mock_historical_data_repository):
+def mock_strategy():
+    strategy = Mock()
+    strategy.get_name.return_value = "test_strategy"
+    strategy.calculate_stop_loss_for.return_value = None
+    return strategy
+
+
+@pytest.fixture
+def executor(mock_tradable_instrument_repository, mock_historical_data_repository, mock_strategy):
     return BackTestTradeExecutor(
         tradable_instrument_repository=mock_tradable_instrument_repository,
         historical_data_repository=mock_historical_data_repository,
-        strategy_name="test_strategy"
+        strategy=mock_strategy
     )
 
 
 def test_executor_initialization(executor):
     """Test that executor is properly initialized."""
-    assert executor.strategy_name == "test_strategy"
+    assert executor.strategy.get_name() == "test_strategy"
     assert executor.tradable_instrument_repository is not None
     assert executor.historical_data_repository is not None
 
@@ -105,7 +114,7 @@ def test_execute_buy_signal_success(executor, sample_trade_signal, sample_tradab
     
     # Verify add_position was called with correct parameters
     sample_tradable_instrument.add_position.assert_called_once_with(
-        sample_trade_signal.timestamp, sample_candle['open'], sample_trade_signal.action, sample_trade_signal.quantity
+        sample_trade_signal.timestamp, sample_candle['open'], sample_trade_signal.action, sample_trade_signal.quantity, None, trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Verify tradable instrument repository was called to save
@@ -125,7 +134,8 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.EXIT
+        position_action=PositionAction.EXIT,
+        trigger_type=TriggerType.EXIT_RULES
     )
     
     # Setup mocks
@@ -140,7 +150,7 @@ def test_execute_sell_signal_success(executor, sample_instrument, sample_tradabl
     
     # Verify exit_position was called
     sample_tradable_instrument.exit_position.assert_called_once_with(
-        sell_signal.timestamp, sample_candle['open'], sell_signal.action, sell_signal.quantity
+        sell_signal.timestamp, sample_candle['open'], sell_signal.action, sell_signal.quantity, trigger_type=TriggerType.EXIT_RULES
     )
 
 
@@ -273,7 +283,8 @@ def test_execute_with_string_actions(executor, sample_instrument, sample_tradabl
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD,
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Setup mocks
@@ -301,7 +312,8 @@ def test_execute_uses_position_action_add(executor, sample_instrument, sample_tr
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD
+        position_action=PositionAction.ADD,
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Use real TradableInstrument instead of mock
@@ -320,7 +332,7 @@ def test_execute_uses_position_action_add(executor, sample_instrument, sample_tr
     
     # Verify add_position was called (because position_action is ADD)
     real_tradable_instrument.add_position.assert_called_once_with(
-        add_signal.timestamp, 100.0, TradeAction.SELL, 10
+        add_signal.timestamp, 100.0, TradeAction.SELL, 10, None, trigger_type=TriggerType.ENTRY_RULES
     )
     real_tradable_instrument.exit_position.assert_not_called()
     
@@ -341,7 +353,8 @@ def test_execute_uses_position_action_exit(executor, sample_instrument, sample_t
         quantity=10,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.EXIT
+        position_action=PositionAction.EXIT,
+        trigger_type=TriggerType.EXIT_RULES
     )
     
     # Use real TradableInstrument instead of mock
@@ -360,7 +373,7 @@ def test_execute_uses_position_action_exit(executor, sample_instrument, sample_t
     
     # Verify exit_position was called (because position_action is EXIT)
     real_tradable_instrument.exit_position.assert_called_once_with(
-        exit_signal.timestamp, 100.0, TradeAction.BUY, 10
+        exit_signal.timestamp, 100.0, TradeAction.BUY, 10, trigger_type=TriggerType.EXIT_RULES
     )
     real_tradable_instrument.add_position.assert_not_called()
     
@@ -381,7 +394,8 @@ def test_execute_position_action_overrides_trade_action(executor, sample_instrum
         quantity=5,
         timestamp=datetime(2025, 9, 17, 9, 15, 0),
         timeframe=Timeframe("5min"),
-        position_action=PositionAction.ADD  # But position_action says ADD
+        position_action=PositionAction.ADD,  # But position_action says ADD
+        trigger_type=TriggerType.ENTRY_RULES
     )
     
     # Use real TradableInstrument instead of mock
@@ -400,7 +414,7 @@ def test_execute_position_action_overrides_trade_action(executor, sample_instrum
     
     # Verify that position_action (ADD) takes precedence over action (SELL)
     real_tradable_instrument.add_position.assert_called_once_with(
-        contradictory_signal.timestamp, 100.0, TradeAction.SELL, 5  # Uses original action for the call
+        contradictory_signal.timestamp, 100.0, TradeAction.SELL, 5, None, trigger_type=TriggerType.ENTRY_RULES  # Uses original action for the call
     )
     real_tradable_instrument.exit_position.assert_not_called()
     

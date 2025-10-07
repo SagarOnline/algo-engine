@@ -4,10 +4,11 @@ from datetime import date, datetime
 from algo.domain.backtest.backtest import BackTest
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo.domain.backtest.report import BackTestReport, TradableInstrument
+from algo.domain.backtest.report import BackTestReport
 from algo.domain.strategy.strategy import Strategy, Instrument, TradeAction, PositionInstrument, InstrumentType, Exchange
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
+from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
 
@@ -136,7 +137,7 @@ class TestBackTestRun:
         
         # Mock StrategyEvaluator to return no signals
         with patch.object(StrategyEvaluator, '__init__', return_value=None) as mock_init:
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None) as mock_evaluate:
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]) as mock_evaluate:
                 # Mock BackTestTradeExecutor
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     with patch.object(BackTestTradeExecutor, 'execute') as mock_execute:
@@ -183,11 +184,11 @@ class TestBackTestRun:
         
         # Create sample trade signals
         sample_instrument = mock_strategy.get_instrument.return_value
-        buy_signal = TradeSignal(sample_instrument, TradeAction.BUY, 1, datetime(2024, 1, 5, 10, 0), Timeframe("5min"), PositionAction.ADD)
-        sell_signal = TradeSignal(sample_instrument, TradeAction.SELL, 1, datetime(2024, 1, 7, 12, 0), Timeframe("5min"), PositionAction.EXIT)
-        
+        buy_signal = TradeSignal(sample_instrument, TradeAction.BUY, 1, datetime(2024, 1, 5, 10, 0), Timeframe("5min"), PositionAction.ADD, trigger_type=TriggerType.ENTRY_RULES)
+        sell_signal = TradeSignal(sample_instrument, TradeAction.SELL, 1, datetime(2024, 1, 7, 12, 0), Timeframe("5min"), PositionAction.EXIT, trigger_type=TriggerType.EXIT_RULES)
+
         # Mock StrategyEvaluator to return trade signals alternately
-        signal_sequence = [buy_signal, None, None, sell_signal] + [None] * 24  # Fill remaining calls with None
+        signal_sequence = [[buy_signal], [], [], [sell_signal]] + [[]] * 24  # Fill remaining calls with empty lists
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
             with patch.object(StrategyEvaluator, 'evaluate', side_effect=signal_sequence) as mock_evaluate:
@@ -240,7 +241,7 @@ class TestBackTestRun:
         mock_tradable_instrument_repository.get_tradable_instruments.return_value = [real_tradable_instrument]
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None) as mock_evaluate:
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]) as mock_evaluate:
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     
                     # Run backtest
@@ -262,7 +263,7 @@ class TestBackTestRun:
         mock_strategy.get_required_history_start_date.return_value = date(2023, 12, 1)
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None):
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]):
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     
                     # Run backtest
@@ -287,7 +288,7 @@ class TestBackTestRun:
         mock_tradable_instrument_repository.get_tradable_instruments.return_value = [real_tradable_instrument]
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None) as mock_evaluator_init:
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None):
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]):
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None) as mock_executor_init:
                     
                     # Run backtest
@@ -304,7 +305,7 @@ class TestBackTestRun:
         mock_executor_init.assert_called_once_with(
             mock_tradable_instrument_repository,
             mock_historical_data_repository,
-            mock_strategy.get_name.return_value
+            mock_strategy
         )
 
     def test_run_handles_timeframe_conversion(self, backtest_instance, mock_strategy,
@@ -320,7 +321,7 @@ class TestBackTestRun:
         mock_strategy.get_timeframe.return_value = "15min"
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None):
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]):
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     
                     # Run backtest
@@ -341,7 +342,7 @@ class TestBackTestRun:
         mock_tradable_instrument_repository.get_tradable_instruments.return_value = [mock_tradable]
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None):
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]):
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     
                     # Run backtest
@@ -363,7 +364,7 @@ class TestBackTestRun:
         mock_tradable_instrument_repository.get_tradable_instruments.return_value = [mock_tradable_instrument]
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
-            with patch.object(StrategyEvaluator, 'evaluate', return_value=None):
+            with patch.object(StrategyEvaluator, 'evaluate', return_value=[]):
                 with patch.object(BackTestTradeExecutor, '__init__', return_value=None):
                     
                     # Run backtest
@@ -406,7 +407,7 @@ class TestBackTestRun:
         
         def capture_timestamp(candle):
             actual_timestamps.append(candle['timestamp'])
-            return None
+            return []
         
         with patch.object(StrategyEvaluator, '__init__', return_value=None):
             with patch.object(StrategyEvaluator, 'evaluate', side_effect=capture_timestamp) as mock_evaluate:

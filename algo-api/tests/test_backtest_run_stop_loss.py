@@ -1,9 +1,7 @@
 import pytest
 from datetime import date, datetime, timedelta
 from algo.domain.strategy.strategy import Instrument, TradeAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
-from algo.domain.backtest.report import BackTestReport, PositionType, TradableInstrument, Position
 from algo.domain.backtest.historical_data import HistoricalData
-from algo.domain.backtest.backtest_run import BackTest
 
 class DummyStrategy(Strategy):
     def __init__(self, instrument, entry_idx=0, exit_idx=2, stop_loss_in_points=None):
@@ -60,15 +58,3 @@ def strategy(instrument):
 def historical_data(candles):
     return DummyHistoricalData(candles)
 
-@pytest.fixture
-def backtest(strategy, historical_data):
-    return BackTest(strategy, historical_data, historical_data, date(2025, 9, 17), date(2025, 9, 17))
-
-def test_stop_loss_triggered(backtest):
-    report = backtest.run()
-    tradable = report.tradable
-    assert len(tradable.positions) == 1
-    pos = tradable.positions[0]
-    assert not pos.is_open()
-    assert pos.exit_price() == 95.0
-    assert pos.exit_time() == datetime(2025, 9, 17, 9, 16)

@@ -1,6 +1,6 @@
 from typing import List, Dict
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
-from algo.domain.backtest.report import TradableInstrument
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 
 class InMemoryTradableInstrumentRepository(TradableInstrumentRepository):
     def __init__(self):
