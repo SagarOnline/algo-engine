@@ -66,6 +66,7 @@ def sample_historical_data(sample_candle):
 def mock_strategy():
     strategy = Mock()
     strategy.get_name.return_value = "test_strategy"
+    strategy.calculate_stop_loss_for.return_value = None
     return strategy
 
 
@@ -112,7 +113,7 @@ def test_execute_buy_signal_success(executor, sample_trade_signal, sample_tradab
     
     # Verify add_position was called with correct parameters
     sample_tradable_instrument.add_position.assert_called_once_with(
-        sample_trade_signal.timestamp, sample_candle['open'], sample_trade_signal.action, sample_trade_signal.quantity
+        sample_trade_signal.timestamp, sample_candle['open'], sample_trade_signal.action, sample_trade_signal.quantity, None
     )
     
     # Verify tradable instrument repository was called to save
@@ -327,7 +328,7 @@ def test_execute_uses_position_action_add(executor, sample_instrument, sample_tr
     
     # Verify add_position was called (because position_action is ADD)
     real_tradable_instrument.add_position.assert_called_once_with(
-        add_signal.timestamp, 100.0, TradeAction.SELL, 10
+        add_signal.timestamp, 100.0, TradeAction.SELL, 10, None
     )
     real_tradable_instrument.exit_position.assert_not_called()
     
@@ -407,7 +408,7 @@ def test_execute_position_action_overrides_trade_action(executor, sample_instrum
     
     # Verify that position_action (ADD) takes precedence over action (SELL)
     real_tradable_instrument.add_position.assert_called_once_with(
-        contradictory_signal.timestamp, 100.0, TradeAction.SELL, 5  # Uses original action for the call
+        contradictory_signal.timestamp, 100.0, TradeAction.SELL, 5, None  # Uses original action for the call
     )
     real_tradable_instrument.exit_position.assert_not_called()
     

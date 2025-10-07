@@ -102,9 +102,9 @@ def test_evaluator_initialization(evaluator, mock_strategy, mock_historical_data
     assert evaluator.tradable_instrument_repository == mock_tradable_instrument_repository
 
 
-def test_evaluate_no_tradable_instruments_returns_none(evaluator, sample_candle, sample_historical_data,
+def test_evaluate_no_tradable_instruments_returns_empty_list(evaluator, sample_candle, sample_historical_data,
                                                       mock_tradable_instrument_repository, mock_historical_data_repository):
-    """Test evaluate returns None when no tradable instruments exist."""
+    """Test evaluate returns empty list when no tradable instruments exist."""
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
@@ -113,13 +113,13 @@ def test_evaluate_no_tradable_instruments_returns_none(evaluator, sample_candle,
     result = evaluator.evaluate(sample_candle)
     
     # Verify
-    assert result is None
+    assert result == []
 
 
-def test_evaluate_no_entry_or_exit_signals_returns_none(evaluator, sample_candle, sample_historical_data,
+def test_evaluate_no_entry_or_exit_signals_returns_empty_list(evaluator, sample_candle, sample_historical_data,
                                                        sample_tradable_instrument, mock_strategy,
                                                        mock_tradable_instrument_repository, mock_historical_data_repository):
-    """Test evaluate returns None when no entry or exit signals are generated."""
+    """Test evaluate returns empty list when no entry or exit signals are generated."""
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
@@ -131,13 +131,13 @@ def test_evaluate_no_entry_or_exit_signals_returns_none(evaluator, sample_candle
     result = evaluator.evaluate(sample_candle)
     
     # Verify
-    assert result is None
+    assert result == []
 
 
 def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_historical_data,
                                         sample_tradable_instrument, mock_strategy,
                                         mock_tradable_instrument_repository, mock_historical_data_repository):
-    """Test evaluate returns TradeSignal when entry condition is met."""
+    """Test evaluate returns list with TradeSignal when entry condition is met."""
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
@@ -148,19 +148,21 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
     result = evaluator.evaluate(sample_candle)
     
     # Verify
-    assert result is not None
-    assert isinstance(result, TradeSignal)
-    assert result.instrument == sample_tradable_instrument.instrument
-    assert result.action == TradeAction.BUY
-    assert result.position_action == PositionAction.ADD
-    assert result.quantity == 1
-    assert result.timeframe == Timeframe.FIVE_MINUTES
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert isinstance(signal, TradeSignal)
+    assert signal.instrument == sample_tradable_instrument.instrument
+    assert signal.action == TradeAction.BUY
+    assert signal.position_action == PositionAction.ADD
+    assert signal.quantity == 1
+    assert signal.timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_historical_data,
                                        sample_tradable_instrument, mock_strategy,
                                        mock_tradable_instrument_repository, mock_historical_data_repository):
-    """Test evaluate returns TradeSignal when exit condition is met."""
+    """Test evaluate returns list with TradeSignal when exit condition is met."""
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
@@ -171,13 +173,15 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     result = evaluator.evaluate(sample_candle)
     
     # Verify
-    assert result is not None
-    assert isinstance(result, TradeSignal)
-    assert result.instrument == sample_tradable_instrument.instrument
-    assert result.action == TradeAction.SELL
-    assert result.position_action == PositionAction.EXIT
-    assert result.quantity == 1
-    assert result.timeframe == Timeframe.FIVE_MINUTES
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert isinstance(signal, TradeSignal)
+    assert signal.instrument == sample_tradable_instrument.instrument
+    assert signal.action == TradeAction.SELL
+    assert signal.position_action == PositionAction.EXIT
+    assert signal.quantity == 1
+    assert signal.timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_calls_strategy_methods_correctly(evaluator, sample_candle, sample_historical_data,
@@ -231,10 +235,10 @@ def test_evaluate_calls_tradable_instrument_repository_correctly(evaluator, samp
     mock_tradable_instrument_repository.get_tradable_instruments.assert_called_once_with("test_strategy")
 
 
-def test_evaluate_multiple_tradable_instruments_returns_first_signal(evaluator, sample_candle, sample_historical_data,
+def test_evaluate_multiple_tradable_instruments_returns_all_signals(evaluator, sample_candle, sample_historical_data,
                                                                     mock_strategy, mock_tradable_instrument_repository,
                                                                     mock_historical_data_repository):
-    """Test that evaluate returns signal from first matching tradable instrument."""
+    """Test that evaluate returns signals from all matching tradable instruments."""
     # Create multiple tradable instruments
     instrument1 = Instrument(InstrumentType.STOCK, Exchange.NSE, "INSTRUMENT1")
     instrument2 = Instrument(InstrumentType.STOCK, Exchange.NSE, "INSTRUMENT2")
@@ -255,15 +259,17 @@ def test_evaluate_multiple_tradable_instruments_returns_first_signal(evaluator, 
     # Execute
     result = evaluator.evaluate(sample_candle)
     
-    # Verify first instrument's signal is returned
-    assert result is not None
-    assert result.instrument == instrument1
+    # Verify signals from both instruments are returned
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0].instrument == instrument1
+    assert result[1].instrument == instrument2
 
 
-def test_evaluate_position_open_but_no_exit_signal_returns_none(evaluator, sample_candle, sample_historical_data,
+def test_evaluate_position_open_but_no_exit_signal_returns_empty_list(evaluator, sample_candle, sample_historical_data,
                                                               sample_tradable_instrument, mock_strategy,
                                                               mock_tradable_instrument_repository, mock_historical_data_repository):
-    """Test that evaluate returns None when position is open but no exit signal."""
+    """Test that evaluate returns empty list when position is open but no exit signal."""
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
@@ -274,7 +280,7 @@ def test_evaluate_position_open_but_no_exit_signal_returns_none(evaluator, sampl
     result = evaluator.evaluate(sample_candle)
     
     # Verify
-    assert result is None
+    assert result == []
 
 
 def test_get_historical_data_calls_strategy_methods(evaluator, mock_strategy, mock_historical_data_repository):
@@ -313,11 +319,11 @@ def test_trade_signal_creation_with_timestamp(evaluator, sample_candle, sample_h
     result = evaluator.evaluate(sample_candle)
     
     # Verify TradeSignal has timestamp and timeframe
-    assert result is not None
-    assert hasattr(result, 'timestamp')
-    assert result.timestamp is not None
-    assert hasattr(result, 'timeframe')
-    assert result.timeframe == Timeframe.FIVE_MINUTES
+    assert result, "Result is  not an empty list"
+    assert hasattr(result[0], 'timestamp')
+    assert result[0].timestamp is not None
+    assert hasattr(result[0], 'timeframe')
+    assert result[0].timeframe == Timeframe.FIVE_MINUTES
 
 
 def test_evaluate_handles_empty_historical_data(evaluator, sample_candle, sample_tradable_instrument,
@@ -339,7 +345,8 @@ def test_evaluate_handles_empty_historical_data(evaluator, sample_candle, sample
     mock_strategy.should_enter_trade.assert_called_once_with([])
     
     # Result can be None or a signal depending on strategy logic
-    assert result is None or isinstance(result, TradeSignal)
+    assert result == [] or (isinstance(result, list) and all(isinstance(item, TradeSignal) for item in result)), \
+    "Result must be an empty list or a list of TradeSignal objects"
 
 
 def test_evaluate_entry_and_exit_priority(evaluator, sample_candle, sample_historical_data,
@@ -357,5 +364,5 @@ def test_evaluate_entry_and_exit_priority(evaluator, sample_candle, sample_histo
     result = evaluator.evaluate(sample_candle)
     
     # Verify entry signal is returned (not exit signal)
-    assert result is not None
-    assert result.action == TradeAction.BUY  # Entry action
+    assert result, "Result is not an empty list"
+    assert result[0].action == TradeAction.BUY  # Entry action

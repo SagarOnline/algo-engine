@@ -73,10 +73,10 @@ class BackTest:
                 break
                 
             # Evaluate strategy to generate trade signals
-            trade_signal = strategy_evaluator.evaluate(candle)
+            trade_signals = strategy_evaluator.evaluate(candle)
             
-            # Execute trade signal if generated
-            if trade_signal is not None:
+            # Execute each trade signal
+            for trade_signal in trade_signals:
                 trade_executor.execute(trade_signal)
         
         # Get the final state of the tradable instrument (it should exist since we created it at the start)
