@@ -534,3 +534,91 @@ def test_exit_position_preserves_entry_trigger_type():
     assert position.entry_trigger_type == TriggerType.STOP_LOSS
     # Exit trigger type should be set to new value
     assert position.exit_trigger_type == TriggerType.EXIT_RULES
+
+
+def test_tradable_instrument_stop_loss_exit_uses_stop_loss_price():
+    """Test that TradableInstrument exit with STOP_LOSS trigger uses stop loss offset calculation"""
+    instr = make_instrument()
+    tradable = TradableInstrument(instr)
+    
+    # Add position with stop loss offset
+    tradable.add_position(
+        datetime(2023,1,1,9,15), 
+        100, 
+        TradeAction.BUY, 
+        10, 
+        stop_loss=95.0  # Stop loss offset of 5 points
+    )
+    
+    # Exit with STOP_LOSS trigger - provided price should be ignored, calculated stop loss used
+    tradable.exit_position(
+        datetime(2023,1,1,9,30), 
+        90.0,  # Market price (ignored)
+        TradeAction.SELL, 
+        10, 
+        trigger_type=TriggerType.STOP_LOSS
+    )
+    
+    position = tradable.positions[0]
+    assert position.exit_price() == 95.0  # entry_price - stop_loss (100 - 5), not market price (90)
+    assert position.exit_trigger_type == TriggerType.STOP_LOSS
+    assert position.pnl() == -50.0  # (95 - 100) * 10
+
+
+def test_tradable_instrument_exit_rules_uses_provided_price():
+    """Test that TradableInstrument exit with EXIT_RULES uses provided price"""
+    instr = make_instrument()
+    tradable = TradableInstrument(instr)
+    
+    # Add position with stop loss offset
+    tradable.add_position(
+        datetime(2023,1,1,9,15), 
+        100, 
+        TradeAction.BUY, 
+        10, 
+        stop_loss=5.0  # Stop loss offset
+    )
+    
+    # Exit with EXIT_RULES trigger - provided price should be used
+    tradable.exit_position(
+        datetime(2023,1,1,9,30), 
+        110.0,  # Target price
+        TradeAction.SELL, 
+        10, 
+        trigger_type=TriggerType.EXIT_RULES
+    )
+    
+    position = tradable.positions[0]
+    assert position.exit_price() == 110.0  # Provided price, not stop loss calculation
+    assert position.exit_trigger_type == TriggerType.EXIT_RULES
+    assert position.pnl() == 100.0  # (110 - 100) * 10
+
+
+def test_tradable_instrument_stop_loss_workflow_multiple_positions():
+    """Test stop loss workflow with multiple positions using offset-based stop loss"""
+    instr = make_instrument()
+    tradable = TradableInstrument(instr)
+    
+    # Position 1: LONG with stop loss offset
+    tradable.add_position(datetime(2023,1,1,9,15), 100, TradeAction.BUY, 10, stop_loss=95.0)
+    
+    # Position 2: SHORT with stop loss offset
+    tradable.add_position(datetime(2023,1,1,9,20), 200, TradeAction.SELL, 5, stop_loss=210.0)
+    
+    # Exit LONG position with stop loss trigger
+    tradable.exit_position(datetime(2023,1,1,9,30), 90.0, TradeAction.SELL, 10, trigger_type=TriggerType.STOP_LOSS)
+    
+    # Exit SHORT position with stop loss trigger  
+    tradable.exit_position(datetime(2023,1,1,9,35), 220.0, TradeAction.BUY, 5, trigger_type=TriggerType.STOP_LOSS)
+    
+    # Verify both positions used calculated stop loss prices
+    long_position = tradable.positions[0]
+    short_position = tradable.positions[1]
+    
+    assert long_position.exit_price() == 95.0  # 100 - 5, not market price 90
+    assert long_position.pnl() == -50.0  # (95 - 100) * 10
+    
+    assert short_position.exit_price() == 210.0  # 200 + 10, not market price 220
+    assert short_position.pnl() == -50.0  # (200 - 210) * 5
+    
+    assert tradable.total_pnl() == -100.0  # Combined loss

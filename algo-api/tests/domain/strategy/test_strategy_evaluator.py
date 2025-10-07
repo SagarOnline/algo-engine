@@ -562,7 +562,7 @@ def test_evaluate_stop_loss_short_position(evaluator, sample_candle, sample_hist
     tradable = TradableInstrument(instrument)
     
     # Add a SHORT position with stop loss (stop loss triggers when price goes up)
-    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.SELL, 1, stop_loss=105.0)
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.SELL, 1, stop_loss=5.0)
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
     
     # Set candle close price above stop loss to trigger it for SHORT position

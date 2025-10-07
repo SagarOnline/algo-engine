@@ -38,7 +38,7 @@ def test_should_trigger_stop_loss_long_position_not_triggers():
 
 def test_should_trigger_stop_loss_short_position_triggers():
     """Test that should_trigger_stop_loss returns True for SHORT position when price >= stop_loss."""
-    pos = make_position_short(entry_price=100.0, stop_loss=105.0)
+    pos = make_position_short(entry_price=100.0, stop_loss=5.0)
     
     # Price exactly at stop loss
     assert pos.has_stop_loss_hit(105.0) is True

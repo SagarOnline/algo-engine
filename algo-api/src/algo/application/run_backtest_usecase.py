@@ -35,7 +35,7 @@ class PositionDTO:
         self.profit_percentage = fmt_percent(position.pnl_percentage())
         self.profit_points = position.pnl_points()
         self.quantity = position.quantity
-        self.exit_type = position.exit_type if hasattr(position, 'exit_type') else None
+        self.exit_type = position.exit_trigger_type if hasattr(position, 'exit_trigger_type') else None
 
     def to_dict(self):
         return {
