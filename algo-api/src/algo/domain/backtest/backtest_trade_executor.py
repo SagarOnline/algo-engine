@@ -32,6 +32,7 @@ class BackTestTradeExecutor(TradeExecutor):
         
         execution_price = candle['open']
         execution_time = trade_signal.timestamp
+        trigger_type = trade_signal.trigger_type
         
         # Find the matching tradable instrument
         for tradable in tradable_instruments:
@@ -41,10 +42,10 @@ class BackTestTradeExecutor(TradeExecutor):
                     # Calculate stop loss using strategy
                     stop_loss = self.strategy.calculate_stop_loss_for(execution_price)
                     # Add new position with stop loss
-                    tradable.add_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity, stop_loss)
+                    tradable.add_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity, stop_loss, trigger_type=trigger_type)
                 elif trade_signal.position_action == PositionAction.EXIT:
                     # Exit existing position
-                    tradable.exit_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity)
+                    tradable.exit_position(execution_time, execution_price, trade_signal.action, trade_signal.quantity, trigger_type=trigger_type)
                 
                 # Save the updated tradable instrument
                 self.tradable_instrument_repository.save_tradable_instrument(self.strategy.get_name(), tradable)

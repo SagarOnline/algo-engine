@@ -2,12 +2,12 @@ import pytest
 from datetime import datetime, date, timedelta
 from unittest.mock import Mock, MagicMock, ANY
 
-from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction, TriggerType
+from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
 from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
-from algo.domain.backtest.report import TradableInstrument
+from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.timeframe import Timeframe
 
 
@@ -161,14 +161,20 @@ def test_evaluate_entry_signal_generated(evaluator, sample_candle, sample_histor
 
 
 def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_historical_data,
-                                       sample_tradable_instrument, mock_strategy,
+                                       mock_strategy,
                                        mock_tradable_instrument_repository, mock_historical_data_repository):
     """Test evaluate returns list with TradeSignal when exit condition is met."""
-    # Setup mocks
-    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
+     # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=None)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     mock_strategy.should_exit_trade.return_value = True
-    sample_tradable_instrument.is_any_position_open.return_value = True
     
     # Execute
     result = evaluator.evaluate(sample_candle)
@@ -178,7 +184,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     assert len(result) == 1
     signal = result[0]
     assert isinstance(signal, TradeSignal)
-    assert signal.instrument == sample_tradable_instrument.instrument
+    assert signal.instrument == tradable.instrument
     assert signal.action == TradeAction.SELL
     assert signal.position_action == PositionAction.EXIT
     assert signal.quantity == 1
@@ -269,14 +275,22 @@ def test_evaluate_multiple_tradable_instruments_returns_all_signals(evaluator, s
 
 
 def test_evaluate_position_open_but_no_exit_signal_returns_empty_list(evaluator, sample_candle, sample_historical_data,
-                                                              sample_tradable_instrument, mock_strategy,
+                                                              mock_strategy,
                                                               mock_tradable_instrument_repository, mock_historical_data_repository):
     """Test that evaluate returns empty list when position is open but no exit signal."""
+    
     # Setup mocks
-    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=None)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     mock_strategy.should_exit_trade.return_value = False
-    sample_tradable_instrument.is_any_position_open.return_value = True
     
     # Execute
     result = evaluator.evaluate(sample_candle)
@@ -368,3 +382,277 @@ def test_evaluate_entry_and_exit_priority(evaluator, sample_candle, sample_histo
     # Verify entry signal is returned (not exit signal)
     assert result, "Result is not an empty list"
     assert result[0].action == TradeAction.BUY  # Entry action
+
+
+def test_evaluate_stop_loss_hit_generates_stop_loss_signal(evaluator, sample_candle, sample_historical_data,
+                                                          mock_strategy, mock_tradable_instrument_repository,
+                                                          mock_historical_data_repository):
+    """Test that evaluate generates stop loss signal when position hits stop loss."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Create a tradable instrument with an open position that will hit stop loss
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price below stop loss to trigger it
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 94.0  # Below stop loss of 95.0
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify stop loss signal is generated
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert isinstance(signal, TradeSignal)
+    assert signal.trigger_type == TriggerType.STOP_LOSS
+    assert signal.position_action == PositionAction.EXIT
+    assert signal.action == TradeAction.SELL
+    assert signal.quantity == 1
+    assert signal.instrument == instrument
+
+
+def test_evaluate_stop_loss_not_hit_no_signal_generated(evaluator, sample_candle, sample_historical_data,
+                                                       mock_strategy, mock_tradable_instrument_repository,
+                                                       mock_historical_data_repository):
+    """Test that evaluate does not generate stop loss signal when stop loss is not hit."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    mock_strategy.should_enter_trade.return_value = False
+    mock_strategy.should_exit_trade.return_value = False
+    
+    # Create a tradable instrument with an open position
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price above stop loss (no trigger)
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 98.0  # Above stop loss of 95.0
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify no signals are generated
+    assert result == []
+
+
+def test_evaluate_stop_loss_multiple_positions_multiple_signals(evaluator, sample_candle, sample_historical_data,
+                                                               mock_strategy, mock_tradable_instrument_repository,
+                                                               mock_historical_data_repository):
+    """Test that evaluate generates multiple stop loss signals when multiple positions hit stop loss."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Create a tradable instrument with multiple open positions
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add multiple open positions with different stop losses
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    tradable.add_position(datetime(2025, 9, 17, 9, 5), 110.0, TradeAction.BUY, 2, stop_loss=105.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price that triggers both stop losses
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 90.0  # Below both stop losses
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify multiple stop loss signals are generated
+    assert isinstance(result, list)
+    assert len(result) == 2
+    
+    # Check both signals are stop loss signals
+    for signal in result:
+        assert signal.trigger_type == TriggerType.STOP_LOSS
+        assert signal.position_action == PositionAction.EXIT
+        assert signal.action == TradeAction.SELL
+
+
+def test_evaluate_stop_loss_priority_over_entry_rules(evaluator, sample_candle, sample_historical_data,
+                                                     mock_strategy, mock_tradable_instrument_repository,
+                                                     mock_historical_data_repository):
+    """Test that stop loss signals take priority over entry rule signals."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    mock_strategy.should_enter_trade.return_value = True  # Entry condition is met
+    mock_strategy.should_exit_trade.return_value = False
+    
+    # Create a tradable instrument with an open position
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price that triggers stop loss
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 94.0  # Below stop loss
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify only stop loss signal is generated (not entry signal)
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert signal.trigger_type == TriggerType.STOP_LOSS
+    assert signal.position_action == PositionAction.EXIT
+
+
+def test_evaluate_stop_loss_priority_over_exit_rules(evaluator, sample_candle, sample_historical_data,
+                                                    mock_strategy, mock_tradable_instrument_repository,
+                                                    mock_historical_data_repository):
+    """Test that stop loss signals take priority over exit rule signals."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    mock_strategy.should_enter_trade.return_value = False
+    mock_strategy.should_exit_trade.return_value = True  # Exit condition is met
+    
+    # Create a tradable instrument with an open position
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price that triggers stop loss
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 94.0  # Below stop loss
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify only stop loss signal is generated (not exit rule signal)
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert signal.trigger_type == TriggerType.STOP_LOSS
+    assert signal.position_action == PositionAction.EXIT
+
+
+def test_evaluate_stop_loss_short_position(evaluator, sample_candle, sample_historical_data,
+                                          mock_strategy, mock_tradable_instrument_repository,
+                                          mock_historical_data_repository):
+    """Test that evaluate correctly handles stop loss for SHORT positions."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    
+    # Create a tradable instrument with a SHORT position
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add a SHORT position with stop loss (stop loss triggers when price goes up)
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.SELL, 1, stop_loss=105.0)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set candle close price above stop loss to trigger it for SHORT position
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 106.0  # Above stop loss of 105.0
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify stop loss signal is generated for SHORT position
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert signal.trigger_type == TriggerType.STOP_LOSS
+    assert signal.position_action == PositionAction.EXIT
+    assert signal.action == TradeAction.SELL  # Close action for SHORT position
+    assert signal.quantity == 1
+
+
+def test_evaluate_stop_loss_no_open_positions(evaluator, sample_candle, sample_historical_data,
+                                             mock_strategy, mock_tradable_instrument_repository,
+                                             mock_historical_data_repository):
+    """Test that evaluate handles tradables with no open positions correctly."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    mock_strategy.should_enter_trade.return_value = False
+    mock_strategy.should_exit_trade.return_value = False
+    
+    # Create a tradable instrument with no positions
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Execute
+    result = evaluator.evaluate(sample_candle)
+    
+    # Verify no signals are generated
+    assert result == []
+
+
+def test_evaluate_stop_loss_position_without_stop_loss(evaluator, sample_candle, sample_historical_data,
+                                                      mock_strategy, mock_tradable_instrument_repository,
+                                                      mock_historical_data_repository):
+    """Test that evaluate handles positions without stop loss correctly."""
+    # Setup mocks
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
+    mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
+    mock_strategy.should_enter_trade.return_value = False
+    mock_strategy.should_exit_trade.return_value = False
+    
+    # Create a tradable instrument with an open position but no stop loss
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add position without stop loss (stop_loss=None)
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=None)
+    mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
+    
+    # Set any candle price
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 50.0  # Very low price, but no stop loss set
+    
+    # Execute
+    result = evaluator.evaluate(test_candle)
+    
+    # Verify no stop loss signals are generated
+    assert result == []
+
+
+def test_evaluate_for_stop_loss_method_isolated(evaluator, sample_candle):
+    """Test the _evaluate_for_stop_loss method in isolation."""
+    # Create a tradable instrument with an open position
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    tradable = TradableInstrument(instrument)
+    
+    # Add an open position with stop loss
+    tradable.add_position(datetime(2025, 9, 17, 9, 0), 100.0, TradeAction.BUY, 1, stop_loss=95.0)
+    
+    # Set candle close price to trigger stop loss
+    test_candle = sample_candle.copy()
+    test_candle['close'] = 94.0
+    
+    # Execute the isolated method
+    result = evaluator._evaluate_for_stop_loss(test_candle, Timeframe.FIVE_MINUTES, tradable)
+    
+    # Verify the result
+    assert isinstance(result, list)
+    assert len(result) == 1
+    signal = result[0]
+    assert signal.trigger_type == TriggerType.STOP_LOSS
+    assert signal.position_action == PositionAction.EXIT
+    assert signal.quantity == 1

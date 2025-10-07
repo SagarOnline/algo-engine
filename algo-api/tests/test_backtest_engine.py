@@ -48,7 +48,7 @@ def mock_historical_data_repository():
 
 @pytest.fixture
 def mock_tradable_instrument_repository():
-    from algo.domain.backtest.report import TradableInstrument
+    from algo.domain.strategy.tradable_instrument import TradableInstrument
     repo = Mock(spec=TradableInstrumentRepository)
     
     # Create a real TradableInstrument using the same instrument from mock_strategy
@@ -113,7 +113,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
 def test_run_respects_start_date():
     """Test using real objects instead of mocks for better debugging."""
     from algo.domain.backtest.historical_data import HistoricalData
-    from algo.domain.backtest.report import TradableInstrument
+    from algo.domain.strategy.tradable_instrument import TradableInstrument
     from algo.infrastructure.in_memory_tradable_instrument_repository import InMemoryTradableInstrumentRepository
     
     start_date = date(2023, 1, 3)

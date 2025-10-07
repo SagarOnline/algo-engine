@@ -1,9 +1,10 @@
 from datetime import date
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Strategy
-from algo.domain.backtest.report import BackTestReport, TradableInstrument
+from algo.domain.backtest.report import BackTestReport
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
 

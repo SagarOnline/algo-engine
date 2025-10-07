@@ -1,7 +1,8 @@
 import pytest
 from datetime import datetime
 from algo.domain.strategy.strategy import Instrument, TradeAction
-from algo.domain.backtest.report import Position, PositionExitType, PositionType
+from algo.domain.strategy.tradable_instrument import Position
+from algo.domain.strategy.tradable_instrument import PositionType
 
 def make_position_long(entry_price=100.0, stop_loss=95.0):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
@@ -12,55 +13,6 @@ def make_position_short(entry_price=100.0, stop_loss=105.0):
     instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     return Position(instrument, PositionType.SHORT, 1, entry_price, entry_time, stop_loss=stop_loss)
-
-def test_process_stop_loss_long_triggers():
-    pos = make_position_long()
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    triggered = pos.process_stop_loss(94.0, exit_time)
-    assert triggered
-    assert not pos.is_open()
-    assert pos.exit_price() == 95.0
-    assert pos.exit_time() == exit_time
-    assert pos.exit_type == PositionExitType.STOP_LOSS
-
-def test_process_stop_loss_long_not_triggered():
-    pos = make_position_long()
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    triggered = pos.process_stop_loss(96.0, exit_time)
-    assert not triggered
-    assert pos.is_open()
-    assert pos.exit_price() is None
-    assert pos.exit_type is None
-
-def test_process_stop_loss_short_triggers():
-    pos = make_position_short()
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    triggered = pos.process_stop_loss(106.0, exit_time)
-    assert triggered
-    assert not pos.is_open()
-    assert pos.exit_price() == 105.0
-    assert pos.exit_time() == exit_time
-    assert pos.exit_type == PositionExitType.STOP_LOSS
-
-def test_process_stop_loss_short_not_triggered():
-    pos = make_position_short()
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    triggered = pos.process_stop_loss(104.0, exit_time)
-    assert not triggered
-    assert pos.is_open()
-    assert pos.exit_price() is None
-    assert pos.exit_type is None
-
-def test_process_stop_loss_no_stop_loss():
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
-    entry_time = datetime(2025, 9, 17, 9, 15)
-    pos = Position(instrument, PositionType.LONG, 1, 100.0, entry_time)
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    triggered = pos.process_stop_loss(94.0, exit_time)
-    assert not triggered
-    assert pos.is_open()
-    assert pos.exit_price() is None
-    assert pos.exit_type is None
 
 def test_should_trigger_stop_loss_long_position_triggers():
     """Test that should_trigger_stop_loss returns True for LONG position when price <= stop_loss."""
@@ -160,27 +112,6 @@ def test_should_trigger_stop_loss_zero_stop_loss():
     assert pos_short.has_stop_loss_hit(0.0) is True
     assert pos_short.has_stop_loss_hit(1.0) is True
     assert pos_short.has_stop_loss_hit(-1.0) is False
-
-
-def test_process_stop_loss_uses_should_trigger_stop_loss():
-    """Test that process_stop_loss correctly uses should_trigger_stop_loss for decision making."""
-    pos_long = make_position_long(entry_price=100.0, stop_loss=95.0)
-    exit_time = datetime(2025, 9, 17, 15, 30)
-    
-    # Test case where should_trigger_stop_loss returns True
-    assert pos_long.has_stop_loss_hit(94.0) is True
-    triggered = pos_long.process_stop_loss(94.0, exit_time)
-    assert triggered is True
-    assert not pos_long.is_open()
-    
-    # Create new position for second test
-    pos_long2 = make_position_long(entry_price=100.0, stop_loss=95.0)
-    
-    # Test case where should_trigger_stop_loss returns False
-    assert pos_long2.has_stop_loss_hit(96.0) is False
-    triggered2 = pos_long2.process_stop_loss(96.0, exit_time)
-    assert triggered2 is False
-    assert pos_long2.is_open()
 
 
 def test_should_trigger_stop_loss_different_position_types():

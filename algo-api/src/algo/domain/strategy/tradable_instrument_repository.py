@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from algo.domain.backtest.report import TradableInstrument
+from algo.domain.strategy.tradable_instrument import TradableInstrument
 
 class TradableInstrumentRepository(ABC):
     @abstractmethod

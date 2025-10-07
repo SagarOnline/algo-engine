@@ -2,6 +2,8 @@ from datetime import date
 import datetime
 from typing import Any, Dict, Optional, List
 from enum import Enum
+
+from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from .strategy import Strategy, Instrument, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
@@ -12,12 +14,6 @@ from algo.domain.timeframe import Timeframe
 class PositionAction(Enum):
     ADD = "ADD"
     EXIT = "EXIT"
-
-
-class TriggerType(Enum):
-    ENTRY_RULES = "ENTRY_RULES"
-    EXIT_RULES = "EXIT_RULES"
-    STOP_LOSS = "STOP_LOSS"
 
 
 class TradeSignal:
@@ -60,7 +56,11 @@ class StrategyEvaluator:
             enter = not tradable.is_any_position_open() and should_enter_trade
             exit = tradable.is_any_position_open() and should_exit_trade
             
-            if enter:
+            # Check for stop loss hits on open positions
+            stop_loss_signals = self._evaluate_for_stop_loss(candle, strategy_timeframe, tradable)
+            if stop_loss_signals:
+                trade_signals.extend(stop_loss_signals)
+            elif enter:
                 # Create a trade signal for entering a position
                 position = self.strategy.get_position_instrument()
                 timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
@@ -75,6 +75,40 @@ class StrategyEvaluator:
                 trade_signals.append(trade_signal)
                 
         return trade_signals
+
+    def _evaluate_for_stop_loss(self, candle, strategy_timeframe, tradable: TradableInstrument) -> List[TradeSignal]:
+        """
+        Evaluate open positions for stop loss hits and return corresponding trade signals.
+        
+        Args:
+            candle: The current candle data
+            strategy_timeframe: The strategy's timeframe
+            tradable: The TradableInstrument to check
+            
+        Returns:
+            List[TradeSignal]: List of stop loss trade signals generated
+        """
+        stop_loss_signals = []
+        
+        if tradable.is_any_position_open():
+            current_price = candle['close']  # Use candle's close price for stop loss check
+            for position in tradable.positions:
+                if position.is_open() and position.has_stop_loss_hit(current_price):
+                    # Create stop loss exit signal
+                    position_instrument = self.strategy.get_position_instrument()
+                    timestamp = self._get_next_candle_timestamp(candle['timestamp'], strategy_timeframe)
+                    stop_loss_signal = TradeSignal(
+                        tradable.instrument, 
+                        position_instrument.get_close_action(), 
+                        position.quantity, 
+                        timestamp, 
+                        strategy_timeframe, 
+                        PositionAction.EXIT, 
+                        TriggerType.STOP_LOSS
+                    )
+                    stop_loss_signals.append(stop_loss_signal)
+                    
+        return stop_loss_signals
     
     def _get_historical_data(self, strategy: Strategy, end_date: date) -> HistoricalData:
         instrument = strategy.get_instrument()
