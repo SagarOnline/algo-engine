@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 from dataclasses import dataclass
 from algo.domain.indicators.registry import register_indicator, IndicatorRegistry
 from algo.domain.strategy.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, InstrumentType, Exchange, TradeAction
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 # --- Mock domain classes ---
 # Using real domain classes now for better testing
@@ -137,7 +137,8 @@ def test_get_required_history_start_date():
     start_date = date(2023, 1, 1)
     
     # Max period is 100. 100 * 1.5 = 150 days buffer
-    expected_date = start_date - timedelta(days=150)
+    # 150 * 5 = 750 days buffer for indicators
+    expected_date = start_date - timedelta(days=150 * 5)
     
     assert strategy.get_required_history_start_date(start_date) == expected_date
 
@@ -173,11 +174,11 @@ def test_get_required_history_start_date_hourly():
     
     strategy = DummyStrategy(entry_rules, timeframe=Timeframe("60min"))
     start_date = date(2023, 1, 1)
-    
-    # 100 candles / (375/60 candles_per_day) = 16 days needed
-    # 16 * 1.5 = 24 calendar days buffer
-    expected_date = start_date - timedelta(days=24)
-    
+
+    # 100 * 5 candles / (375/60 candles_per_day) = 80 days needed
+    # 80 * 1.5 = 120 + 1 calendar days buffer + extra day for mid-session logic
+    expected_date = start_date - timedelta(days=121)
+
     assert strategy.get_required_history_start_date(start_date) == expected_date
 
 def test_get_required_history_start_date_minute():
@@ -194,11 +195,11 @@ def test_get_required_history_start_date_minute():
     
     strategy = DummyStrategy(entry_rules, timeframe=Timeframe("5min"))
     start_date = date(2023, 1, 1)
-    
-    # 200 candles / (375/5 candles_per_day) = 2.66 days -> ceil(3) = 3 days needed
-    # 3 * 1.5 = 4.5 -> ceil(5) = 5 calendar days buffer
-    expected_date = start_date - timedelta(days=5)
-    
+
+    # 200 * 5 candles / (375/5 candles_per_day) = 13.33 days -> ceil(14) = 14 days needed
+    # 14 * 1.5 = 21 + extra day for mid-session logic
+    expected_date = start_date - timedelta(days=22)  # 22 days total for mid-session logic
+
     assert strategy.get_required_history_start_date(start_date) == expected_date
     
 def test_expression_evaluate_with_value():
@@ -359,3 +360,199 @@ def test_ruleset_get_maximum_period_value_none():
         ]
     )
     assert ruleset.get_maximum_period_value() == 0
+
+
+# Tests for enhanced get_required_history_start_date with datetime objects
+
+def test_get_required_history_start_date_with_datetime():
+    """Test that get_required_history_start_date works with datetime objects"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 50}),
+                right=Expression(expr_type="ema", params={"period": 20})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("1d"))
+    end_datetime = datetime(2023, 1, 1, 15, 30)  # Mid-session datetime
+    # 50 * 5 = 250 days buffer
+    # Max period is 50. 250 * 1.5 = 375 days buffer
+    expected_datetime = end_datetime - timedelta(days=375)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert isinstance(result, datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_minute_timeframe_mid_session():
+    """Test minute timeframe with mid-session datetime gets extra day buffer"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 75}),  # 75 candles needed
+                right=Expression(expr_type="ema", params={"period": 20})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("5min"))
+    end_datetime = datetime(2023, 1, 15, 11, 25)  # Mid-session on a trading day
+
+    # 75 * 5 candles / (375/5 candles_per_day) = 375/75 = 5 days needed
+    # 5 * 1.5 = 7.5 -> ceil(8) = 8 calendar days buffer
+    # +1 extra day for mid-session = 9 days total
+    expected_datetime = end_datetime - timedelta(days=9)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_minute_timeframe_start_of_session():
+    """Test minute timeframe with start-of-session datetime still gets extra day buffer"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 150}),  # 150 candles needed
+                right=Expression(expr_type="ema", params={"period": 50})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("15min"))
+    end_datetime = datetime(2023, 1, 15, 9, 15)  # Start of trading session
+
+    # 150 * 5 candles / (375/15 candles_per_day) = 750/25 = 30 days needed
+    # 30 * 1.5 = 45 calendar days buffer
+    # +1 extra day for mid-session logic = 46 days total
+    expected_datetime = end_datetime - timedelta(days=46)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_minute_timeframe_weekend():
+    """Test minute timeframe with weekend datetime gets extra day buffer"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 100}),
+                right=Expression(expr_type="ema", params={"period": 20})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("1min"))
+    end_datetime = datetime(2023, 1, 14, 14, 30)  # Saturday afternoon
+
+    # 100 * 5 candles / (375/1 candles_per_day) = 500/375 = 0.266 -> ceil(2) = 2 days needed
+    # 2 * 1.5 = 3 -> ceil(3) = 3 calendar days buffer
+    # +1 extra day for mid-session logic = 4 days total
+    expected_datetime = end_datetime - timedelta(days=4)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_daily_timeframe_no_extra_day():
+    """Test that daily timeframe does not get extra day buffer"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 20}),
+                right=Expression(expr_type="ema", params={"period": 10})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("1d"))
+    end_datetime = datetime(2023, 1, 15, 14, 30)  # Mid-day datetime
+
+    # Daily timeframe: 20 * 5 days needed * 1.5 = 150 calendar days buffer
+    # No extra day added for daily timeframe
+    expected_datetime = end_datetime - timedelta(days=150)
+    
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_weekly_timeframe_no_extra_day():
+    """Test that weekly timeframe does not get extra day buffer"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 4}),  # 4 weeks
+                right=Expression(expr_type="ema", params={"period": 2})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("1w"))
+    end_datetime = datetime(2023, 1, 15, 10, 0)  # Sunday morning
+    
+    # Weekly timeframe: 4 * 5 weeks * 7 days = 140 days needed
+    # 140 * 1.5 = 210 calendar days buffer
+    # No extra day added for weekly timeframe
+    expected_datetime = end_datetime - timedelta(days=210)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_large_minute_period():
+    """Test minute timeframe with large period requiring multiple days"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="ema", params={"period": 1000}),  # Large period
+                right=Expression(expr_type="ema", params={"period": 500})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("5min"))
+    end_datetime = datetime(2023, 6, 15, 13, 45)  # Mid-session
+
+    # 1000 * 5 candles / (375/5 candles_per_day) = 5000/75 = 66.67 -> ceil(67) = 67 days needed
+    # 67 * 1.5 = 100.5 -> ceil(101) = 101 calendar days buffer
+    # +1 extra day for mid-session = 102 days total
+    expected_datetime = end_datetime - timedelta(days=102)
+
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == expected_datetime
+
+
+def test_get_required_history_start_date_zero_period_with_datetime():
+    """Test that zero period returns same datetime"""
+    entry_rules = RuleSet(
+        logic="AND",
+        conditions=[
+            Condition(
+                operator=">",
+                left=Expression(expr_type="price", params={"price": "close"}),
+                right=Expression(expr_type="number", params={"value": 100})
+            )
+        ]
+    )
+    
+    strategy = DummyStrategy(entry_rules, timeframe=Timeframe("15min"))
+    end_datetime = datetime(2023, 3, 20, 16, 30)
+    
+    # No period-based indicators, should return same datetime
+    result = strategy.get_required_history_start_date(end_datetime)
+    assert result == end_datetime

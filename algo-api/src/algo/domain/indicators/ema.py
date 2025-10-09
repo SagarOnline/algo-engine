@@ -12,7 +12,6 @@ def indicator_ema(historical_data: Union[List[Dict[str, Any]], pd.DataFrame], pa
 
     if historical_data.empty:
         raise RuntimeError("historical_data is empty in ema indicator")
-    
     period = params.get("period", 20)
     price_col = params.get("price", "close")
 

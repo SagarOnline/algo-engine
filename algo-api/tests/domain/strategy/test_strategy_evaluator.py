@@ -1,7 +1,8 @@
 import pytest
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from unittest.mock import Mock, MagicMock, ANY
 
+from algo.domain.backtest import historical_data
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
 from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
@@ -17,7 +18,7 @@ def mock_strategy():
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "5min"
     strategy.get_instrument.return_value = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
-    strategy.get_required_history_start_date.return_value = date(2025, 9, 10)
+    strategy.get_required_history_start_date.return_value = datetime(2025, 9, 10, 9, 15, 0)
     strategy.should_enter_trade.return_value = False
     strategy.should_exit_trade.return_value = False
     strategy.get_timeframe.return_value = Timeframe.FIVE_MINUTES
@@ -43,8 +44,7 @@ def mock_tradable_instrument_repository():
 
 @pytest.fixture
 def sample_historical_data():
-    historical_data = Mock(spec=HistoricalData)
-    historical_data.data = [
+    sample_data = [
         {
             'timestamp': datetime(2025, 9, 17, 9, 0, 0),
             'open': 100.0,
@@ -62,7 +62,7 @@ def sample_historical_data():
             'volume': 1200
         }
     ]
-    return historical_data
+    return HistoricalData(sample_data)
 
 
 @pytest.fixture
@@ -222,7 +222,7 @@ def test_evaluate_calls_historical_data_repository_correctly(evaluator, sample_c
     # Verify historical data repository was called correctly
     mock_historical_data_repository.get_historical_data.assert_called_once_with(
         mock_strategy.get_instrument.return_value,
-        mock_strategy.get_required_history_start_date.return_value,
+        mock_strategy.get_required_history_start_date().date(),
         sample_candle['timestamp'].date(),
         ANY  # Timeframe object
     )
@@ -302,8 +302,8 @@ def test_evaluate_position_open_but_no_exit_signal_returns_empty_list(evaluator,
 def test_get_historical_data_calls_strategy_methods(evaluator, mock_strategy, mock_historical_data_repository):
     """Test that _get_historical_data calls strategy methods correctly."""
     # Setup
-    end_date = date(2025, 9, 17)
-    mock_historical_data = Mock(spec=HistoricalData)
+    end_date = datetime(2025, 9, 17, 9, 15, 0)
+    mock_historical_data = HistoricalData([])
     mock_historical_data_repository.get_historical_data.return_value = mock_historical_data
     
     # Execute
@@ -318,7 +318,7 @@ def test_get_historical_data_calls_strategy_methods(evaluator, mock_strategy, mo
     mock_historical_data_repository.get_historical_data.assert_called_once()
     
     # Verify result
-    assert result == mock_historical_data
+    assert result == mock_historical_data.data
 
 
 def test_trade_signal_creation_with_timestamp(evaluator, sample_candle, sample_historical_data,
@@ -347,8 +347,7 @@ def test_evaluate_handles_empty_historical_data(evaluator, sample_candle, sample
                                                mock_historical_data_repository):
     """Test that evaluate handles empty historical data gracefully."""
     # Setup mocks with empty historical data
-    empty_historical_data = Mock(spec=HistoricalData)
-    empty_historical_data.data = []
+    empty_historical_data = HistoricalData([])
     
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [sample_tradable_instrument]
     mock_historical_data_repository.get_historical_data.return_value = empty_historical_data
@@ -656,3 +655,281 @@ def test_evaluate_for_stop_loss_method_isolated(evaluator, sample_candle):
     assert signal.trigger_type == TriggerType.STOP_LOSS
     assert signal.position_action == PositionAction.EXIT
     assert signal.quantity == 1
+
+
+# Tests for _get_next_candle_timestamp method
+
+def test_get_next_candle_timestamp_intraday_within_trading_hours():
+    """Test that next candle timestamp is calculated correctly within trading hours and preserves timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test 5-minute timeframe within trading hours with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    current_time = datetime(2023, 10, 9, 10, 30, tzinfo=ist)  # Monday 10:30 AM IST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 10, 35, tzinfo=ist)  # 10:35 AM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+    
+    # Test 15-minute timeframe within trading hours with UTC timezone
+    utc_time = datetime(2023, 10, 9, 14, 0, tzinfo=timezone.utc)  # Monday 2:00 PM UTC
+    next_time = evaluator._get_next_candle_timestamp(utc_time, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 9, 14, 15, tzinfo=timezone.utc)  # 2:15 PM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+
+
+def test_get_next_candle_timestamp_last_candle_of_day():
+    """Test that next candle timestamp moves to next trading day at 9:15 AM when current is last candle and preserves timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test 5-minute timeframe at 3:25 PM (last candle before 3:30 PM close) with UTC timezone
+    current_time = datetime(2023, 10, 9, 15, 25, tzinfo=timezone.utc)  # Monday 3:25 PM UTC
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=timezone.utc)  # Tuesday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+    
+    # Test 15-minute timeframe at 3:15 PM with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    current_time = datetime(2023, 10, 9, 15, 15, tzinfo=ist)  # Monday 3:15 PM IST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=ist)  # Tuesday 9:15 AM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+
+
+def test_get_next_candle_timestamp_after_trading_hours():
+    """Test that timestamps after trading hours move to next trading day and preserve timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test timestamp at 4:00 PM (after market close) with UTC timezone
+    current_time = datetime(2023, 10, 9, 16, 0, tzinfo=timezone.utc)  # Monday 4:00 PM UTC
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=timezone.utc)  # Tuesday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+    
+    # Test with EST timezone
+    est = timezone(timedelta(hours=-5))
+    current_time = datetime(2023, 10, 9, 16, 0, tzinfo=est)  # Monday 4:00 PM EST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=est)  # Tuesday 9:15 AM EST
+    assert next_time == expected_time
+    assert next_time.tzinfo == est
+
+
+def test_get_next_candle_timestamp_friday_to_monday():
+    """Test that Friday's last candle moves to Monday 9:15 AM (skipping weekend) and preserves timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test Friday 3:25 PM (last candle) with UTC timezone
+    current_time = datetime(2023, 10, 6, 15, 25, tzinfo=timezone.utc)  # Friday 3:25 PM UTC
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=timezone.utc)  # Monday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+    
+    # Test Friday 3:30 PM exactly (market close) with JST timezone
+    jst = timezone(timedelta(hours=9))
+    current_time = datetime(2023, 10, 6, 15, 29, tzinfo=jst)  # Friday 3:30 PM JST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=jst)  # Monday 9:15 AM JST
+    assert next_time == expected_time
+    assert next_time.tzinfo == jst
+
+
+def test_get_next_candle_timestamp_weekend_to_monday():
+    """Test that weekend timestamps move to Monday 9:15 AM and preserve timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test Saturday timestamp with EST timezone
+    est = timezone(timedelta(hours=-5))
+    current_time = datetime(2023, 10, 7, 12, 0, tzinfo=est)  # Saturday 12:00 PM EST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=est)  # Monday 9:15 AM EST
+    assert next_time == expected_time
+    assert next_time.tzinfo == est
+    
+    # Test Sunday timestamp with PST timezone
+    pst = timezone(timedelta(hours=-8))
+    current_time = datetime(2023, 10, 8, 14, 30, tzinfo=pst)  # Sunday 2:30 PM PST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=pst)  # Monday 9:15 AM PST
+    assert next_time == expected_time
+    assert next_time.tzinfo == pst
+
+
+def test_get_next_candle_timestamp_daily_timeframe():
+    """Test daily timeframe moves to next trading day at 9:15 AM and preserves timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test Monday to Tuesday with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    current_time = datetime(2023, 10, 9, 15, 30, tzinfo=ist)  # Monday market close IST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_DAY)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=ist)  # Tuesday 9:15 AM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+    
+    # Test Friday to Monday (skip weekend) with UTC timezone
+    utc_time = datetime(2023, 10, 6, 15, 30, tzinfo=timezone.utc)  # Friday market close UTC
+    next_time = evaluator._get_next_candle_timestamp(utc_time, Timeframe.ONE_DAY)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=timezone.utc)  # Monday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+
+
+def test_get_next_candle_timestamp_weekly_timeframe():
+    """Test weekly timeframe moves to next week's first trading day at 9:15 AM and preserves timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test current week Monday to next week Monday with JST timezone
+    jst = timezone(timedelta(hours=9))
+    current_time = datetime(2023, 10, 9, 15, 30, tzinfo=jst)  # Monday market close JST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_WEEK)
+    expected_time = datetime(2023, 10, 16, 9, 15, tzinfo=jst)  # Next Monday 9:15 AM JST
+    assert next_time == expected_time
+    assert next_time.tzinfo == jst
+    
+    # Test current week Friday to next week Monday with custom timezone
+    custom_tz = timezone(timedelta(hours=-3))
+    current_time = datetime(2023, 10, 6, 15, 30, tzinfo=custom_tz)  # Friday market close
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_WEEK)
+    expected_time = datetime(2023, 10, 13, 9, 15, tzinfo=custom_tz)  # Next Friday 9:15 AM (one week later)
+    assert next_time == expected_time
+    assert next_time.tzinfo == custom_tz
+
+
+def test_get_next_candle_timestamp_different_minute_timeframes():
+    """Test different minute-based timeframes and timezone preservation"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test 1-minute timeframe within trading hours with UTC timezone
+    current_time = datetime(2023, 10, 9, 10, 30, tzinfo=timezone.utc)  # Monday 10:30 AM UTC
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 9, 10, 31, tzinfo=timezone.utc)  # 10:31 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+    
+    # Test 30-minute timeframe within trading hours with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    current_time = datetime(2023, 10, 9, 14, 0, tzinfo=ist)  # Monday 2:00 PM IST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.THIRTY_MINUTES)
+    expected_time = datetime(2023, 10, 9, 14, 30, tzinfo=ist)  # 2:30 PM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+    
+    # Test 60-minute timeframe within trading hours with EST timezone
+    est = timezone(timedelta(hours=-5))
+    current_time = datetime(2023, 10, 9, 13, 0, tzinfo=est)  # Monday 1:00 PM EST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.SIXTY_MINUTES)
+    expected_time = datetime(2023, 10, 9, 14, 0, tzinfo=est)  # 2:00 PM EST
+    assert next_time == expected_time
+    assert next_time.tzinfo == est
+
+
+def test_get_next_candle_timestamp_exactly_at_market_close():
+    """Test timestamp exactly at market close time (3:30 PM) and timezone preservation"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test exactly at 3:30 PM with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    current_time = datetime(2023, 10, 9, 15, 30, tzinfo=ist)  # Monday 3:30 PM IST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=ist)  # Tuesday 9:15 AM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+    
+    # Test exactly at 3:30 PM with UTC timezone
+    utc_time = datetime(2023, 10, 9, 15, 30, tzinfo=timezone.utc)  # Monday 3:30 PM UTC
+    next_time = evaluator._get_next_candle_timestamp(utc_time, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 10, 9, 15, tzinfo=timezone.utc)  # Tuesday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+
+
+def test_get_next_candle_timestamp_early_morning():
+    """Test timestamps in early morning within trading hours and timezone preservation"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Test at 9:15 AM (market open) with EST timezone
+    est = timezone(timedelta(hours=-5))
+    current_time = datetime(2023, 10, 9, 9, 15, tzinfo=est)  # Monday 9:15 AM EST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 20, tzinfo=est)  # 9:20 AM EST
+    assert next_time == expected_time
+    assert next_time.tzinfo == est
+    
+    # Test at 9:20 AM with JST timezone
+    jst = timezone(timedelta(hours=9))
+    current_time = datetime(2023, 10, 9, 9, 20, tzinfo=jst)  # Monday 9:20 AM JST
+    next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 35, tzinfo=jst)  # 9:35 AM JST
+    assert next_time == expected_time
+    assert next_time.tzinfo == jst
+
+
+def test_get_next_candle_timestamp_weekend_during_trading_hours():
+    """Test that weekend timestamps during trading hours move to Monday 9:15 AM and preserve timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Saturday 11:00 AM (during what would be trading hours) with UTC timezone
+    saturday_timestamp = datetime(2023, 10, 7, 11, 0, tzinfo=timezone.utc)  # Saturday UTC
+    next_time = evaluator._get_next_candle_timestamp(saturday_timestamp, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=timezone.utc)  # Monday 9:15 AM UTC
+    assert next_time == expected_time
+    assert next_time.tzinfo == timezone.utc
+    
+    # Sunday 2:00 PM (during what would be trading hours) with Pacific timezone
+    pacific = timezone(timedelta(hours=-8))
+    sunday_timestamp = datetime(2023, 10, 8, 14, 0, tzinfo=pacific)  # Sunday PST
+    next_time = evaluator._get_next_candle_timestamp(sunday_timestamp, Timeframe.ONE_MINUTE)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=pacific)  # Monday 9:15 AM PST
+    assert next_time == expected_time
+    assert next_time.tzinfo == pacific
+
+
+def test_get_next_candle_timestamp_friday_crossing_to_weekend():
+    """Test that Friday timestamps that would result in weekend move to Monday and preserve timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Friday 3:25 PM + 5 minutes = Friday 3:30 PM (end of trading) with IST timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    friday_timestamp = datetime(2023, 10, 6, 15, 25, tzinfo=ist)  # Friday IST
+    next_time = evaluator._get_next_candle_timestamp(friday_timestamp, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=ist)  # Monday 9:15 AM IST
+    assert next_time == expected_time
+    assert next_time.tzinfo == ist
+    
+    # Friday with timezone crossing to Monday
+    mountain = timezone(timedelta(hours=-7))
+    friday_timestamp = datetime(2023, 10, 6, 15, 25, tzinfo=mountain)  # Friday MST
+    next_time = evaluator._get_next_candle_timestamp(friday_timestamp, Timeframe.FIVE_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=mountain)  # Monday 9:15 AM MST
+    assert next_time == expected_time
+    assert next_time.tzinfo == mountain
+
+
+def test_get_next_candle_timestamp_weekend_after_hours():
+    """Test that weekend timestamps after trading hours move to Monday 9:15 AM and preserve timezone"""
+    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    
+    # Saturday 6:00 PM (after trading hours) with JST timezone
+    jst = timezone(timedelta(hours=9))
+    saturday_timestamp = datetime(2023, 10, 7, 18, 0, tzinfo=jst)  # Saturday JST
+    next_time = evaluator._get_next_candle_timestamp(saturday_timestamp, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=jst)  # Monday 9:15 AM JST
+    assert next_time == expected_time
+    assert next_time.tzinfo == jst
+    
+    # Saturday 6:00 PM with Central timezone
+    central = timezone(timedelta(hours=-6))
+    saturday_timestamp = datetime(2023, 10, 7, 18, 0, tzinfo=central)  # Saturday CST
+    next_time = evaluator._get_next_candle_timestamp(saturday_timestamp, Timeframe.FIFTEEN_MINUTES)
+    expected_time = datetime(2023, 10, 9, 9, 15, tzinfo=central)  # Monday 9:15 AM CST
+    assert next_time == expected_time
+    assert next_time.tzinfo == central
+
+
+# Remove the separate timezone tests since they are now integrated into existing tests

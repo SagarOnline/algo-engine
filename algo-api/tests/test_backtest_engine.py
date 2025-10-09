@@ -13,10 +13,10 @@ from algo.domain.timeframe import Timeframe
 def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
-    strategy.get_required_history_start_date.return_value = date(2023, 1, 1)
+    strategy.get_required_history_start_date.return_value = datetime(2023, 1, 1, 9, 15, 0)
     strategy.get_timeframe.return_value = Timeframe.ONE_DAY.value
-    
-    instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
+
+    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     position= PositionInstrument(TradeAction.BUY,instrument)
     strategy.get_position_instrument.return_value = position
@@ -125,7 +125,7 @@ def test_run_respects_start_date():
     strategy.get_timeframe.return_value = Timeframe.ONE_DAY.value
     
     # required_start_date will be earlier
-    required_start_date = date(2023, 1, 1)
+    required_start_date = datetime(2023, 1, 1, 9, 15, 0)
     strategy.get_required_history_start_date.return_value = required_start_date
     
     # Use real domain objects

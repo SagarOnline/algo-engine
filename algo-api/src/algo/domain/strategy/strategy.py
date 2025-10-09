@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Union, Literal, Dict, Any
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import math
 from algo.domain.indicators.registry import IndicatorRegistry
 from algo.domain.market import Candle
@@ -195,16 +195,16 @@ class Strategy(ABC):
     def get_risk_management(self) -> Optional[RiskManagement]:
         pass
 
-    def get_required_history_start_date(self, start_date: date) -> date:
+    def get_required_history_start_date(self, end_datetime: datetime) -> datetime:
         entry_rules = self.get_entry_rules()
         exit_rules = self.get_exit_rules()
-
-        entry_max = entry_rules.get_maximum_period_value() if entry_rules else 0
-        exit_max = exit_rules.get_maximum_period_value() if exit_rules else 0
+        period_multiplier = 5 # Multiplier to ensure enough data for indicators
+        entry_max = entry_rules.get_maximum_period_value()* period_multiplier if entry_rules else 0
+        exit_max = exit_rules.get_maximum_period_value()* period_multiplier if exit_rules else 0
         max_period = max(entry_max, exit_max)
 
         if max_period == 0:
-            return start_date
+            return end_datetime
 
         timeframe = self.get_timeframe()
         timeframe_str = timeframe.value
@@ -215,18 +215,21 @@ class Strategy(ABC):
 
         if timeframe_str.endswith('d'):
             days_needed = max_period
+            calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier)
         elif timeframe_str.endswith('w'):
             days_needed = max_period * 7
+            calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier)
         elif timeframe_str.endswith('min'):
             minutes = int(timeframe_str[:-3])
             # Assuming 375 trading minutes a day
             candles_per_day = 375 / minutes
             days_needed = math.ceil(max_period / candles_per_day)
+            # Add buffer and ONE extra day to account for end_datetime possibly being mid-session
+            calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier) + 1
         else:
-            days_needed = 0 # Should not happen for valid timeframes
+            calendar_days_needed = 0 # Should not happen for valid timeframes
 
-        calendar_days_needed = math.ceil(days_needed * calendar_days_buffer_multiplier)
-        return start_date - timedelta(days=calendar_days_needed)
+        return end_datetime - timedelta(days=calendar_days_needed)
 
     def should_enter_trade(self, historical_data: List[Dict[str, Any]]) -> bool:
         entry_rules = self.get_entry_rules()
