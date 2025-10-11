@@ -36,6 +36,13 @@ class BrokerAPIConfig:
         self.upstox_config = upstox_config
 
 
+class SpecialDayConfig:
+    def __init__(self, config_dir: str):
+        self.config_dir = get_value(
+            config_dir, "SPECIAL_DAY_CONFIG.CONFIG_DIR", "./config/special_day/"
+        )
+
+
 class BacktestEngineConfig:
     def __init__(
         self,
@@ -66,9 +73,10 @@ class BacktestEngineConfig:
 
 
 class Config:
-    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict):
+    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, special_day_config: SpecialDayConfig):
         self.backtest_engine = backtest_engine
         self.broker_api = broker_api
+        self.special_day_config = special_day_config
 
     @staticmethod
     def from_dict(config_dict):
@@ -85,4 +93,11 @@ class Config:
                 redirect_url=broker_api.get("upstox", {}).get("redirect_url", "")
             )
         )
-        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config)
+        
+        # Add special day configuration
+        special_day_dict = config_dict.get("special_day_config", {})
+        special_day_config = SpecialDayConfig(
+            config_dir=special_day_dict.get("config_dir", "./config/special_day/")
+        )
+        
+        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, special_day_config=special_day_config)

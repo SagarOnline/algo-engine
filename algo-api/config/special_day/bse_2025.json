@@ -1,0 +1,130 @@
+[
+    {
+        "date": "2025-01-01",
+        "day_type": "HOLIDAY",
+        "description": "New Year's Day",
+        "metadata": {
+            "category": "national",
+            "recurring": true
+        }
+    },
+    {
+        "date": "2025-01-26",
+        "day_type": "HOLIDAY",
+        "description": "Republic Day",
+        "metadata": {
+            "category": "national",
+            "country": "India"
+        }
+    },
+    {
+        "date": "2025-02-26",
+        "day_type": "HOLIDAY",
+        "description": "Maha Shivratri",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2025-03-14",
+        "day_type": "HOLIDAY",
+        "description": "Holi",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2025-04-06",
+        "day_type": "HOLIDAY",
+        "description": "Ram Navami",
+        "metadata": {
+            "category": "religious"
+        }
+    },
+    {
+        "date": "2025-04-14",
+        "day_type": "HOLIDAY",
+        "description": "Dr. Ambedkar Jayanti",
+        "metadata": {
+            "category": "national"
+        }
+    },
+    {
+        "date": "2025-04-18",
+        "day_type": "HOLIDAY",
+        "description": "Good Friday",
+        "metadata": {
+            "category": "religious"
+        }
+    },
+    {
+        "date": "2025-08-15",
+        "day_type": "HOLIDAY",
+        "description": "Independence Day",
+        "metadata": {
+            "category": "national",
+            "recurring": true
+        }
+    },
+    {
+        "date": "2025-10-02",
+        "day_type": "HOLIDAY",
+        "description": "Gandhi Jayanti",
+        "metadata": {
+            "category": "national",
+            "recurring": true
+        }
+    },
+    {
+        "date": "2025-10-20",
+        "day_type": "HOLIDAY",
+        "description": "Diwali",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2025-11-05",
+        "day_type": "HOLIDAY",
+        "description": "Gurunanak Jayanti",
+        "metadata": {
+            "category": "religious"
+        }
+    },
+    {
+        "date": "2025-12-25",
+        "day_type": "HOLIDAY",
+        "description": "Christmas Day",
+        "metadata": {
+            "category": "religious",
+            "recurring": true
+        }
+    },
+    {
+        "date": "2025-12-24",
+        "day_type": "SPECIAL_TRADING_DAY",
+        "description": "Christmas Eve - Early Close",
+        "trading_start": "09:15:00",
+        "trading_end": "13:00:00",
+        "metadata": {
+            "early_close": true,
+            "reason": "Christmas Eve",
+            "exchange_specific": "BSE early close policy"
+        }
+    },
+    {
+        "date": "2025-12-31",
+        "day_type": "SPECIAL_TRADING_DAY",
+        "description": "New Year's Eve - Early Close",
+        "trading_start": "09:15:00",
+        "trading_end": "13:00:00",
+        "metadata": {
+            "early_close": true,
+            "reason": "New Year's Eve",
+            "exchange_specific": "BSE early close policy"
+        }
+    }
+]
