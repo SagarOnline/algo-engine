@@ -1,26 +1,8 @@
 [
     {
-        "date": "2025-01-01",
-        "day_type": "HOLIDAY",
-        "description": "New Year's Day",
-        "metadata": {
-            "category": "national",
-            "recurring": true
-        }
-    },
-    {
-        "date": "2025-01-26",
-        "day_type": "HOLIDAY",
-        "description": "Republic Day",
-        "metadata": {
-            "category": "national",
-            "country": "India"
-        }
-    },
-    {
         "date": "2025-02-26",
         "day_type": "HOLIDAY",
-        "description": "Maha Shivratri",
+        "description": "Mahashivratri",
         "metadata": {
             "category": "religious",
             "region": "India"
@@ -36,9 +18,18 @@
         }
     },
     {
-        "date": "2025-04-06",
+        "date": "2025-03-31",
         "day_type": "HOLIDAY",
-        "description": "Ram Navami",
+        "description": "Id-Ul-Fitr (Ramadan Eid)",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2025-04-10",
+        "day_type": "HOLIDAY",
+        "description": "Shri Mahavir Jayanti",
         "metadata": {
             "category": "religious"
         }
@@ -46,7 +37,7 @@
     {
         "date": "2025-04-14",
         "day_type": "HOLIDAY",
-        "description": "Dr. Ambedkar Jayanti",
+        "description": "Dr. Baba Saheb Ambedkar Jayanti",
         "metadata": {
             "category": "national"
         }
@@ -71,25 +62,43 @@
     {
         "date": "2025-08-15",
         "day_type": "HOLIDAY",
-        "description": "Independence Day",
+        "description": "Independence Day / Parsi New Year",
         "metadata": {
             "category": "national",
             "recurring": true
+        }
+    },
+    {
+        "date": "2025-08-27",
+        "day_type": "HOLIDAY",
+        "description": "Shri Ganesh Chaturthi",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
         }
     },
     {
         "date": "2025-10-02",
         "day_type": "HOLIDAY",
-        "description": "Gandhi Jayanti",
+        "description": "Mahatma Gandhi Jayanti/Dussehra",
         "metadata": {
             "category": "national",
             "recurring": true
         }
     },
     {
-        "date": "2025-10-20",
+        "date": "2025-10-21",
         "day_type": "HOLIDAY",
-        "description": "Diwali",
+        "description": "Diwali Laxmi Pujan",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2025-10-22",
+        "day_type": "HOLIDAY",
+        "description": "Balipratipada",
         "metadata": {
             "category": "religious",
             "region": "India"
@@ -98,7 +107,7 @@
     {
         "date": "2025-11-05",
         "day_type": "HOLIDAY",
-        "description": "Gurunanak Jayanti",
+        "description": "Prakash Gurpurb Sri Guru Nanak Dev",
         "metadata": {
             "category": "religious"
         }
@@ -106,32 +115,11 @@
     {
         "date": "2025-12-25",
         "day_type": "HOLIDAY",
-        "description": "Christmas Day",
+        "description": "Christmas",
         "metadata": {
             "category": "religious",
             "recurring": true
         }
-    },
-    {
-        "date": "2025-12-24",
-        "day_type": "SPECIAL_TRADING_DAY",
-        "description": "Christmas Eve - Early Close",
-        "trading_start": "09:15:00",
-        "trading_end": "13:00:00",
-        "metadata": {
-            "early_close": true,
-            "reason": "Christmas Eve"
-        }
-    },
-    {
-        "date": "2025-12-31",
-        "day_type": "SPECIAL_TRADING_DAY",
-        "description": "New Year's Eve - Early Close",
-        "trading_start": "09:15:00",
-        "trading_end": "13:00:00",
-        "metadata": {
-            "early_close": true,
-            "reason": "New Year's Eve"
-        }
     }
+    
 ]

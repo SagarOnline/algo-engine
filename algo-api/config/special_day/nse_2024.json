@@ -1,11 +1,10 @@
 [
     {
-        "date": "2024-01-01",
+        "date": "2024-01-22",
         "day_type": "HOLIDAY",
-        "description": "New Year's Day",
+        "description": "Special Holiday",
         "metadata": {
-            "category": "national",
-            "recurring": true
+            "category": "special"
         }
     },
     {
@@ -15,6 +14,15 @@
         "metadata": {
             "category": "national",
             "country": "India"
+        }
+    },
+    {
+        "date": "2024-03-08",
+        "day_type": "HOLIDAY",
+        "description": "Maha Shivaratri",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
         }
     },
     {
@@ -35,6 +43,15 @@
         }
     },
     {
+        "date": "2024-04-11",
+        "day_type": "HOLIDAY",
+        "description": "Eid-Ul-Fitr (Ramzan Eid)",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
         "date": "2024-04-17",
         "day_type": "HOLIDAY",
         "description": "Ram Navami",
@@ -52,6 +69,24 @@
         }
     },
     {
+        "date": "2024-06-17",
+        "day_type": "HOLIDAY",
+        "description": "Bakri Eid",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
+        "date": "2024-07-17",
+        "day_type": "HOLIDAY",
+        "description": "Moharram",
+        "metadata": {
+            "category": "religious",
+            "region": "India"
+        }
+    },
+    {
         "date": "2024-08-15",
         "day_type": "HOLIDAY",
         "description": "Independence Day",
@@ -63,7 +98,7 @@
     {
         "date": "2024-10-02",
         "day_type": "HOLIDAY",
-        "description": "Gandhi Jayanti",
+        "description": "Mahatma Gandhi Jayanti",
         "metadata": {
             "category": "national",
             "recurring": true
@@ -72,7 +107,7 @@
     {
         "date": "2024-11-01",
         "day_type": "HOLIDAY",
-        "description": "Diwali",
+        "description": "Diwali-Laxmi Pujan",
         "metadata": {
             "category": "religious",
             "region": "India"
@@ -87,34 +122,21 @@
         }
     },
     {
+        "date": "2024-11-20",
+        "day_type": "HOLIDAY",
+        "description": "Maharashtra Assembly Elections",
+        "metadata": {
+            "category": "special",
+            "state": "Maharashtra"
+        }
+    },
+    {
         "date": "2024-12-25",
         "day_type": "HOLIDAY",
-        "description": "Christmas Day",
+        "description": "Christmas",
         "metadata": {
             "category": "religious",
             "recurring": true
-        }
-    },
-    {
-        "date": "2024-12-24",
-        "day_type": "SPECIAL_TRADING_DAY",
-        "description": "Christmas Eve - Early Close",
-        "trading_start": "09:15:00",
-        "trading_end": "13:00:00",
-        "metadata": {
-            "early_close": true,
-            "reason": "Christmas Eve"
-        }
-    },
-    {
-        "date": "2024-12-31",
-        "day_type": "SPECIAL_TRADING_DAY",
-        "description": "New Year's Eve - Early Close",
-        "trading_start": "09:15:00",
-        "trading_end": "13:00:00",
-        "metadata": {
-            "early_close": true,
-            "reason": "New Year's Eve"
         }
     }
 ]
