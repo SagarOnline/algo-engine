@@ -1,0 +1,90 @@
+{
+  "exchange": "NSE",
+  "segment": "FNO",
+  "year": 2024,
+
+  "default_trading_windows": [
+    {
+      "effective_from": null,
+      "effective_to": null,
+      "open_time": "09:15",
+      "close_time": "15:30"
+    }
+  ],
+
+  "special_days": [
+    {
+      "date": "2024-11-01",
+      "description": "Muhurat Trading (Friday)",
+      "open_time": "18:00",
+      "close_time": "19:00"
+    }
+  ],
+
+  "holidays": [
+    {
+      "date": "2024-01-22",
+      "description": "Special Holiday"
+    },
+    {
+      "date": "2024-01-26",
+      "description": "Republic Day"
+    },
+    {
+      "date": "2024-03-08",
+      "description": "Maha Shivaratri"
+    },
+    {
+      "date": "2024-03-25",
+      "description": "Holi"
+    },
+    {
+      "date": "2024-03-29",
+      "description": "Good Friday"
+    },
+    {
+      "date": "2024-04-11",
+      "description": "Eid-Ul-Fitr (Ramzan Eid)"
+    },
+    {
+      "date": "2024-04-17",
+      "description": "Ram Navami"
+    },
+    {
+      "date": "2024-05-01",
+      "description": "Maharashtra Day"
+    },
+    {
+      "date": "2024-06-17",
+      "description": "Bakri Eid"
+    },
+    {
+      "date": "2024-07-17",
+      "description": "Moharram"
+    },
+    {
+      "date": "2024-08-15",
+      "description": "Independence Day"
+    },
+    {
+      "date": "2024-10-02",
+      "description": "Mahatma Gandhi Jayanti"
+    },
+    {
+      "date": "2024-11-01",
+      "description": "Diwali Laxmi Pujan"
+    },
+    {
+      "date": "2024-11-15",
+      "description": "Gurunanak Jayanti"
+    },
+    {
+      "date": "2024-11-20",
+      "description": "Maharashtra Assembly Elections"
+    },
+    {
+      "date": "2024-12-25",
+      "description": "Christmas"
+    }
+  ]
+}
