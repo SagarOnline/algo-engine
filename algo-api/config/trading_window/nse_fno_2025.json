@@ -11,6 +11,14 @@
       "close_time": "15:30"
     }
   ],
+  "weekly_holidays": [
+    {
+      "day_of_week": "SATURDAY"
+    },
+    {
+      "day_of_week": "SUNDAY"
+    }
+  ],
 
   "special_days": [
     {

@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from algo.domain.config import Config, TradingWindowConfig, SpecialDayConfig, BacktestEngineConfig, BrokerAPIConfig, UpstoxConfig
+from algo.domain.config import Config, TradingWindowConfig, BacktestEngineConfig, BrokerAPIConfig, UpstoxConfig
 from algo.config_context import get_config, load_config
 from algo.infrastructure.service_configuration import register_all_services
 from algo.infrastructure.service_registry import service_registry, get_service
@@ -52,9 +52,6 @@ class TestConfigFromDict:
                     "redirect_url": "http://localhost:5000/callback"
                 }
             },
-            "special_day_config": {
-                "config_dir": "./config/special_day/"
-            },
             "trading_window_config": {
                 "config_dir": "./config/trading_window/"
             }
@@ -64,8 +61,6 @@ class TestConfigFromDict:
         
         assert isinstance(config.trading_window_config, TradingWindowConfig)
         assert config.trading_window_config.config_dir == "./config/trading_window/"
-        assert isinstance(config.special_day_config, SpecialDayConfig)
-        assert config.special_day_config.config_dir == "./config/special_day/"
     
     def test_config_from_dict_without_trading_window(self):
         """Test creating Config from dictionary without trading window config."""
@@ -77,9 +72,6 @@ class TestConfigFromDict:
                 "strategy_json_config_dir": "./strategies"
             },
             "broker_api": {},
-            "special_day_config": {
-                "config_dir": "./config/special_day/"
-            }
         }
         
         config = Config.from_dict(config_dict)
@@ -104,9 +96,6 @@ class TestConfigContext:
                 "upstox": {
                     "redirect_url": "http://localhost:5000/callback"
                 }
-            },
-            "special_day_config": {
-                "config_dir": "./config/special_day/"
             },
             "trading_window_config": {
                 "config_dir": "./config/trading_window/"
@@ -167,9 +156,6 @@ class TestServiceConfigurationIntegration:
                 "strategy_json_config_dir": "./strategies"
             },
             "broker_api": {},
-            "special_day_config": {
-                "config_dir": "./config/special_day/"
-            }
         }
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:

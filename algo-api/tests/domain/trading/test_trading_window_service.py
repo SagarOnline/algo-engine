@@ -222,6 +222,14 @@ class TestTradingWindowService:
                     "close_time": "15:30"
                 }
             ],
+            "weekly_holidays": [
+                {
+                    "day_of_week": "SATURDAY"
+                },
+                {
+                    "day_of_week": "SUNDAY"
+                }
+            ],
             "special_days": [
                 {
                     "date": "2024-11-01",
@@ -240,6 +248,24 @@ class TestTradingWindowService:
                     "description": "Republic Day"
                 }
             ]
+        }
+    
+    @pytest.fixture
+    def config_data_without_weekly_holidays(self):
+        """Sample config data without weekly holidays for comparison tests."""
+        return {
+            "exchange": "BSE",
+            "segment": "EQ",
+            "year": 2024,
+            "default_trading_windows": [
+                {
+                    "effective_from": None,
+                    "effective_to": None,
+                    "open_time": "09:15",
+                    "close_time": "15:30"
+                }
+            ],
+            "holidays": []
         }
     
     @pytest.fixture
@@ -401,6 +427,235 @@ class TestTradingWindowService:
         assert not service.is_holiday(date(2024, 12, 25), "BSE", "EQ")
         assert service.get_trading_hours(date(2024, 11, 5), "BSE", "EQ") is None
         assert service.get_holidays(2024, "BSE", "EQ") == []
+    
+    def test_weekly_holidays_validation_valid_config(self):
+        """Test validation of valid weekly holidays configuration."""
+        valid_config = [{
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": [
+                {"day_of_week": "SATURDAY"},
+                {"day_of_week": "SUNDAY"}
+            ]
+        }]
+        
+        # Should not raise any exception
+        service = TradingWindowService(valid_config)
+        assert service is not None
+    
+    def test_weekly_holidays_validation_invalid_day_name(self):
+        """Test validation failure for invalid day names in weekly holidays."""
+        invalid_config = [{
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": [
+                {"day_of_week": "INVALID_DAY"}
+            ]
+        }]
+        
+        with pytest.raises(ValueError, match="Weekly holiday 'day_of_week' must be one of"):
+            TradingWindowService(invalid_config)
+    
+    def test_weekly_holidays_validation_missing_day_of_week(self):
+        """Test validation failure for missing day_of_week field."""
+        invalid_config = [{
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": [
+                {"invalid_field": "SATURDAY"}
+            ]
+        }]
+        
+        with pytest.raises(ValueError, match="Weekly holiday missing 'day_of_week' field"):
+            TradingWindowService(invalid_config)
+    
+    def test_weekly_holidays_validation_not_object(self):
+        """Test validation failure for non-object weekly holiday entries."""
+        invalid_config = [{
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": ["SATURDAY", "SUNDAY"]  # Should be objects
+        }]
+        
+        with pytest.raises(ValueError, match="Weekly holiday must be an object with 'day_of_week' field"):
+            TradingWindowService(invalid_config)
+    
+    def test_weekly_holidays_saturday_detection(self, config_data_list):
+        """Test that Saturdays are correctly identified as weekly holidays."""
+        service = TradingWindowService(config_data_list)
+        
+        # November 2, 2024 is a Saturday
+        saturday_date = date(2024, 11, 2)
+        window = service.get_trading_window(saturday_date, "NSE", "FNO")
+        
+        assert window is not None
+        assert window.is_holiday
+        assert window.description == "Weekly Holiday"
+        assert window.open_time is None
+        assert window.close_time is None
+        assert "weekly_holiday" in window.metadata
+    
+    def test_weekly_holidays_sunday_detection(self, config_data_list):
+        """Test that Sundays are correctly identified as weekly holidays."""
+        service = TradingWindowService(config_data_list)
+        
+        # November 3, 2024 is a Sunday
+        sunday_date = date(2024, 11, 3)
+        window = service.get_trading_window(sunday_date, "NSE", "FNO")
+        
+        assert window is not None
+        assert window.is_holiday
+        assert window.description == "Weekly Holiday"
+        assert window.open_time is None
+        assert window.close_time is None
+        assert "weekly_holiday" in window.metadata
+    
+    def test_weekly_holidays_weekday_not_holiday(self, config_data_list):
+        """Test that weekdays are not identified as weekly holidays when only weekends are configured."""
+        service = TradingWindowService(config_data_list)
+        
+        # November 1, 2024 is a Friday (not a weekend)
+        friday_date = date(2024, 11, 1)
+        window = service.get_trading_window(friday_date, "NSE", "FNO")
+        
+        # Should be special trading day (Muhurat), not weekly holiday
+        assert window is not None
+        assert window.is_special_trading_day
+        assert not window.is_holiday or "special_trading" in window.metadata
+    
+    def test_weekly_holidays_all_days_configuration(self):
+        """Test configuration with all days as weekly holidays."""
+        all_days_config = [{
+            "exchange": "TEST",
+            "segment": "ALL",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": [
+                {"day_of_week": "MONDAY"},
+                {"day_of_week": "TUESDAY"},
+                {"day_of_week": "WEDNESDAY"},
+                {"day_of_week": "THURSDAY"},
+                {"day_of_week": "FRIDAY"},
+                {"day_of_week": "SATURDAY"},
+                {"day_of_week": "SUNDAY"}
+            ]
+        }]
+        
+        service = TradingWindowService(all_days_config)
+        
+        # Test each day of the week
+        for day_offset in range(7):
+            test_date = date(2024, 11, 4 + day_offset)  # Starting from Monday Nov 4, 2024
+            window = service.get_trading_window(test_date, "TEST", "ALL")
+            
+            assert window is not None
+            assert window.is_holiday
+            assert window.description == "Weekly Holiday"
+    
+    def test_weekly_holidays_case_insensitive(self):
+        """Test that day names are case insensitive."""
+        mixed_case_config = [{
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": [
+                {"day_of_week": "saturday"},  # lowercase
+                {"day_of_week": "Sunday"},    # mixed case
+                {"day_of_week": "FRIDAY"}     # uppercase
+            ]
+        }]
+        
+        service = TradingWindowService(mixed_case_config)
+        
+        # Test Saturday (Nov 2, 2024)
+        saturday_window = service.get_trading_window(date(2024, 11, 2), "NSE", "FNO")
+        assert saturday_window.is_holiday
+        
+        # Test Sunday (Nov 3, 2024)
+        sunday_window = service.get_trading_window(date(2024, 11, 3), "NSE", "FNO")
+        assert sunday_window.is_holiday
+        
+        # Test Friday (Nov 1, 2024) - should override special day
+        friday_window = service.get_trading_window(date(2024, 11, 1), "NSE", "FNO")
+        assert friday_window.is_holiday  # Weekly holiday takes precedence
+    
+    def test_weekly_holidays_without_configuration(self, config_data_without_weekly_holidays):
+        """Test behavior when no weekly holidays are configured."""
+        service = TradingWindowService([config_data_without_weekly_holidays])
+        
+        # November 2, 2024 is a Saturday, but no weekly holidays configured
+        saturday_date = date(2024, 11, 2)
+        window = service.get_trading_window(saturday_date, "BSE", "EQ")
+        
+        # Should generate default trading window since no weekly holidays configured
+        assert window is not None
+        assert window.is_regular_trading_day
+        assert window.open_time == time(9, 15)
+        assert window.close_time == time(15, 30)
+    
+    def test_weekly_holidays_storage_and_conversion(self, config_data_list):
+        """Test that day names are properly converted and stored as numeric values."""
+        service = TradingWindowService(config_data_list)
+        
+        # Access the internal storage to verify conversion
+        assert hasattr(service, '_weekly_holidays')
+        
+        weekly_holidays = service._weekly_holidays.get("NSE-FNO", {}).get(2024, [])
+        
+        # Should contain numeric values for Saturday (5) and Sunday (6)
+        assert 5 in weekly_holidays  # Saturday
+        assert 6 in weekly_holidays  # Sunday
+        assert len(weekly_holidays) == 2
+    
+    def test_weekly_holidays_multiple_years(self):
+        """Test weekly holidays configuration for multiple years."""
+        multi_year_config = [
+            {
+                "exchange": "NSE",
+                "segment": "FNO",
+                "year": 2024,
+                "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+                "weekly_holidays": [{"day_of_week": "SATURDAY"}, {"day_of_week": "SUNDAY"}]
+            },
+            {
+                "exchange": "NSE",
+                "segment": "FNO",
+                "year": 2025,
+                "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+                "weekly_holidays": [{"day_of_week": "FRIDAY"}, {"day_of_week": "SATURDAY"}, {"day_of_week": "SUNDAY"}]
+            }
+        ]
+        
+        service = TradingWindowService(multi_year_config)
+        
+        # Test 2024 configuration (Saturday/Sunday)
+        saturday_2024 = date(2024, 11, 2)  # Saturday
+        friday_2024 = date(2024, 11, 1)    # Friday
+        
+        saturday_window_2024 = service.get_trading_window(saturday_2024, "NSE", "FNO")
+        friday_window_2024 = service.get_trading_window(friday_2024, "NSE", "FNO")
+        
+        assert saturday_window_2024.is_holiday  # Saturday is weekly holiday in 2024
+        assert not friday_window_2024.is_holiday or "special_trading" in friday_window_2024.metadata  # Friday is not weekly holiday in 2024
+        
+        # Test 2025 configuration (Friday/Saturday/Sunday)
+        saturday_2025 = date(2025, 11, 1)  # Saturday
+        friday_2025 = date(2025, 10, 31)   # Friday
+        
+        saturday_window_2025 = service.get_trading_window(saturday_2025, "NSE", "FNO")
+        friday_window_2025 = service.get_trading_window(friday_2025, "NSE", "FNO")
+        
+        assert saturday_window_2025.is_holiday  # Saturday is weekly holiday in 2025
+        assert friday_window_2025.is_holiday    # Friday is weekly holiday in 2025
 
 
 if __name__ == "__main__":

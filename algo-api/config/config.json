@@ -5,9 +5,6 @@
     "parquet_files_base_dir": "./historical-data/",
     "strategy_json_config_dir": "./strategies/"
   },
-  "special_day_config":{
-    "config_dir": "./config/special_day/"
-  },
   "trading_window_config":{
     "config_dir": "./config/trading_window/"
   },

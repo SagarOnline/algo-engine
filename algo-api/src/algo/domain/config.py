@@ -36,13 +36,6 @@ class BrokerAPIConfig:
         self.upstox_config = upstox_config
 
 
-class SpecialDayConfig:
-    def __init__(self, config_dir: str):
-        self.config_dir = get_value(
-            config_dir, "SPECIAL_DAY_CONFIG.CONFIG_DIR", "./config/special_day/"
-        )
-
-
 class TradingWindowConfig:
     def __init__(self, config_dir: str):
         self.config_dir = get_value(
@@ -80,10 +73,9 @@ class BacktestEngineConfig:
 
 
 class Config:
-    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, special_day_config: SpecialDayConfig, trading_window_config: TradingWindowConfig):
+    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, trading_window_config: TradingWindowConfig):
         self.backtest_engine = backtest_engine
         self.broker_api = broker_api
-        self.special_day_config = special_day_config
         self.trading_window_config = trading_window_config
 
     @staticmethod
@@ -102,16 +94,10 @@ class Config:
             )
         )
         
-        # Add special day configuration
-        special_day_dict = config_dict.get("special_day_config", {})
-        special_day_config = SpecialDayConfig(
-            config_dir=special_day_dict.get("config_dir", "./config/special_day/")
-        )
-        
         # Add trading window configuration
         trading_window_dict = config_dict.get("trading_window_config", {})
         trading_window_config = TradingWindowConfig(
             config_dir=trading_window_dict.get("config_dir", "./config/trading_window/")
         )
         
-        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, special_day_config=special_day_config, trading_window_config=trading_window_config)
+        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, trading_window_config=trading_window_config)

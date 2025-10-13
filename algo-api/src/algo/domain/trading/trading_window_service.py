@@ -128,8 +128,9 @@ class TradingWindowService:
             
             year_cache[special_date] = trading_window
         
-        # Store default window configuration for generating regular trading days
+        # Store default and weekly holiday configuration for generating regular trading days
         self._store_default_configuration(exchange_segment_key, year, default_windows)
+        self._store_weekly_holidays_configuration(exchange_segment_key, year, config_data)
         
         logger.info(f"Loaded {len(holidays)} holidays and {len(special_days)} special days for {exchange_segment_key} {year}")
     
@@ -176,6 +177,23 @@ class TradingWindowService:
             for field in required_special_fields:
                 if field not in special_day:
                     raise ValueError(f"Special day missing '{field}' field in configuration at index {config_index}")
+        
+        # Validate weekly holidays
+        weekly_holidays = config_data.get("weekly_holidays", [])
+        if not isinstance(weekly_holidays, list):
+            raise ValueError(f"weekly_holidays must be a list in configuration at index {config_index}")
+        
+        valid_days = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"}
+        for weekly_holiday in weekly_holidays:
+            if not isinstance(weekly_holiday, dict):
+                raise ValueError(f"Weekly holiday must be an object with 'day_of_week' field in configuration at index {config_index}")
+            
+            if "day_of_week" not in weekly_holiday:
+                raise ValueError(f"Weekly holiday missing 'day_of_week' field in configuration at index {config_index}")
+            
+            day_of_week = weekly_holiday["day_of_week"]
+            if not isinstance(day_of_week, str) or day_of_week.upper() not in valid_days:
+                raise ValueError(f"Weekly holiday 'day_of_week' must be one of {valid_days} in configuration at index {config_index}")
     
     def _store_default_configuration(
         self, 
@@ -209,6 +227,52 @@ class TradingWindowService:
                 "effective_from": default_config.get("effective_from"),
                 "effective_to": default_config.get("effective_to")
             }
+    
+    def _store_weekly_holidays_configuration(
+        self, 
+        exchange_segment_key: str, 
+        year: int, 
+        config_data: TradingConfigData
+    ) -> None:
+        """
+        Store weekly holidays configuration.
+        
+        Args:
+            exchange_segment_key: Exchange-segment key
+            year: Year of the configuration
+            config_data: Configuration data containing weekly holidays
+        """
+        weekly_holidays_config = config_data.get("weekly_holidays", [])
+        
+        if weekly_holidays_config:
+            # Convert day names to weekday numbers (0=Monday, 6=Sunday)
+            day_name_to_number = {
+                "MONDAY": 0,
+                "TUESDAY": 1,
+                "WEDNESDAY": 2,
+                "THURSDAY": 3,
+                "FRIDAY": 4,
+                "SATURDAY": 5,
+                "SUNDAY": 6
+            }
+            
+            weekly_holidays = []
+            for holiday_config in weekly_holidays_config:
+                day_name = holiday_config["day_of_week"].upper()
+                weekly_holidays.append(day_name_to_number[day_name])
+            
+            # Store weekly holidays configuration
+            if not hasattr(self, '_weekly_holidays'):
+                self._weekly_holidays: Dict[str, Dict[int, List[int]]] = {}
+            
+            if exchange_segment_key not in self._weekly_holidays:
+                self._weekly_holidays[exchange_segment_key] = {}
+            
+            self._weekly_holidays[exchange_segment_key][year] = weekly_holidays
+            
+            # Log with both formats for clarity
+            day_names = [holiday_config["day_of_week"] for holiday_config in weekly_holidays_config]
+            logger.info(f"Configured weekly holidays {day_names} (weekdays {weekly_holidays}) for {exchange_segment_key} {year}")
     
     def get_trading_window(
         self, 
@@ -271,6 +335,19 @@ class TradingWindowService:
             year not in self._default_configs[exchange_segment_key]):
             return None
         
+        # Check if this day falls on a weekly holiday
+        if self._is_weekly_holiday(target_date, exchange_segment_key, year):
+            return TradingWindow(
+                date=target_date,
+                exchange=exchange,
+                segment=segment,
+                window_type=TradingWindowType.HOLIDAY,
+                open_time=None,
+                close_time=None,
+                description="Weekly Holiday",
+                metadata={"weekly_holiday": True}
+            )
+        
         default_config = self._default_configs[exchange_segment_key][year]
         
         return TradingWindow(
@@ -283,6 +360,33 @@ class TradingWindowService:
             description="Regular trading day",
             metadata={"default": True}
         )
+    
+    def _is_weekly_holiday(
+        self, 
+        target_date: date, 
+        exchange_segment_key: str, 
+        year: int
+    ) -> bool:
+        """
+        Check if a date falls on a configured weekly holiday.
+        
+        Args:
+            target_date: The date to check
+            exchange_segment_key: Exchange-segment key
+            year: Year to check configuration for
+            
+        Returns:
+            True if the date is a weekly holiday, False otherwise
+        """
+        if (not hasattr(self, '_weekly_holidays') or 
+            exchange_segment_key not in self._weekly_holidays or 
+            year not in self._weekly_holidays[exchange_segment_key]):
+            return False
+        
+        weekly_holidays = self._weekly_holidays[exchange_segment_key][year]
+        
+        # Check if the weekday (0=Monday, 6=Sunday) is in the weekly holidays list
+        return target_date.weekday() in weekly_holidays
     
     def is_holiday(self, target_date: date, exchange: str, segment: str) -> bool:
         """
