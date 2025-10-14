@@ -95,6 +95,31 @@ class TradingWindow:
         
         return self.open_time <= check_time <= self.close_time
     
+    def is_within_trading_window(self, timestamp: datetime) -> bool:
+        """
+        Check if a datetime timestamp falls within this trading window.
+        
+        Args:
+            timestamp: The datetime timestamp to check
+            
+        Returns:
+            True if timestamp falls within the trading window, False otherwise
+        """
+        # First check if the date matches
+        if timestamp.date() != self.date:
+            return False
+        
+        # If it's a holiday, market is never open
+        if self.is_holiday:
+            return False
+        
+        # If open/close times are not set, return False
+        if self.open_time is None or self.close_time is None:
+            return False
+        
+        # Check if the time falls within trading hours
+        return self.open_time <= timestamp.time() <= self.close_time
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert trading window to dictionary representation."""
         return {

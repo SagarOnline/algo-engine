@@ -4,7 +4,7 @@ Example trading window controller showing service registry usage.
 from flask import Blueprint, jsonify, request
 from datetime import date, datetime
 
-from algo.infrastructure.services import get_trading_window_service
+from algo.domain.services import get_trading_window_service
 
 # Create blueprint for trading window endpoints
 trading_window_bp = Blueprint('trading_window', __name__, url_prefix='/api/trading-window')

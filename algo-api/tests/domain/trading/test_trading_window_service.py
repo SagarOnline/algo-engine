@@ -2,7 +2,7 @@
 Tests for the TradingWindowService and TradingWindow classes.
 """
 import pytest
-from datetime import date, time
+from datetime import date, time, datetime
 
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
 from algo.domain.trading.trading_window_service import TradingWindowService
@@ -202,6 +202,181 @@ class TestTradingWindow:
         assert window.close_time == time(15, 30)
         assert window.description == "Regular trading day"
         assert window.metadata == {"test": "value"}
+    
+    def test_is_within_trading_window_normal_trading_day(self):
+        """Test is_within_trading_window for a normal trading day."""
+        window = TradingWindow(
+            date=date(2024, 11, 5),
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.DEFAULT,
+            open_time=time(9, 15),
+            close_time=time(15, 30),
+            description="Regular trading day"
+        )
+        
+        # Test within trading hours
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 10, 30))  # Mid-day
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 9, 15))   # Exact open
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 15, 30))  # Exact close
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 12, 0))   # Noon
+        
+        # Test outside trading hours
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 9, 14))   # Before open
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 31))  # After close
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 8, 0))    # Early morning
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 16, 0))   # Evening
+        
+        # Test different date
+        assert not window.is_within_trading_window(datetime(2024, 11, 6, 10, 30))  # Next day
+        assert not window.is_within_trading_window(datetime(2024, 11, 4, 10, 30))  # Previous day
+    
+    def test_is_within_trading_window_holiday(self):
+        """Test is_within_trading_window for a holiday."""
+        holiday_window = TradingWindow(
+            date=date(2024, 12, 25),
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.HOLIDAY,
+            open_time=None,
+            close_time=None,
+            description="Christmas"
+        )
+        
+        # All times should return False for holidays
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 25, 9, 15))
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 25, 10, 30))
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 25, 15, 30))
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 25, 0, 0))
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 25, 23, 59))
+        
+        # Different date should also be False
+        assert not holiday_window.is_within_trading_window(datetime(2024, 12, 24, 10, 30))
+    
+    def test_is_within_trading_window_special_trading_day(self):
+        """Test is_within_trading_window for a special trading day."""
+        special_window = TradingWindow(
+            date=date(2024, 11, 1),
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.SPECIAL,
+            open_time=time(18, 0),
+            close_time=time(19, 0),
+            description="Muhurat Trading"
+        )
+        
+        # Test within special trading hours
+        assert special_window.is_within_trading_window(datetime(2024, 11, 1, 18, 0))   # Exact open
+        assert special_window.is_within_trading_window(datetime(2024, 11, 1, 18, 30))  # Mid-session
+        assert special_window.is_within_trading_window(datetime(2024, 11, 1, 19, 0))   # Exact close
+        
+        # Test outside special trading hours
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 17, 59))  # Before open
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 19, 1))   # After close
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 9, 15))   # Normal trading hours
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 15, 30))  # Normal trading hours
+        
+        # Test different date
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 2, 18, 30))
+    
+    def test_is_within_trading_window_weekly_holiday(self):
+        """Test is_within_trading_window for a weekly holiday (weekend)."""
+        # Create a trading window that represents a weekly holiday (Saturday)
+        weekly_holiday_window = TradingWindow(
+            date=date(2024, 11, 2),  # Saturday
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.HOLIDAY,
+            open_time=None,
+            close_time=None,
+            description="Weekly Holiday",
+            metadata={"weekly_holiday": True}
+        )
+        
+        # All times should return False for weekly holidays
+        assert not weekly_holiday_window.is_within_trading_window(datetime(2024, 11, 2, 9, 15))
+        assert not weekly_holiday_window.is_within_trading_window(datetime(2024, 11, 2, 10, 30))
+        assert not weekly_holiday_window.is_within_trading_window(datetime(2024, 11, 2, 15, 30))
+        assert not weekly_holiday_window.is_within_trading_window(datetime(2024, 11, 2, 12, 0))
+        
+        # Different date should also be False
+        assert not weekly_holiday_window.is_within_trading_window(datetime(2024, 11, 1, 10, 30))
+    
+    def test_is_within_trading_window_edge_cases(self):
+        """Test edge cases for is_within_trading_window."""
+        window = TradingWindow(
+            date=date(2024, 11, 5),
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.DEFAULT,
+            open_time=time(9, 15),
+            close_time=time(15, 30),
+            description="Regular trading day"
+        )
+        
+        # Test exact boundary times
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 9, 15, 0))    # Exact open with seconds
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 15, 30, 0))   # Exact close with seconds
+        
+        # Test microseconds before/after boundaries
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 9, 14, 59))   # 1 second before
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 30, 1))   # 1 second after
+        
+        # Test with different timezone-aware datetimes (should work the same as they use .time())
+        from datetime import timezone
+        utc_tz = timezone.utc
+        assert window.is_within_trading_window(datetime(2024, 11, 5, 10, 30, tzinfo=utc_tz))
+    
+    def test_is_within_trading_window_budget_day_special(self):
+        """Test is_within_trading_window for Budget Day special trading (from 2025 config)."""
+        budget_day_window = TradingWindow(
+            date=date(2025, 2, 1),  # Saturday Budget Day
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.SPECIAL,
+            open_time=time(9, 0),
+            close_time=time(13, 0),
+            description="Union Budget Day (Saturday)"
+        )
+        
+        # Test within special budget trading hours
+        assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 9, 0))    # Exact open
+        assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 11, 0))   # Mid-session
+        assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 13, 0))   # Exact close
+        
+        # Test outside budget trading hours
+        assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 8, 59))   # Before open
+        assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 13, 1))   # After close
+        assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 15, 30))  # Normal close time
+        
+        # Test different date
+        assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 2, 11, 0))
+    
+    def test_is_within_trading_window_muhurat_trading_special(self):
+        """Test is_within_trading_window for Muhurat Trading special session (from 2025 config)."""
+        muhurat_window = TradingWindow(
+            date=date(2025, 10, 21),  # Saturday Muhurat Trading
+            exchange="NSE",
+            segment="FNO",
+            window_type=TradingWindowType.SPECIAL,
+            open_time=time(13, 45),
+            close_time=time(14, 45),
+            description="Muhurat Trading (Saturday)"
+        )
+        
+        # Test within Muhurat trading hours
+        assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 13, 45))  # Exact open
+        assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 15))  # Mid-session
+        assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 45))  # Exact close
+        
+        # Test outside Muhurat trading hours
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 13, 44))  # Before open
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 46))  # After close
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 9, 15))   # Normal open time
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 15, 30))  # Normal close time
+        
+        # Test different date
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 22, 14, 15))
 
 
 class TestTradingWindowService:

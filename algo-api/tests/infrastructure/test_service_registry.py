@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from algo.infrastructure.service_registry import ServiceRegistry, service_registry, register_service_instance, get_service
 from algo.infrastructure.service_configuration import register_all_services
-from algo.infrastructure.services import get_trading_window_service
+from algo.domain.services import get_trading_window_service
 from algo.domain.trading.trading_window_service import TradingWindowService
 
 
