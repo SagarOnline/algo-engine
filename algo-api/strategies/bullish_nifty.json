@@ -3,7 +3,7 @@
   "display_name": "Bullish Nifty",
   "description": "A simple bullish strategy for Nifty using EMA crossover.",
   "instrument": {
-    "type": "FUTURE",
+    "type": "EQ",
     "expiry": "MONTHLY",
     "expiring": "NEXT",
     "atm": -50,
@@ -15,7 +15,7 @@
   "position": {
     "action": "BUY",
     "instrument": {
-      "type": "FUTURE",
+      "type": "FNO",
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,

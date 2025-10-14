@@ -4,7 +4,7 @@ from unittest.mock import Mock, MagicMock, ANY
 
 from algo.domain.backtest import historical_data
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
-from algo.domain.strategy.strategy import Strategy, Instrument, InstrumentType, Exchange, TradeAction
+from algo.domain.strategy.strategy import Strategy, Instrument, Segment, Exchange, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
@@ -17,7 +17,7 @@ def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "5min"
-    strategy.get_instrument.return_value = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_required_history_start_date.return_value = datetime(2025, 9, 10, 9, 15, 0)
     strategy.should_enter_trade.return_value = False
     strategy.should_exit_trade.return_value = False
@@ -67,7 +67,7 @@ def sample_historical_data():
 
 @pytest.fixture
 def sample_tradable_instrument():
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = Mock(spec=TradableInstrument)
     tradable.instrument = instrument
     tradable.is_any_position_open.return_value = False
@@ -166,7 +166,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     """Test evaluate returns list with TradeSignal when exit condition is met."""
      # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -248,8 +248,8 @@ def test_evaluate_multiple_tradable_instruments_returns_all_signals(evaluator, s
                                                                     mock_historical_data_repository):
     """Test that evaluate returns signals from all matching tradable instruments."""
     # Create multiple tradable instruments
-    instrument1 = Instrument(InstrumentType.STOCK, Exchange.NSE, "INSTRUMENT1")
-    instrument2 = Instrument(InstrumentType.STOCK, Exchange.NSE, "INSTRUMENT2")
+    instrument1 = Instrument(Segment.EQ, Exchange.NSE, "INSTRUMENT1")
+    instrument2 = Instrument(Segment.EQ, Exchange.NSE, "INSTRUMENT2")
     
     tradable1 = Mock(spec=TradableInstrument)
     tradable1.instrument = instrument1
@@ -281,7 +281,7 @@ def test_evaluate_position_open_but_no_exit_signal_returns_empty_list(evaluator,
     
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -392,7 +392,7 @@ def test_evaluate_stop_loss_hit_generates_stop_loss_signal(evaluator, sample_can
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with an open position that will hit stop loss
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -429,7 +429,7 @@ def test_evaluate_stop_loss_not_hit_no_signal_generated(evaluator, sample_candle
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -456,7 +456,7 @@ def test_evaluate_stop_loss_multiple_positions_multiple_signals(evaluator, sampl
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with multiple open positions
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add multiple open positions with different stop losses
@@ -493,7 +493,7 @@ def test_evaluate_stop_loss_priority_over_entry_rules(evaluator, sample_candle, 
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -526,7 +526,7 @@ def test_evaluate_stop_loss_priority_over_exit_rules(evaluator, sample_candle, s
     mock_strategy.should_exit_trade.return_value = True  # Exit condition is met
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -557,7 +557,7 @@ def test_evaluate_stop_loss_short_position(evaluator, sample_candle, sample_hist
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with a SHORT position
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add a SHORT position with stop loss (stop loss triggers when price goes up)
@@ -592,7 +592,7 @@ def test_evaluate_stop_loss_no_open_positions(evaluator, sample_candle, sample_h
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with no positions
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
     
@@ -614,7 +614,7 @@ def test_evaluate_stop_loss_position_without_stop_loss(evaluator, sample_candle,
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position but no stop loss
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add position without stop loss (stop_loss=None)
@@ -635,7 +635,7 @@ def test_evaluate_stop_loss_position_without_stop_loss(evaluator, sample_candle,
 def test_evaluate_for_stop_loss_method_isolated(evaluator, sample_candle):
     """Test the _evaluate_for_stop_loss method in isolation."""
     # Create a tradable instrument with an open position
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss

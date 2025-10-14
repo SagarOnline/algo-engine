@@ -162,34 +162,20 @@ class StrategyEvaluator:
             return timestamp
         
         # For intraday timeframes, check if next timestamp is within trading window
-        next_date = next_timestamp.date()
         trading_window_service = services.get_trading_window_service()
+        next_date = next_timestamp.date()
         trading_window = trading_window_service.get_trading_window(next_date, exchange, segment)
         
-        # If no trading window found, or it's a holiday, move to next trading day
-        if trading_window is None or trading_window.is_holiday:
+        # If no trading window found, move to next trading day
+        if trading_window is None:
             return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
         
-        # If it's a special trading day, check if timestamp is within special hours
-        if trading_window.is_special_trading_day:
-            if (next_timestamp.time() >= trading_window.open_time and 
-                next_timestamp.time() <= trading_window.close_time):
-                return next_timestamp
-            else:
-                # Outside special trading hours, move to next trading day
-                return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
-        
-        # For regular trading day, check if timestamp is within trading hours
-        if trading_window.is_regular_trading_day:
-            if (next_timestamp.time() >= trading_window.open_time and 
-                next_timestamp.time() <= trading_window.close_time):
-                return next_timestamp
-            else:
-                # Outside regular trading hours, move to next trading day
-                return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
-        
-        # Fallback: if we can't determine, move to next trading day
-        return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
+        # Use the TradingWindow.is_within_trading_window() method to check if next timestamp is valid
+        if trading_window.is_within_trading_window(next_timestamp):
+            return next_timestamp
+        else:
+            # Next timestamp is not within trading window, move to next trading day
+            return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
     
     def _get_next_trading_day_opening(self, timestamp, exchange: str, segment: str):
         """
@@ -214,7 +200,7 @@ class StrategyEvaluator:
             trading_window_service = services.get_trading_window_service()
             trading_window = trading_window_service.get_trading_window(next_day, exchange, segment)
             
-            if trading_window is not None and not trading_window.is_holiday:
+            if trading_window is not None and trading_window.get_trading_duration_minutes() > 0:
                 # Found a trading day, return opening time
                 opening_time = trading_window.open_time
                 return datetime.datetime.combine(next_day, opening_time, tzinfo=timestamp.tzinfo)

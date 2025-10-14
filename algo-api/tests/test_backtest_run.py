@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from datetime import date, datetime
-from algo.domain.strategy.strategy import Exchange, Instrument, InstrumentType, TradeAction, Strategy
+from algo.domain.strategy.strategy import Exchange, Instrument, Segment, TradeAction, Strategy
 from algo.domain.backtest.report import BackTestReport
 
 from algo.domain.backtest.backtest_run import BackTest
@@ -19,7 +19,7 @@ def mock_strategy():
     position_instrument.action = TradeAction.BUY
     position_instrument.get_close_action.return_value = TradeAction.SELL
     strategy.get_position_instrument.return_value = position_instrument
-    instrument = Instrument(InstrumentType.STOCK,Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ,Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     strategy.get_required_history_start_date.return_value = date(2023, 1, 1)
     return strategy

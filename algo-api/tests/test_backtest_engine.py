@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,TradeAction
+from algo.domain.strategy.strategy import Segment, Strategy,Instrument,Exchange,PositionInstrument,TradeAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
@@ -16,7 +16,7 @@ def mock_strategy():
     strategy.get_required_history_start_date.return_value = datetime(2023, 1, 1, 9, 15, 0)
     strategy.get_timeframe.return_value = Timeframe.ONE_DAY.value
 
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     position= PositionInstrument(TradeAction.BUY,instrument)
     strategy.get_position_instrument.return_value = position
@@ -52,7 +52,7 @@ def mock_tradable_instrument_repository():
     repo = Mock(spec=TradableInstrumentRepository)
     
     # Create a real TradableInstrument using the same instrument from mock_strategy
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     real_tradable_instrument = TradableInstrument(instrument)
     
     # Mock the repository to return the saved instrument
@@ -129,7 +129,7 @@ def test_run_respects_start_date():
     strategy.get_required_history_start_date.return_value = required_start_date
     
     # Use real domain objects
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     position = PositionInstrument(TradeAction.BUY, instrument)
     strategy.get_position_instrument.return_value = position

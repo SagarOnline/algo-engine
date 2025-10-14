@@ -135,7 +135,7 @@ class TestTradingWindow:
             description="Christmas"
         )
         
-        assert window.get_trading_duration_minutes() is None
+        assert window.get_trading_duration_minutes() is 0
     
     def test_market_open_check(self):
         """Test market open time checking."""

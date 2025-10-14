@@ -69,10 +69,10 @@ class TradingWindow:
         Get the trading duration in minutes.
         
         Returns:
-            Trading duration in minutes, or None for holidays
+            Trading duration in minutes, or 0 for holidays
         """
         if self.is_holiday or self.open_time is None or self.close_time is None:
-            return None
+            return 0
         
         # Convert times to minutes since midnight
         open_minutes = self.open_time.hour * 60 + self.open_time.minute
