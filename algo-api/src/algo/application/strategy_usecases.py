@@ -28,7 +28,7 @@ class InstrumentDTO:
 
     def to_dict(self):
         return {
-            "type": self.segement,
+            "segment": self.segement,
             "exchange": str(self.exchange),
             "instrument_key": str(self.instrument_key),
             "expiry": str(self.expiry),
