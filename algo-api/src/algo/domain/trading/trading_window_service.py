@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
 from .trading_window import TradingWindow, TradingWindowType
+from ..strategy.strategy import Exchange, Segment
 
 logger = logging.getLogger(__name__)
 
@@ -277,21 +278,21 @@ class TradingWindowService:
     def get_trading_window(
         self, 
         target_date: date, 
-        exchange: str, 
-        segment: str
+        exchange: Exchange, 
+        segment: Segment
     ) -> Optional[TradingWindow]:
         """
         Get the trading window for a specific date, exchange, and segment.
         
         Args:
             target_date: The date to get trading window for
-            exchange: Exchange name (e.g., NSE, BSE)
-            segment: Market segment (e.g., FNO, EQ, CDS)
+            exchange: Exchange enum (e.g., Exchange.NSE, Exchange.BSE)
+            segment: Market segment enum (e.g., Segment.FNO, Segment.EQ)
             
         Returns:
             TradingWindow object if found, None if no configuration exists
         """
-        exchange_segment_key = f"{exchange}-{segment}"
+        exchange_segment_key = f"{exchange.value}-{segment.value}"
         year = target_date.year
         
         # Check if we have configuration for this exchange-segment-year
@@ -312,21 +313,21 @@ class TradingWindowService:
     def _generate_default_trading_window(
         self, 
         target_date: date, 
-        exchange: str, 
-        segment: str
+        exchange: Exchange, 
+        segment: Segment
     ) -> Optional[TradingWindow]:
         """
         Generate a default trading window for a date.
         
         Args:
             target_date: The date to generate window for
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             Default TradingWindow or None if no default configuration exists
         """
-        exchange_segment_key = f"{exchange}-{segment}"
+        exchange_segment_key = f"{exchange.value}-{segment.value}"
         year = target_date.year
         
         # Get default configuration
@@ -339,8 +340,8 @@ class TradingWindowService:
         if self._is_weekly_holiday(target_date, exchange_segment_key, year):
             return TradingWindow(
                 date=target_date,
-                exchange=exchange,
-                segment=segment,
+                exchange=exchange.value,
+                segment=segment.value,
                 window_type=TradingWindowType.HOLIDAY,
                 open_time=None,
                 close_time=None,
@@ -352,8 +353,8 @@ class TradingWindowService:
         
         return TradingWindow(
             date=target_date,
-            exchange=exchange,
-            segment=segment,
+            exchange=exchange.value,
+            segment=segment.value,
             window_type=TradingWindowType.DEFAULT,
             open_time=default_config["open_time"],
             close_time=default_config["close_time"],
@@ -388,14 +389,14 @@ class TradingWindowService:
         # Check if the weekday (0=Monday, 6=Sunday) is in the weekly holidays list
         return target_date.weekday() in weekly_holidays
     
-    def is_holiday(self, target_date: date, exchange: str, segment: str) -> bool:
+    def is_holiday(self, target_date: date, exchange: Exchange, segment: Segment) -> bool:
         """
         Check if a specific date is a holiday for the given exchange and segment.
         
         Args:
             target_date: The date to check
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             True if the date is a holiday, False otherwise
@@ -403,14 +404,14 @@ class TradingWindowService:
         trading_window = self.get_trading_window(target_date, exchange, segment)
         return trading_window is not None and trading_window.is_holiday
     
-    def is_special_trading_day(self, target_date: date, exchange: str, segment: str) -> bool:
+    def is_special_trading_day(self, target_date: date, exchange: Exchange, segment: Segment) -> bool:
         """
         Check if a specific date is a special trading day for the given exchange and segment.
         
         Args:
             target_date: The date to check
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             True if the date is a special trading day, False otherwise
@@ -421,16 +422,16 @@ class TradingWindowService:
     def get_trading_hours(
         self, 
         target_date: date, 
-        exchange: str, 
-        segment: str
+        exchange: Exchange, 
+        segment: Segment
     ) -> Optional[Tuple[time, time]]:
         """
         Get trading hours for a specific date, exchange, and segment.
         
         Args:
             target_date: The date to get trading hours for
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             Tuple of (open_time, close_time) if market is open, None if holiday
@@ -442,19 +443,19 @@ class TradingWindowService:
         
         return (trading_window.open_time, trading_window.close_time)
     
-    def get_holidays(self, year: int, exchange: str, segment: str) -> List[TradingWindow]:
+    def get_holidays(self, year: int, exchange: Exchange, segment: Segment) -> List[TradingWindow]:
         """
         Get all holidays for a specific year, exchange, and segment.
         
         Args:
             year: The year to get holidays for
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             List of holiday TradingWindow objects
         """
-        exchange_segment_key = f"{exchange}-{segment}"
+        exchange_segment_key = f"{exchange.value}-{segment.value}"
         
         if (exchange_segment_key not in self._trading_windows or 
             year not in self._trading_windows[exchange_segment_key]):
@@ -469,19 +470,19 @@ class TradingWindowService:
         
         return sorted(holidays, key=lambda x: x.date)
     
-    def get_special_trading_days(self, year: int, exchange: str, segment: str) -> List[TradingWindow]:
+    def get_special_trading_days(self, year: int, exchange: Exchange, segment: Segment) -> List[TradingWindow]:
         """
         Get all special trading days for a specific year, exchange, and segment.
         
         Args:
             year: The year to get special trading days for
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             List of special trading day TradingWindow objects
         """
-        exchange_segment_key = f"{exchange}-{segment}"
+        exchange_segment_key = f"{exchange.value}-{segment.value}"
         
         if (exchange_segment_key not in self._trading_windows or 
             year not in self._trading_windows[exchange_segment_key]):
@@ -496,32 +497,19 @@ class TradingWindowService:
         
         return sorted(special_days, key=lambda x: x.date)
     
-    def get_available_exchanges_segments(self) -> List[Tuple[str, str]]:
-        """
-        Get list of available exchange-segment combinations.
-        
-        Returns:
-            List of (exchange, segment) tuples
-        """
-        result = []
-        for exchange_segment_key in self._trading_windows.keys():
-            exchange, segment = exchange_segment_key.split("-", 1)
-            result.append((exchange, segment))
-        
-        return sorted(result)
     
-    def get_available_years(self, exchange: str, segment: str) -> List[int]:
+    def get_available_years(self, exchange: Exchange, segment: Segment) -> List[int]:
         """
         Get list of available years for a specific exchange and segment.
         
         Args:
-            exchange: Exchange name
-            segment: Market segment
+            exchange: Exchange enum
+            segment: Market segment enum
             
         Returns:
             List of available years
         """
-        exchange_segment_key = f"{exchange}-{segment}"
+        exchange_segment_key = f"{exchange.value}-{segment.value}"
         
         if exchange_segment_key not in self._trading_windows:
             return []

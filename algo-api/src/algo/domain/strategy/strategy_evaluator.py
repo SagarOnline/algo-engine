@@ -156,8 +156,7 @@ class StrategyEvaluator:
             return self._get_next_trading_day_opening(timestamp, exchange, segment)
         elif timeframe == Timeframe.ONE_WEEK:
             # For weekly timeframe, move to next week's first trading day
-            next_week = timestamp + timedelta(weeks=1)
-            return self._get_next_trading_day_opening(next_week, exchange, segment)
+            next_timestamp = timestamp + timedelta(weeks=1)
         else:
             return timestamp
         

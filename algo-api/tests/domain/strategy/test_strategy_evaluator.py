@@ -11,6 +11,7 @@ from algo.domain.strategy.tradable_instrument_repository import TradableInstrume
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.timeframe import Timeframe
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
+from algo.domain.trading.trading_window_service import TradingWindowService
 
 
 @pytest.fixture
@@ -18,7 +19,7 @@ def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "5min"
-    strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_required_history_start_date.return_value = datetime(2025, 9, 10, 9, 15, 0)
     strategy.should_enter_trade.return_value = False
     strategy.should_exit_trade.return_value = False
@@ -45,23 +46,38 @@ def mock_tradable_instrument_repository():
 
 @pytest.fixture
 def mock_trading_window_service():
-    """Mock trading window service that returns trading windows for any date."""
-    mock_service = Mock()
+    """Real trading window service instance initialized with test data for year 2023."""
+    # Test configuration data for NSE FNO segment for year 2023
+    config_data = [
+        {
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2023,
+            "default_trading_windows": [
+                {
+                    "effective_from": None,
+                    "effective_to": None,
+                    "open_time": "09:15",
+                    "close_time": "15:30"
+                }
+            ],
+            "weekly_holidays": [
+                {
+                    "day_of_week": "SATURDAY"
+                },
+                {
+                    "day_of_week": "SUNDAY"
+                }
+            ],
+            "special_days": [
+            ],
+            "holidays": [
+            ]
+        }
+    ]
     
-    # Create a default trading window for any date
-    def get_trading_window(target_date, exchange, segment):
-        return TradingWindow(
-            date=target_date,
-            exchange=exchange,
-            segment=segment,
-            window_type=TradingWindowType.DEFAULT,
-            open_time=datetime.strptime("09:15", "%H:%M").time(),
-            close_time=datetime.strptime("15:30", "%H:%M").time(),
-            description="Regular trading day"
-        )
-    
-    mock_service.get_trading_window.side_effect = get_trading_window
-    return mock_service
+    # Create and return real TradingWindowService instance
+    return TradingWindowService(config_data)
 
 
 @pytest.fixture
@@ -89,7 +105,7 @@ def sample_historical_data():
 
 @pytest.fixture
 def sample_tradable_instrument():
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = Mock(spec=TradableInstrument)
     tradable.instrument = instrument
     tradable.is_any_position_open.return_value = False
@@ -115,6 +131,41 @@ def evaluator(mock_strategy, mock_historical_data_repository, mock_tradable_inst
             historical_data_repository=mock_historical_data_repository,
             tradable_instrument_repository=mock_tradable_instrument_repository
         )
+
+@pytest.fixture
+def mock_trading_window_service():
+    """Real trading window service instance initialized with test data for year 2023."""
+    # Test configuration data for NSE FNO segment for year 2023
+    config_data = [
+        {
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2023,
+            "default_trading_windows": [
+                {
+                    "effective_from": None,
+                    "effective_to": None,
+                    "open_time": "09:15",
+                    "close_time": "15:30"
+                }
+            ],
+            "weekly_holidays": [
+                {
+                    "day_of_week": "SATURDAY"
+                },
+                {
+                    "day_of_week": "SUNDAY"
+                }
+            ],
+            "special_days": [
+            ],
+            "holidays": [
+            ]
+        }
+    ]
+    
+    # Create and return real TradingWindowService instance
+    return TradingWindowService(config_data)
 
 @pytest.fixture
 def patched_trading_window_service(mock_trading_window_service):
@@ -193,7 +244,7 @@ def test_evaluate_exit_signal_generated(evaluator, sample_candle, sample_histori
     """Test evaluate returns list with TradeSignal when exit condition is met."""
      # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -275,8 +326,8 @@ def test_evaluate_multiple_tradable_instruments_returns_all_signals(evaluator, s
                                                                     mock_historical_data_repository):
     """Test that evaluate returns signals from all matching tradable instruments."""
     # Create multiple tradable instruments
-    instrument1 = Instrument(Segment.EQ, Exchange.NSE, "INSTRUMENT1")
-    instrument2 = Instrument(Segment.EQ, Exchange.NSE, "INSTRUMENT2")
+    instrument1 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT1")
+    instrument2 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT2")
     
     tradable1 = Mock(spec=TradableInstrument)
     tradable1.instrument = instrument1
@@ -308,7 +359,7 @@ def test_evaluate_position_open_but_no_exit_signal_returns_empty_list(evaluator,
     
     # Setup mocks
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = []
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -419,7 +470,7 @@ def test_evaluate_stop_loss_hit_generates_stop_loss_signal(evaluator, sample_can
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with an open position that will hit stop loss
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -456,7 +507,7 @@ def test_evaluate_stop_loss_not_hit_no_signal_generated(evaluator, sample_candle
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -483,7 +534,7 @@ def test_evaluate_stop_loss_multiple_positions_multiple_signals(evaluator, sampl
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with multiple open positions
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add multiple open positions with different stop losses
@@ -520,7 +571,7 @@ def test_evaluate_stop_loss_priority_over_entry_rules(evaluator, sample_candle, 
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -553,7 +604,7 @@ def test_evaluate_stop_loss_priority_over_exit_rules(evaluator, sample_candle, s
     mock_strategy.should_exit_trade.return_value = True  # Exit condition is met
     
     # Create a tradable instrument with an open position
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -584,7 +635,7 @@ def test_evaluate_stop_loss_short_position(evaluator, sample_candle, sample_hist
     mock_historical_data_repository.get_historical_data.return_value = sample_historical_data
     
     # Create a tradable instrument with a SHORT position
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add a SHORT position with stop loss (stop loss triggers when price goes up)
@@ -619,7 +670,7 @@ def test_evaluate_stop_loss_no_open_positions(evaluator, sample_candle, sample_h
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with no positions
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     mock_tradable_instrument_repository.get_tradable_instruments.return_value = [tradable]
     
@@ -641,7 +692,7 @@ def test_evaluate_stop_loss_position_without_stop_loss(evaluator, sample_candle,
     mock_strategy.should_exit_trade.return_value = False
     
     # Create a tradable instrument with an open position but no stop loss
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add position without stop loss (stop_loss=None)
@@ -662,7 +713,7 @@ def test_evaluate_stop_loss_position_without_stop_loss(evaluator, sample_candle,
 def test_evaluate_for_stop_loss_method_isolated(evaluator, sample_candle, patched_trading_window_service):
     """Test the _evaluate_for_stop_loss method in isolation."""
     # Create a tradable instrument with an open position
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     
     # Add an open position with stop loss
@@ -708,7 +759,7 @@ def test_get_next_candle_timestamp_intraday_within_trading_hours(mock_get_servic
     
     # Create evaluator with mock strategy
     mock_strategy = Mock()
-    mock_strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "TEST")
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
     evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test 5-minute timeframe within trading hours with IST timezone
@@ -725,7 +776,7 @@ def test_get_next_candle_timestamp_last_candle_of_day(patched_trading_window_ser
     """Test that next candle timestamp moves to next trading day at 9:15 AM when current is last candle and preserves timezone"""
     # Create evaluator with mock strategy
     mock_strategy = Mock()
-    mock_strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "TEST")
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
     evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test 5-minute timeframe at 3:25 PM (last candle before 3:30 PM close) with UTC timezone
@@ -758,7 +809,7 @@ def test_get_next_candle_timestamp_after_trading_hours(mock_get_service):
     
     # Create evaluator with mock strategy
     mock_strategy = Mock()
-    mock_strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "TEST")
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
     evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test timestamp at 4:00 PM (after market close) with UTC timezone
@@ -773,7 +824,7 @@ def test_get_next_candle_timestamp_after_trading_hours(mock_get_service):
 def test_get_next_candle_timestamp_friday_to_monday(patched_trading_window_service):
     """Test that Friday's last candle moves to Monday 9:15 AM (skipping weekend) and preserves timezone"""
     mock_strategy = Mock()
-    mock_strategy.get_instrument.return_value = Instrument(Segment.EQ, Exchange.NSE, "TEST")
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
     evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test Friday 3:25 PM (last candle) with UTC timezone
@@ -786,7 +837,9 @@ def test_get_next_candle_timestamp_friday_to_monday(patched_trading_window_servi
 
 def test_get_next_candle_timestamp_weekend_to_monday(patched_trading_window_service):
     """Test that weekend timestamps move to Monday 9:15 AM and preserve timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test Saturday timestamp with EST timezone
     est = timezone(timedelta(hours=-5))
@@ -807,7 +860,9 @@ def test_get_next_candle_timestamp_weekend_to_monday(patched_trading_window_serv
 
 def test_get_next_candle_timestamp_daily_timeframe(patched_trading_window_service):
     """Test daily timeframe moves to next trading day at 9:15 AM and preserves timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test Monday to Tuesday with IST timezone
     ist = timezone(timedelta(hours=5, minutes=30))
@@ -827,11 +882,13 @@ def test_get_next_candle_timestamp_daily_timeframe(patched_trading_window_servic
 
 def test_get_next_candle_timestamp_weekly_timeframe(patched_trading_window_service):
     """Test weekly timeframe moves to next week's first trading day at 9:15 AM and preserves timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test current week Monday to next week Monday with JST timezone
     jst = timezone(timedelta(hours=9))
-    current_time = datetime(2023, 10, 9, 15, 30, tzinfo=jst)  # Monday market close JST
+    current_time = datetime(2023, 10, 9, 9, 15, tzinfo=jst)  # Monday market close JST
     next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_WEEK)
     expected_time = datetime(2023, 10, 16, 9, 15, tzinfo=jst)  # Next Monday 9:15 AM JST
     assert next_time == expected_time
@@ -839,7 +896,7 @@ def test_get_next_candle_timestamp_weekly_timeframe(patched_trading_window_servi
     
     # Test current week Friday to next week Monday with custom timezone
     custom_tz = timezone(timedelta(hours=-3))
-    current_time = datetime(2023, 10, 6, 15, 30, tzinfo=custom_tz)  # Friday market close
+    current_time = datetime(2023, 10, 6, 9, 15, tzinfo=custom_tz)  # Friday market close
     next_time = evaluator._get_next_candle_timestamp(current_time, Timeframe.ONE_WEEK)
     expected_time = datetime(2023, 10, 13, 9, 15, tzinfo=custom_tz)  # Next Friday 9:15 AM (one week later)
     assert next_time == expected_time
@@ -848,7 +905,9 @@ def test_get_next_candle_timestamp_weekly_timeframe(patched_trading_window_servi
 
 def test_get_next_candle_timestamp_different_minute_timeframes(patched_trading_window_service):
     """Test different minute-based timeframes and timezone preservation"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test 1-minute timeframe within trading hours with UTC timezone
     current_time = datetime(2023, 10, 9, 10, 30, tzinfo=timezone.utc)  # Monday 10:30 AM UTC
@@ -876,7 +935,9 @@ def test_get_next_candle_timestamp_different_minute_timeframes(patched_trading_w
 
 def test_get_next_candle_timestamp_exactly_at_market_close(patched_trading_window_service):
     """Test timestamp exactly at market close time (3:30 PM) and timezone preservation"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test exactly at 3:30 PM with IST timezone
     ist = timezone(timedelta(hours=5, minutes=30))
@@ -896,7 +957,9 @@ def test_get_next_candle_timestamp_exactly_at_market_close(patched_trading_windo
 
 def test_get_next_candle_timestamp_early_morning(patched_trading_window_service):
     """Test timestamps in early morning within trading hours and timezone preservation"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Test at 9:15 AM (market open) with EST timezone
     est = timezone(timedelta(hours=-5))
@@ -917,7 +980,9 @@ def test_get_next_candle_timestamp_early_morning(patched_trading_window_service)
 
 def test_get_next_candle_timestamp_weekend_during_trading_hours(patched_trading_window_service):
     """Test that weekend timestamps during trading hours move to Monday 9:15 AM and preserve timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Saturday 11:00 AM (during what would be trading hours) with UTC timezone
     saturday_timestamp = datetime(2023, 10, 7, 11, 0, tzinfo=timezone.utc)  # Saturday UTC
@@ -937,7 +1002,9 @@ def test_get_next_candle_timestamp_weekend_during_trading_hours(patched_trading_
 
 def test_get_next_candle_timestamp_friday_crossing_to_weekend(patched_trading_window_service):
     """Test that Friday timestamps that would result in weekend move to Monday and preserve timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Friday 3:25 PM + 5 minutes = Friday 3:30 PM (end of trading) with IST timezone
     ist = timezone(timedelta(hours=5, minutes=30))
@@ -958,7 +1025,9 @@ def test_get_next_candle_timestamp_friday_crossing_to_weekend(patched_trading_wi
 
 def test_get_next_candle_timestamp_weekend_after_hours(patched_trading_window_service):
     """Test that weekend timestamps after trading hours move to Monday 9:15 AM and preserve timezone"""
-    evaluator = StrategyEvaluator(Mock(), Mock(), Mock())
+    mock_strategy = Mock()
+    mock_strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "TEST")
+    evaluator = StrategyEvaluator(mock_strategy, Mock(), Mock())
     
     # Saturday 6:00 PM (after trading hours) with JST timezone
     jst = timezone(timedelta(hours=9))
