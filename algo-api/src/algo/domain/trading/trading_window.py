@@ -118,7 +118,7 @@ class TradingWindow:
             return False
         
         # Check if the time falls within trading hours
-        return self.open_time <= timestamp.time() <= self.close_time
+        return self.open_time <= timestamp.time() < self.close_time
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert trading window to dictionary representation."""

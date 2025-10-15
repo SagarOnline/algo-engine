@@ -218,10 +218,11 @@ class TestTradingWindow:
         # Test within trading hours
         assert window.is_within_trading_window(datetime(2024, 11, 5, 10, 30))  # Mid-day
         assert window.is_within_trading_window(datetime(2024, 11, 5, 9, 15))   # Exact open
-        assert window.is_within_trading_window(datetime(2024, 11, 5, 15, 30))  # Exact close
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 30))  # Exact close
         assert window.is_within_trading_window(datetime(2024, 11, 5, 12, 0))   # Noon
         
         # Test outside trading hours
+        
         assert not window.is_within_trading_window(datetime(2024, 11, 5, 9, 14))   # Before open
         assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 31))  # After close
         assert not window.is_within_trading_window(datetime(2024, 11, 5, 8, 0))    # Early morning
@@ -268,9 +269,10 @@ class TestTradingWindow:
         # Test within special trading hours
         assert special_window.is_within_trading_window(datetime(2024, 11, 1, 18, 0))   # Exact open
         assert special_window.is_within_trading_window(datetime(2024, 11, 1, 18, 30))  # Mid-session
-        assert special_window.is_within_trading_window(datetime(2024, 11, 1, 19, 0))   # Exact close
+        assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 19, 0))   # Exact close
         
         # Test outside special trading hours
+        
         assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 17, 59))  # Before open
         assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 19, 1))   # After close
         assert not special_window.is_within_trading_window(datetime(2024, 11, 1, 9, 15))   # Normal trading hours
@@ -316,8 +318,8 @@ class TestTradingWindow:
         
         # Test exact boundary times
         assert window.is_within_trading_window(datetime(2024, 11, 5, 9, 15, 0))    # Exact open with seconds
-        assert window.is_within_trading_window(datetime(2024, 11, 5, 15, 30, 0))   # Exact close with seconds
-        
+        assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 30, 0))   # Exact close with seconds
+
         # Test microseconds before/after boundaries
         assert not window.is_within_trading_window(datetime(2024, 11, 5, 9, 14, 59))   # 1 second before
         assert not window.is_within_trading_window(datetime(2024, 11, 5, 15, 30, 1))   # 1 second after
@@ -342,8 +344,8 @@ class TestTradingWindow:
         # Test within special budget trading hours
         assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 9, 0))    # Exact open
         assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 11, 0))   # Mid-session
-        assert budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 13, 0))   # Exact close
-        
+        assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 13, 0))   # Exact close
+
         # Test outside budget trading hours
         assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 8, 59))   # Before open
         assert not budget_day_window.is_within_trading_window(datetime(2025, 2, 1, 13, 1))   # After close
@@ -367,8 +369,8 @@ class TestTradingWindow:
         # Test within Muhurat trading hours
         assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 13, 45))  # Exact open
         assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 15))  # Mid-session
-        assert muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 45))  # Exact close
-        
+        assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 45))  # Exact close
+
         # Test outside Muhurat trading hours
         assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 13, 44))  # Before open
         assert not muhurat_window.is_within_trading_window(datetime(2025, 10, 21, 14, 46))  # After close
