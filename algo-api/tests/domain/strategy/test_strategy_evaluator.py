@@ -746,8 +746,8 @@ def test_get_next_candle_timestamp_intraday_within_trading_hours(mock_get_servic
     def get_trading_window(target_date, exchange, segment):
         return TradingWindow(
             date=target_date,
-            exchange=exchange,
-            segment=segment,
+            exchange=Exchange(exchange) if isinstance(exchange, str) else exchange,
+            segment=Segment(segment) if isinstance(segment, str) else segment,
             window_type=TradingWindowType.DEFAULT,
             open_time=datetime.strptime("09:15", "%H:%M").time(),
             close_time=datetime.strptime("15:30", "%H:%M").time(),
@@ -796,8 +796,8 @@ def test_get_next_candle_timestamp_after_trading_hours(mock_get_service):
     def get_trading_window(target_date, exchange, segment):
         return TradingWindow(
             date=target_date,
-            exchange=exchange,
-            segment=segment,
+            exchange=Exchange(exchange) if isinstance(exchange, str) else exchange,
+            segment=Segment(segment) if isinstance(segment, str) else segment,
             window_type=TradingWindowType.DEFAULT,
             open_time=datetime.strptime("09:15", "%H:%M").time(),
             close_time=datetime.strptime("15:30", "%H:%M").time(),

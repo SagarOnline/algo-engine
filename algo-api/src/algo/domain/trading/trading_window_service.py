@@ -96,8 +96,8 @@ class TradingWindowService:
             
             trading_window = TradingWindow(
                 date=holiday_date,
-                exchange=exchange,
-                segment=segment,
+                exchange=Exchange(exchange),
+                segment=Segment(segment),
                 window_type=TradingWindowType.HOLIDAY,
                 open_time=None,
                 close_time=None,
@@ -118,8 +118,8 @@ class TradingWindowService:
             
             trading_window = TradingWindow(
                 date=special_date,
-                exchange=exchange,
-                segment=segment,
+                exchange=Exchange(exchange),
+                segment=Segment(segment),
                 window_type=TradingWindowType.SPECIAL,
                 open_time=open_time,
                 close_time=close_time,
@@ -340,8 +340,8 @@ class TradingWindowService:
         if self._is_weekly_holiday(target_date, exchange_segment_key, year):
             return TradingWindow(
                 date=target_date,
-                exchange=exchange.value,
-                segment=segment.value,
+                exchange=exchange,
+                segment=segment,
                 window_type=TradingWindowType.HOLIDAY,
                 open_time=None,
                 close_time=None,
@@ -353,8 +353,8 @@ class TradingWindowService:
         
         return TradingWindow(
             date=target_date,
-            exchange=exchange.value,
-            segment=segment.value,
+            exchange=exchange,
+            segment=segment,
             window_type=TradingWindowType.DEFAULT,
             open_time=default_config["open_time"],
             close_time=default_config["close_time"],

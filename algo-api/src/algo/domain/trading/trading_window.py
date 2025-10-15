@@ -6,6 +6,8 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
+from ..strategy.strategy import Exchange, Segment
+
 
 class TradingWindowType(Enum):
     """Types of trading windows."""
@@ -21,8 +23,8 @@ class TradingWindow:
     
     Attributes:
         date: The trading date
-        exchange: Exchange name (e.g., NSE, BSE)
-        segment: Market segment (e.g., FNO, EQ, CDS)
+        exchange: Exchange enum (e.g., Exchange.NSE, Exchange.BSE)
+        segment: Market segment enum (e.g., Segment.FNO, Segment.EQ)
         window_type: Type of trading window (DEFAULT, SPECIAL, HOLIDAY)
         open_time: Market opening time (None for holidays)
         close_time: Market closing time (None for holidays)
@@ -30,8 +32,8 @@ class TradingWindow:
         metadata: Additional metadata about the trading window
     """
     date: date
-    exchange: str
-    segment: str
+    exchange: Exchange
+    segment: Segment
     window_type: TradingWindowType
     open_time: Optional[time]
     close_time: Optional[time]
@@ -124,8 +126,8 @@ class TradingWindow:
         """Convert trading window to dictionary representation."""
         return {
             "date": self.date.isoformat(),
-            "exchange": self.exchange,
-            "segment": self.segment,
+            "exchange": self.exchange.value,
+            "segment": self.segment.value,
             "window_type": self.window_type.value,
             "open_time": self.open_time.strftime("%H:%M") if self.open_time else None,
             "close_time": self.close_time.strftime("%H:%M") if self.close_time else None,
@@ -138,8 +140,8 @@ class TradingWindow:
         """Create TradingWindow from dictionary representation."""
         return cls(
             date=datetime.strptime(data["date"], "%Y-%m-%d").date(),
-            exchange=data["exchange"],
-            segment=data["segment"],
+            exchange=Exchange(data["exchange"]),
+            segment=Segment(data["segment"]),
             window_type=TradingWindowType(data["window_type"]),
             open_time=datetime.strptime(data["open_time"], "%H:%M").time() if data.get("open_time") else None,
             close_time=datetime.strptime(data["close_time"], "%H:%M").time() if data.get("close_time") else None,
@@ -150,6 +152,6 @@ class TradingWindow:
     def __str__(self) -> str:
         """String representation of trading window."""
         if self.is_holiday:
-            return f"{self.date} {self.exchange}-{self.segment}: HOLIDAY - {self.description}"
+            return f"{self.date} {self.exchange.value}-{self.segment.value}: HOLIDAY - {self.description}"
         else:
-            return f"{self.date} {self.exchange}-{self.segment}: {self.open_time}-{self.close_time}"
+            return f"{self.date} {self.exchange.value}-{self.segment.value}: {self.open_time}-{self.close_time}"
