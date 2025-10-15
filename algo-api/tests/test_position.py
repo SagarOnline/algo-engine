@@ -8,7 +8,7 @@ from algo.domain.strategy.tradable_instrument import PositionType
 @pytest.fixture
 def instrument():
     return Instrument(
-        type="STOCK",
+        segment="EQ",
         exchange="NSE",
         instrument_key="TCS"
     )
@@ -139,7 +139,7 @@ def test_position_all_trigger_types(instrument, entry_time, exit_time):
 
 def test_position_stop_loss_exit_uses_stop_loss_price():
     """Test that exit with STOP_LOSS trigger uses stop loss offset from entry price"""
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     exit_time = datetime(2025, 9, 17, 15, 30)
     
@@ -162,7 +162,7 @@ def test_position_stop_loss_exit_uses_stop_loss_price():
 
 def test_position_exit_rules_uses_provided_price():
     """Test that exit with EXIT_RULES trigger uses provided exit price"""
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     exit_time = datetime(2025, 9, 17, 15, 30)
     
@@ -177,7 +177,7 @@ def test_position_exit_rules_uses_provided_price():
 
 def test_position_stop_loss_exit_no_stop_loss_set():
     """Test that exit with STOP_LOSS trigger uses provided price when no stop loss is set"""
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     exit_time = datetime(2025, 9, 17, 15, 30)
     
@@ -192,7 +192,7 @@ def test_position_stop_loss_exit_no_stop_loss_set():
 
 def test_position_stop_loss_workflow_realistic():
     """Test realistic stop loss workflow with offset-based stop loss"""
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     exit_time = datetime(2025, 9, 17, 15, 30)
     
@@ -213,7 +213,7 @@ def test_position_stop_loss_workflow_realistic():
 
 def test_position_has_stop_loss_hit_with_offset():
     """Test has_stop_loss_hit method with offset-based stop loss"""
-    instrument = Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
     entry_time = datetime(2025, 9, 17, 9, 15)
     
     # LONG position with stop loss offset of 5 points

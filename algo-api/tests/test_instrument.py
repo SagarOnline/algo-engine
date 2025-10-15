@@ -1,14 +1,14 @@
 import pytest
-from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange, Expiry, Expiring
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring
 
 def test_instrument_equality_basic():
     inst1 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
     inst2 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
@@ -16,7 +16,7 @@ def test_instrument_equality_basic():
 
 def test_instrument_equality_with_all_fields():
     inst1 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY,
@@ -24,7 +24,7 @@ def test_instrument_equality_with_all_fields():
         atm=0
     )
     inst2 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY,
@@ -35,12 +35,12 @@ def test_instrument_equality_with_all_fields():
 
 def test_instrument_inequality_type():
     inst1 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
     inst2 = Instrument(
-        type=InstrumentType.STOCK,
+        segment=Segment.EQ,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
@@ -48,12 +48,12 @@ def test_instrument_inequality_type():
 
 def test_instrument_inequality_exchange():
     inst1 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
     inst2 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="NIFTY23JUNFUT"
     )
@@ -61,12 +61,12 @@ def test_instrument_inequality_exchange():
 
 def test_instrument_inequality_instrument_key():
     inst1 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )
     inst2 = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="BANKNIFTY23JUNFUT"
     )
@@ -74,13 +74,13 @@ def test_instrument_inequality_instrument_key():
 
 def test_instrument_inequality_expiry():
     inst1 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY
     )
     inst2 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.WEEKLY
@@ -89,13 +89,13 @@ def test_instrument_inequality_expiry():
 
 def test_instrument_inequality_expiring():
     inst1 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiring=Expiring.CURRENT
     )
     inst2 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiring=Expiring.NEXT
@@ -104,13 +104,13 @@ def test_instrument_inequality_expiring():
 
 def test_instrument_inequality_atm():
     inst1 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         atm=0
     )
     inst2 = Instrument(
-        type=InstrumentType.PE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         atm=1
@@ -119,7 +119,7 @@ def test_instrument_inequality_atm():
 
 def test_instrument_not_equal_to_other_type():
     inst = Instrument(
-        type=InstrumentType.FUTURE,
+        segment=Segment.FNO,
         exchange=Exchange.NSE,
         instrument_key="NIFTY23JUNFUT"
     )

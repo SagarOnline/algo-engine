@@ -48,7 +48,7 @@ def candles():
 
 @pytest.fixture
 def instrument():
-    return Instrument(type="STOCK", exchange="NSE", instrument_key="TCS")
+    return Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
 
 @pytest.fixture
 def strategy(instrument):

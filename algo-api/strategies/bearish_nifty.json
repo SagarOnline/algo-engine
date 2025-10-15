@@ -3,7 +3,7 @@
   "display_name": "Bearish Nifty",
   "description": "A simple bullish strategy for Nifty using EMA crossover.",
   "instrument": {
-    "type": "FUTURE",
+    "segment": "EQ",
     "expiry": "MONTHLY",
     "expiring": "NEXT",
     "atm": -50,
@@ -15,7 +15,7 @@
   "position": {
     "action": "BUY",
     "instrument": {
-      "type": "FUTURE",
+      "segment": "FNO",
       "expiry": "MONTHLY",
       "expiring": "NEXT",
       "atm": -50,

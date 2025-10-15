@@ -7,11 +7,9 @@ from algo.domain.market import Candle
 from enum import Enum
 from algo.domain.timeframe import Timeframe
 
-class InstrumentType(Enum):
-    FUTURE = "FUTURE"
-    PE = "PE"
-    CE = "CE"
-    STOCK = "STOCK"
+class Segment(Enum):
+    FNO = "FNO"
+    EQ = "EQ"
 
 class Exchange(Enum):
     NSE = "NSE"
@@ -44,14 +42,14 @@ class RiskManagement:
         
 class Instrument:
     def __init__(self, 
-        type: InstrumentType,
+        segment: Segment,
         exchange: Exchange,
         instrument_key: str,
         expiry: Optional[Expiry] = None,
         expiring: Optional[Expiring] = None, 
         atm: Optional[int] = None
     ):
-        self.type = InstrumentType(type)
+        self.segment = Segment(segment)
         self.exchange = Exchange(exchange)
         self.instrument_key = instrument_key
         self.expiry = Expiry(expiry) if expiry else None
@@ -60,7 +58,7 @@ class Instrument:
         
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "type": self.type.value,
+            "segment": self.segment.value,
             "exchange": self.exchange.value,
             "instrument_key": self.instrument_key,
             "expiry": self.expiry.value if self.expiry else None,
@@ -73,7 +71,7 @@ class Instrument:
         if not isinstance(other, Instrument):
             return False
         return (
-            self.type == other.type and
+            self.segment == other.segment and
             self.exchange == other.exchange and
             self.instrument_key == other.instrument_key and
             self.expiry == other.expiry and

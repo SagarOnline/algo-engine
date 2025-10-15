@@ -25,6 +25,6 @@ def get_config():
     if _config is None:
         with _config_lock:
             if _config is None:
-                load_config_path = os.getenv("CONFIG_JSON_PATH", "")
+                load_config_path = os.getenv("CONFIG_JSON_PATH", "config/config.json")
                 _config = load_config(load_config_path)
     return _config

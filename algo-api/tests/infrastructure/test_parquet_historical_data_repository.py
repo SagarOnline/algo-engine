@@ -6,7 +6,7 @@ from datetime import date, datetime
 import pytest
 from unittest.mock import patch
 
-from algo.domain.strategy.strategy import Instrument, InstrumentType, Exchange
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange
 from algo.domain.timeframe import Timeframe
 from algo.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
 from algo.domain.config import HistoricalDataBackend
@@ -21,7 +21,7 @@ def temp_data_dir():
 @pytest.fixture
 def instrument():
     return Instrument(
-        type=InstrumentType.STOCK,
+        segment=Segment.EQ,
         exchange=Exchange.NSE,
         instrument_key="TEST_INSTRUMENT"
     )

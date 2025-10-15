@@ -4,10 +4,11 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy.strategy import InstrumentType, Strategy,Instrument,Exchange,PositionInstrument,TradeAction
+from algo.domain.strategy.strategy import Segment, Strategy,Instrument,Exchange,PositionInstrument,TradeAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
+from algo.domain.trading.trading_window_service import TradingWindowService
 
 @pytest.fixture
 def mock_strategy():
@@ -16,7 +17,7 @@ def mock_strategy():
     strategy.get_required_history_start_date.return_value = datetime(2023, 1, 1, 9, 15, 0)
     strategy.get_timeframe.return_value = Timeframe.ONE_DAY.value
 
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     position= PositionInstrument(TradeAction.BUY,instrument)
     strategy.get_position_instrument.return_value = position
@@ -52,7 +53,7 @@ def mock_tradable_instrument_repository():
     repo = Mock(spec=TradableInstrumentRepository)
     
     # Create a real TradableInstrument using the same instrument from mock_strategy
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
     real_tradable_instrument = TradableInstrument(instrument)
     
     # Mock the repository to return the saved instrument
@@ -60,7 +61,39 @@ def mock_tradable_instrument_repository():
     
     return repo
 
+@pytest.fixture
+def mock_trading_window_service():
+    """Real trading window service instance initialized with test data for year 2023."""
+    # Test configuration data for NSE FNO segment for year 2023
+    config_data = [
+        {
+            "exchange": "NSE",
+            "segment": "FNO",
+            "year": 2023,
+            "default_trading_windows": [
+                {
+                    "effective_from": None,
+                    "effective_to": None,
+                    "open_time": "09:15",
+                    "close_time": "15:30"
+                }
+            ],
+            "weekly_holidays": [
+            ],
+            "special_days": [
+            ],
+            "holidays": [
+            ]
+        }
+    ]
+    
+    # Create and return real TradingWindowService instance
+    return TradingWindowService(config_data)
 
+@pytest.fixture
+def patched_trading_window_service(mock_trading_window_service):
+    with patch('algo.domain.services.get_trading_window_service', return_value=mock_trading_window_service):
+        yield
 
 @pytest.fixture
 def backtest_engine(mock_historical_data_repository, mock_tradable_instrument_repository):
@@ -82,7 +115,7 @@ def test_run_with_no_data(mock_strategy: Strategy, backtest_engine: BacktestEngi
     
 
 
-def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strategy: Mock, mock_historical_data_repository: Mock):
+def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strategy: Mock, mock_historical_data_repository: Mock, patched_trading_window_service: Mock):
     start_date = date(2023, 1, 1)
     end_date = date(2023, 1, 5)
     
@@ -110,7 +143,7 @@ def test_run_enters_and_exits_trade(backtest_engine: BacktestEngine, mock_strate
     assert report.total_pnl() == -5
 
 
-def test_run_respects_start_date():
+def test_run_respects_start_date(patched_trading_window_service: Mock):
     """Test using real objects instead of mocks for better debugging."""
     from algo.domain.backtest.historical_data import HistoricalData
     from algo.domain.strategy.tradable_instrument import TradableInstrument
@@ -129,7 +162,7 @@ def test_run_respects_start_date():
     strategy.get_required_history_start_date.return_value = required_start_date
     
     # Use real domain objects
-    instrument = Instrument(InstrumentType.STOCK, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
     strategy.get_instrument.return_value = instrument
     position = PositionInstrument(TradeAction.BUY, instrument)
     strategy.get_position_instrument.return_value = position

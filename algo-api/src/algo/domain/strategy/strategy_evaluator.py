@@ -8,6 +8,7 @@ from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from .tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
+from algo.domain import services
 
 
 class PositionAction(Enum):
@@ -122,7 +123,8 @@ class StrategyEvaluator:
     def _get_next_candle_timestamp(self, timestamp, timeframe: Timeframe):
         """
         Get the next candle timestamp based on the current timestamp and timeframe.
-        If the next candle would be after trading hours, returns the first candle of the next trading day (9:15 AM).
+        Uses TradingWindowService to check if the next timestamp falls within active trading window,
+        otherwise returns the first candle of the next trading day.
         
         Args:
             timestamp: Current candle timestamp
@@ -131,11 +133,12 @@ class StrategyEvaluator:
         Returns:
             datetime: Next candle timestamp
         """
-        from datetime import timedelta, time
+        from datetime import timedelta
         
-        # Define trading session times
-        TRADING_START_TIME = time(9, 15)  # 9:15 AM
-        TRADING_END_TIME = time(15, 30)   # 3:30 PM (assuming Indian market hours)
+        # Get instrument details for trading window lookup
+        instrument = self.strategy.get_instrument()
+        exchange = instrument.exchange
+        segment = instrument.segment
         
         # Calculate the next timestamp based on timeframe
         if timeframe == Timeframe.ONE_MINUTE:
@@ -149,38 +152,67 @@ class StrategyEvaluator:
         elif timeframe == Timeframe.SIXTY_MINUTES:
             next_timestamp = timestamp + timedelta(hours=1)
         elif timeframe == Timeframe.ONE_DAY:
-            # For daily timeframe, move to next trading day at 9:15 AM
-            next_day = timestamp.date() + timedelta(days=1)
-            # Skip weekends (assuming Saturday=5, Sunday=6)
-            while next_day.weekday() >= 5:  # Saturday or Sunday
-                next_day += timedelta(days=1)
-            return datetime.datetime.combine(next_day, TRADING_START_TIME, tzinfo=timestamp.tzinfo)
+            # For daily timeframe, move to next trading day
+            return self._get_next_trading_day_opening(timestamp, exchange, segment)
         elif timeframe == Timeframe.ONE_WEEK:
-            # For weekly timeframe, move to next week's first trading day at 9:15 AM
-            next_week = timestamp + timedelta(weeks=1)
-            next_day = next_week.date()
-            # Move to Monday if weekend
-            while next_day.weekday() >= 5:  # Saturday or Sunday
-                next_day += timedelta(days=1)
-            return datetime.datetime.combine(next_day, TRADING_START_TIME, tzinfo=timestamp.tzinfo)
+            # For weekly timeframe, move to next week's first trading day
+            next_timestamp = timestamp + timedelta(weeks=1)
         else:
             return timestamp
         
-        # For intraday timeframes, check if next timestamp is on weekend OR after trading hours
-        if next_timestamp.weekday() >= 5 or next_timestamp.time() >= TRADING_END_TIME:
-            # Move to next trading day at 9:15 AM
-            next_day = next_timestamp.date()
-            if next_timestamp.weekday() >= 5:
-                # If it's weekend, move to Monday
-                while next_day.weekday() >= 5:  # Saturday or Sunday
-                    next_day += timedelta(days=1)
-            else:
-                # If it's after trading hours on a weekday, move to next day
-                next_day += timedelta(days=1)
-                # Skip weekends if the next day is weekend
-                while next_day.weekday() >= 5:  # Saturday or Sunday
-                    next_day += timedelta(days=1)
-            return datetime.datetime.combine(next_day, TRADING_START_TIME, tzinfo=timestamp.tzinfo)
+        # For intraday timeframes, check if next timestamp is within trading window
+        trading_window_service = services.get_trading_window_service()
+        next_date = next_timestamp.date()
+        trading_window = trading_window_service.get_trading_window(next_date, exchange, segment)
         
-        # If next timestamp is during trading hours on a weekday, return it as is
-        return next_timestamp
+        # If no trading window found, move to next trading day
+        if trading_window is None:
+            return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
+        
+        # Use the TradingWindow.is_within_trading_window() method to check if next timestamp is valid
+        if trading_window.is_within_trading_window(next_timestamp):
+            return next_timestamp
+        else:
+            # Next timestamp is not within trading window, move to next trading day
+            return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
+    
+    def _get_next_trading_day_opening(self, timestamp, exchange: str, segment: str):
+        """
+        Get the next trading day opening timestamp.
+        
+        Args:
+            timestamp: Current timestamp
+            exchange: Exchange name
+            segment: Market segment
+            
+        Returns:
+            datetime: Next trading day opening timestamp
+        """
+        from datetime import timedelta
+        
+        # Start checking from the next day
+        next_day = timestamp.date() + timedelta(days=1)
+        max_attempts = 10  # Prevent infinite loop
+        attempts = 0
+        
+        while attempts < max_attempts:
+            trading_window_service = services.get_trading_window_service()
+            trading_window = trading_window_service.get_trading_window(next_day, exchange, segment)
+            
+            if trading_window is not None and trading_window.get_trading_duration_minutes() > 0:
+                # Found a trading day, return opening time
+                opening_time = trading_window.open_time
+                return datetime.datetime.combine(next_day, opening_time, tzinfo=timestamp.tzinfo)
+            
+            # Move to next day if current day is holiday
+            next_day += timedelta(days=1)
+            attempts += 1
+        
+        # Fallback: if we can't find a trading day within max_attempts, 
+        # assume next weekday at 9:15 AM (default market opening)
+        while next_day.weekday() >= 5:  # Skip weekends
+            next_day += timedelta(days=1)
+        
+        from datetime import time
+        default_opening_time = time(9, 15)  # Default market opening
+        return datetime.datetime.combine(next_day, default_opening_time, tzinfo=timestamp.tzinfo)
