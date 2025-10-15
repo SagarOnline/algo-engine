@@ -36,7 +36,7 @@ def test_instrument_dto_to_dict():
     instr = make_instrument()
     dto = InstrumentDTO(instr)
     d = dto.to_dict()
-    assert d["type"] == str(Segment.FNO.name)
+    assert d["segment"] == str(Segment.FNO.name)
     assert d["exchange"] == str(Exchange.NSE.name)
     assert d["instrument_key"] == "NSE_INDEX|Nifty 50"
     assert d["expiry"] == str(Expiry.MONTHLY.name)
