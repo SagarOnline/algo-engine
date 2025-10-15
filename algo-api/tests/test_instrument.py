@@ -16,7 +16,7 @@ def test_instrument_equality_basic():
 
 def test_instrument_equality_with_all_fields():
     inst1 = Instrument(
-        segment=Segment.PFNOE,
+        segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY,
