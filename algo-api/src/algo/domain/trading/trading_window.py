@@ -6,7 +6,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
-from ..strategy.strategy import Exchange, Segment
+from ..strategy.strategy import Exchange, Segment, Type
 
 
 class TradingWindowType(Enum):
@@ -39,6 +39,7 @@ class TradingWindow:
     close_time: Optional[time]
     description: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+    type: Optional[Type] = None
     
     def __post_init__(self) -> None:
         """Validate trading window data after initialization."""
@@ -128,6 +129,7 @@ class TradingWindow:
             "date": self.date.isoformat(),
             "exchange": self.exchange.value,
             "segment": self.segment.value,
+            "type": self.type.value if self.type else None,
             "window_type": self.window_type.value,
             "open_time": self.open_time.strftime("%H:%M") if self.open_time else None,
             "close_time": self.close_time.strftime("%H:%M") if self.close_time else None,
@@ -142,6 +144,7 @@ class TradingWindow:
             date=datetime.strptime(data["date"], "%Y-%m-%d").date(),
             exchange=Exchange(data["exchange"]),
             segment=Segment(data["segment"]),
+            type=Type(data["type"]) if data.get("type") else None,
             window_type=TradingWindowType(data["window_type"]),
             open_time=datetime.strptime(data["open_time"], "%H:%M").time() if data.get("open_time") else None,
             close_time=datetime.strptime(data["close_time"], "%H:%M").time() if data.get("close_time") else None,
@@ -152,6 +155,6 @@ class TradingWindow:
     def __str__(self) -> str:
         """String representation of trading window."""
         if self.is_holiday:
-            return f"{self.date} {self.exchange.value}-{self.segment.value}: HOLIDAY - {self.description}"
+            return f"{self.date} {self.exchange.value}-{self.type.value}: HOLIDAY - {self.description}"
         else:
-            return f"{self.date} {self.exchange.value}-{self.segment.value}: {self.open_time}-{self.close_time}"
+            return f"{self.date} {self.exchange.value}-{self.type.value}: {self.open_time}-{self.close_time}"
