@@ -58,18 +58,6 @@ def main():
     for special_day in special_days:
         print(f"   - {special_day.date}: {special_day.description} "
               f"({special_day.open_time} - {special_day.close_time})")
-    
-    # Display cache statistics
-    print(f"\n📈 Cache Statistics:")
-    stats = service.get_cache_stats()
-    print(f"   Total exchange-segments loaded: {stats['total_exchange_segments']}")
-    
-    for key, exchange_stats in stats['exchange_segments'].items():
-        print(f"   {key}:")
-        print(f"     Years: {exchange_stats['years_loaded']}")
-        print(f"     Total windows: {exchange_stats['total_windows']}")
-        print(f"     Holidays: {exchange_stats['total_holidays']}")
-        print(f"     Special days: {exchange_stats['total_special_days']}")
 
 
 def check_trading_day(service: TradingWindowService, target_date: date, exchange: str, segment: str):

@@ -567,22 +567,6 @@ class TestTradingWindowService:
         assert special_days[0].date == date(2024, 11, 1)  # Muhurat Trading
         assert special_days[0].is_special_trading_day
     
-    def test_get_cache_stats(self, config_data_list):
-        """Test cache statistics retrieval."""
-        service = TradingWindowService(config_data_list)
-        
-        stats = service.get_cache_stats()
-        
-        assert stats["total_exchange_segments"] == 1
-        assert "NSE-FNO" in stats["exchange_segments"]
-        
-        nse_fno_stats = stats["exchange_segments"]["NSE-FNO"]
-        assert nse_fno_stats["exchange"] == "NSE"
-        assert nse_fno_stats["segment"] == "FNO"
-        assert nse_fno_stats["years_loaded"] == [2024]
-        assert nse_fno_stats["total_holidays"] == 2
-        assert nse_fno_stats["total_special_days"] == 1
-    
     def test_non_existent_exchange_segment(self, config_data_list):
         """Test querying non-existent exchange-segment combination."""
         service = TradingWindowService(config_data_list)
