@@ -10,6 +10,12 @@ from algo.domain.timeframe import Timeframe
 class Segment(Enum):
     FNO = "FNO"
     EQ = "EQ"
+    
+class Type(Enum):
+    FUT = "FUT"
+    CE = "CE"
+    PE = "PE"
+    EQ = "EQ"
 
 class Exchange(Enum):
     NSE = "NSE"
@@ -47,7 +53,8 @@ class Instrument:
         instrument_key: str,
         expiry: Optional[Expiry] = None,
         expiring: Optional[Expiring] = None, 
-        atm: Optional[int] = None
+        atm: Optional[int] = None,
+        type: Optional[Type] = None
     ):
         self.segment = Segment(segment)
         self.exchange = Exchange(exchange)
@@ -55,6 +62,7 @@ class Instrument:
         self.expiry = Expiry(expiry) if expiry else None
         self.expiring = Expiring(expiring) if expiring else None
         self.atm = atm
+        self.type = Type(type) if type else None
         
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -63,7 +71,8 @@ class Instrument:
             "instrument_key": self.instrument_key,
             "expiry": self.expiry.value if self.expiry else None,
             "expiring": self.expiring.value if self.expiring else None,
-            "atm": self.atm
+            "atm": self.atm,
+            "type": self.type.value if self.type else None
         }
         
 
@@ -76,7 +85,8 @@ class Instrument:
             self.instrument_key == other.instrument_key and
             self.expiry == other.expiry and
             self.expiring == other.expiring and
-            self.atm == other.atm
+            self.atm == other.atm and
+            self.type == other.type
         )
 
 

@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy.strategy import Instrument
+from algo.domain.strategy.strategy import Instrument, Type
 from algo.domain.strategy.tradable_instrument import Position
 from algo.domain.strategy.tradable_instrument import TriggerType
 from algo.domain.strategy.tradable_instrument import PositionType
@@ -10,7 +10,8 @@ def instrument():
     return Instrument(
         segment="EQ",
         exchange="NSE",
-        instrument_key="TCS"
+        instrument_key="TCS",
+        type=Type.EQ
     )
 
 @pytest.fixture
@@ -139,7 +140,7 @@ def test_position_all_trigger_types(instrument, entry_time, exit_time):
 
 def test_position_stop_loss_exit_uses_stop_loss_price():
     """Test that exit with STOP_LOSS trigger uses stop loss offset from entry price"""
-    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS", type=Type.EQ)
     entry_time = datetime(2025, 9, 17, 9, 15)
     exit_time = datetime(2025, 9, 17, 15, 30)
     

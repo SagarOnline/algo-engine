@@ -1,16 +1,18 @@
 import pytest
-from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring, Type
 
 def test_instrument_equality_basic():
     inst1 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     assert inst1 == inst2
 
@@ -21,7 +23,8 @@ def test_instrument_equality_with_all_fields():
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY,
         expiring=Expiring.CURRENT,
-        atm=0
+        atm=0,
+        type=Type.PE
     )
     inst2 = Instrument(
         segment=Segment.FNO,
@@ -29,7 +32,8 @@ def test_instrument_equality_with_all_fields():
         instrument_key="BANKNIFTY23JUN18000PE",
         expiry=Expiry.MONTHLY,
         expiring=Expiring.CURRENT,
-        atm=0
+        atm=0,
+        type=Type.PE
     )
     assert inst1 == inst2
 
@@ -37,12 +41,14 @@ def test_instrument_inequality_type():
     inst1 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     inst2 = Instrument(
         segment=Segment.EQ,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.EQ
     )
     assert inst1 != inst2
 
@@ -50,12 +56,14 @@ def test_instrument_inequality_exchange():
     inst1 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.BSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     assert inst1 != inst2
 
@@ -63,12 +71,14 @@ def test_instrument_inequality_instrument_key():
     inst1 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="BANKNIFTY23JUNFUT"
+        instrument_key="BANKNIFTY23JUNFUT",
+        type=Type.FUT
     )
     assert inst1 != inst2
 
@@ -77,13 +87,15 @@ def test_instrument_inequality_expiry():
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiry=Expiry.MONTHLY
+        expiry=Expiry.MONTHLY,
+        type=Type.PE
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiry=Expiry.WEEKLY
+        expiry=Expiry.WEEKLY,
+        type=Type.PE
     )
     assert inst1 != inst2
 
@@ -92,13 +104,15 @@ def test_instrument_inequality_expiring():
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiring=Expiring.CURRENT
+        expiring=Expiring.CURRENT,
+        type=Type.PE
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiring=Expiring.NEXT
+        expiring=Expiring.NEXT,
+        type=Type.PE
     )
     assert inst1 != inst2
 
@@ -107,13 +121,15 @@ def test_instrument_inequality_atm():
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        atm=0
+        atm=0,
+        type=Type.PE
     )
     inst2 = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        atm=1
+        atm=1,
+        type=Type.PE
     )
     assert inst1 != inst2
 
@@ -121,6 +137,7 @@ def test_instrument_not_equal_to_other_type():
     inst = Instrument(
         segment=Segment.FNO,
         exchange=Exchange.NSE,
-        instrument_key="NIFTY23JUNFUT"
+        instrument_key="NIFTY23JUNFUT",
+        type=Type.FUT
     )
     assert inst != "not an instrument"

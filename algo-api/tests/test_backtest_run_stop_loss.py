@@ -1,6 +1,6 @@
 import pytest
 from datetime import date, datetime, timedelta
-from algo.domain.strategy.strategy import Instrument, TradeAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy
+from algo.domain.strategy.strategy import Exchange, Instrument, Segment, TradeAction, PositionInstrument, RiskManagement, StopLoss, StopLossType, Strategy, Type
 from algo.domain.backtest.historical_data import HistoricalData
 
 class DummyStrategy(Strategy):
@@ -48,7 +48,7 @@ def candles():
 
 @pytest.fixture
 def instrument():
-    return Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
+    return Instrument(segment=Segment.EQ, type=Type.FUT, exchange=Exchange.NSE, instrument_key="TCS")
 
 @pytest.fixture
 def strategy(instrument):

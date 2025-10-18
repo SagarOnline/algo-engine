@@ -1,13 +1,13 @@
 import pytest
 from datetime import datetime
 from algo.application.util import fmt_currency
-from algo.domain.strategy.strategy import Instrument, TradeAction
+from algo.domain.strategy.strategy import Exchange, Instrument, Segment, TradeAction, Type
 from algo.domain.strategy.tradable_instrument import Position
 from algo.application.run_backtest_usecase import PositionDTO
 from algo.domain.strategy.tradable_instrument import PositionType
 
 def make_position(entry_price=None, entry_time=None, exit_price=None, exit_time=None):
-    instrument = Instrument(segment="EQ", exchange="NSE", instrument_key="TCS")
+    instrument = Instrument(segment=Segment.EQ, type=Type.EQ, exchange=Exchange.NSE, instrument_key="TCS")
     pos = Position(instrument, PositionType.LONG, 1, entry_price if entry_price is not None else 100.0, entry_time if entry_time is not None else datetime(2025, 9, 17, 9, 15))
     if exit_price is not None and exit_time is not None:
         pos.exit(exit_price, exit_time)

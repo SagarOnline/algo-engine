@@ -16,8 +16,8 @@ class TestTradingWindow:
         """Test creating a regular trading window."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            segment=Segment.FNO,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -25,8 +25,8 @@ class TestTradingWindow:
         )
         
         assert window.date == date(2024, 11, 5)
-        assert window.exchange == "NSE"
-        assert window.segment == "FNO"
+        assert window.exchange == Exchange.NSE
+        assert window.segment == Segment.FNO
         assert window.window_type == TradingWindowType.DEFAULT
         assert window.open_time == time(9, 15)
         assert window.close_time == time(15, 30)
@@ -160,8 +160,8 @@ class TestTradingWindow:
         """Test conversion to dictionary."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            segment=Segment.FNO,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -196,8 +196,8 @@ class TestTradingWindow:
         window = TradingWindow.from_dict(data)
         
         assert window.date == date(2024, 11, 5)
-        assert window.exchange == "NSE"
-        assert window.segment == "FNO"
+        assert window.exchange == Exchange.NSE
+        assert window.segment == Segment.FNO
         assert window.window_type == TradingWindowType.DEFAULT
         assert window.open_time == time(9, 15)
         assert window.close_time == time(15, 30)
@@ -208,8 +208,8 @@ class TestTradingWindow:
         """Test is_within_trading_window for a normal trading day."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            segment=Segment.FNO,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),

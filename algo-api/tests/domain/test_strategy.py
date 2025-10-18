@@ -2,7 +2,7 @@ import pytest
 from typing import Dict, Any, List
 from dataclasses import dataclass
 from algo.domain.indicators.registry import register_indicator, IndicatorRegistry
-from algo.domain.strategy.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, Segment, Exchange, TradeAction
+from algo.domain.strategy.strategy import Strategy, Instrument, Timeframe, RuleSet, Expression, Condition, PositionInstrument, Segment, Exchange, TradeAction, Type
 from datetime import date, datetime, timedelta
 
 # --- Mock domain classes ---
@@ -43,7 +43,7 @@ class DummyStrategy(Strategy):
         return "Dummy Strategy"
 
     def get_instrument(self) -> Instrument:
-        return Instrument(segment=Segment.EQ, exchange=Exchange.NSE, instrument_key="DUMMY")
+        return Instrument(segment=Segment.EQ, type=Type.EQ, exchange=Exchange.NSE, instrument_key="DUMMY")
 
     def get_timeframe(self) -> Timeframe:
         return self._timeframe

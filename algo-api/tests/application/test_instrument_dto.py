@@ -1,6 +1,6 @@
 import pytest
 from algo.application.strategy_usecases import InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring, Type
 
 def make_instrument():
     return Instrument(
@@ -9,14 +9,16 @@ def make_instrument():
         instrument_key="NSE_INDEX|Nifty 50",
         expiry=Expiry.MONTHLY,
         expiring=Expiring.NEXT,
-        atm=-50
+        atm=-50,
+        type=Type.FUT
     )
 
 
 def test_instrument_dto_fields():
     instr = make_instrument()
     dto = InstrumentDTO(instr)
-    assert dto.segement == Segment.FNO.name
+    assert dto.segment == Segment.FNO.name
+    assert dto.type == Type.FUT.name
     assert dto.exchange == Exchange.NSE.name
     assert dto.instrument_key == "NSE_INDEX|Nifty 50"
     assert dto.expiry == Expiry.MONTHLY.name
@@ -37,6 +39,7 @@ def test_instrument_dto_to_dict():
     dto = InstrumentDTO(instr)
     d = dto.to_dict()
     assert d["segment"] == str(Segment.FNO.name)
+    assert d["type"] == str(Type.FUT.name)
     assert d["exchange"] == str(Exchange.NSE.name)
     assert d["instrument_key"] == "NSE_INDEX|Nifty 50"
     assert d["expiry"] == str(Expiry.MONTHLY.name)

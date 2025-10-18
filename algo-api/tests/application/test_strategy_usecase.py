@@ -1,13 +1,13 @@
 import pytest
 from algo.application.strategy_usecases import StrategyUseCase, StrategyNotFound, StrategyDetailsDTO
 from algo.domain.strategy_repository import StrategyRepository
-from algo.domain.strategy.strategy import Exchange, Expiring, Expiry, Segment, Strategy, Instrument
+from algo.domain.strategy.strategy import Exchange, Expiring, Expiry, Segment, Strategy, Instrument, Type
 
 class DummyStrategy(Strategy):
     def get_name(self): return "test_strategy"
     def get_display_name(self): return "Test Strategy Display Name"
     def get_description(self): return "Test Description"
-    def get_instrument(self): return Instrument(segment=Segment.FNO, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY, expiring=Expiring.CURRENT)
+    def get_instrument(self): return Instrument(segment=Segment.FNO, type=Type.FUT, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY, expiring=Expiring.CURRENT)
     def get_timeframe(self): return "1d"
     def get_position_instrument(self): return []
     def get_capital(self): return 10000
