@@ -13,7 +13,7 @@ class DummyStrategy:
     def get_instrument(self):
         return Instrument(
             segment=Segment.FNO,
-            type=Type.FUT
+            type=Type.FUT,
             exchange=Exchange.NSE,
             instrument_key="NSE_INDEX|Nifty 50",
             expiry=Expiry.MONTHLY,
