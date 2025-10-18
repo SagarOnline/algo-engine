@@ -5,7 +5,7 @@ from algo.domain.backtest.backtest import BackTest
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.backtest.report import BackTestReport
-from algo.domain.strategy.strategy import Strategy, Instrument, TradeAction, PositionInstrument, Segment, Exchange
+from algo.domain.strategy.strategy import Strategy, Instrument, TradeAction, PositionInstrument, Segment, Exchange, Type
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
@@ -17,6 +17,7 @@ def create_test_instrument():
     """Create a real Instrument object for testing."""
     return Instrument(
         segment=Segment.EQ,
+        type=Type.EQ,
         exchange=Exchange.NSE,
         instrument_key="NSE_EQ|INE002A01018"
     )

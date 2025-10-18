@@ -4,7 +4,7 @@ from unittest.mock import Mock, MagicMock, ANY, patch
 
 from algo.domain.backtest import historical_data
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
-from algo.domain.strategy.strategy import Strategy, Instrument, Segment, Exchange, TradeAction
+from algo.domain.strategy.strategy import Strategy, Instrument, Segment, Exchange, TradeAction, Type
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
@@ -19,7 +19,7 @@ def mock_strategy():
     strategy = Mock(spec=Strategy)
     strategy.get_name.return_value = "test_strategy"
     strategy.get_timeframe.return_value = "5min"
-    strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
+    strategy.get_instrument.return_value = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013", type=Type.FUT)
     strategy.get_required_history_start_date.return_value = datetime(2025, 9, 10, 9, 15, 0)
     strategy.should_enter_trade.return_value = False
     strategy.should_exit_trade.return_value = False
@@ -105,7 +105,7 @@ def sample_historical_data():
 
 @pytest.fixture
 def sample_tradable_instrument():
-    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.FNO, Exchange.NSE, "NSE_INE869I01013", type=Type.FUT)
     tradable = Mock(spec=TradableInstrument)
     tradable.instrument = instrument
     tradable.is_any_position_open.return_value = False
@@ -326,8 +326,8 @@ def test_evaluate_multiple_tradable_instruments_returns_all_signals(evaluator, s
                                                                     mock_historical_data_repository):
     """Test that evaluate returns signals from all matching tradable instruments."""
     # Create multiple tradable instruments
-    instrument1 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT1")
-    instrument2 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT2")
+    instrument1 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT1", type=Type.FUT)
+    instrument2 = Instrument(Segment.FNO, Exchange.NSE, "INSTRUMENT2", type=Type.FUT)
     
     tradable1 = Mock(spec=TradableInstrument)
     tradable1.instrument = instrument1

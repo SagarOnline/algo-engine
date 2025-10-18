@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
-from algo.domain.strategy.strategy import Instrument, Segment, Exchange, TradeAction
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, TradeAction, Type
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.timeframe import Timeframe
@@ -23,7 +23,7 @@ def mock_historical_data_repository():
 
 @pytest.fixture
 def sample_instrument():
-    return Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    return Instrument(Segment.EQ, type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_INE869I01013")
 
 
 @pytest.fixture
@@ -173,7 +173,7 @@ def test_execute_no_matching_tradable_instrument(executor, sample_trade_signal, 
                                                 mock_tradable_instrument_repository, mock_historical_data_repository):
     """Test execution when no matching tradable instrument is found."""
     # Create a different instrument
-    different_instrument = Instrument(Segment.FNO, Exchange.NSE, "DIFFERENT_INSTRUMENT")
+    different_instrument = Instrument(segment=Segment.FNO, type=Type.FUT, exchange=Exchange.NSE, instrument_key="DIFFERENT_INSTRUMENT")
     different_tradable = TradableInstrument(different_instrument)
     
     # Setup mocks
@@ -252,7 +252,7 @@ def test_execute_instrument_comparison_uses_object_equality(executor, sample_tra
                                                            mock_tradable_instrument_repository, mock_historical_data_repository):
     """Test that instrument comparison uses object equality correctly."""
     # Create an instrument with same properties but different object
-    similar_instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    similar_instrument = Instrument(segment=Segment.EQ, type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_INE869I01013")
     similar_tradable = TradableInstrument(similar_instrument)
     
     # Setup mocks

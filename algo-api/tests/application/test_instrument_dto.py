@@ -1,6 +1,6 @@
 import pytest
 from algo.application.strategy_usecases import InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring, Type
 
 def make_instrument():
     return Instrument(
@@ -9,7 +9,8 @@ def make_instrument():
         instrument_key="NSE_INDEX|Nifty 50",
         expiry=Expiry.MONTHLY,
         expiring=Expiring.NEXT,
-        atm=-50
+        atm=-50,
+        type=Type.FUT
     )
 
 

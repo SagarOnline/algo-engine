@@ -1,6 +1,6 @@
 import pytest
 from algo.application.strategy_usecases import PositionInstrumentDTO, StrategyDetailsDTO, InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring, PositionInstrument
+from algo.domain.strategy.strategy import Instrument, Segment, Exchange, Expiry, Expiring, PositionInstrument, Type
 
 class DummyStrategy:
     def get_name(self):
@@ -13,6 +13,7 @@ class DummyStrategy:
     def get_instrument(self):
         return Instrument(
             segment=Segment.FNO,
+            type=Type.FUT
             exchange=Exchange.NSE,
             instrument_key="NSE_INDEX|Nifty 50",
             expiry=Expiry.MONTHLY,

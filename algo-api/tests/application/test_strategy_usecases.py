@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from algo.domain.strategy.strategy import Instrument,Segment,Exchange,Expiring, Expiry, PositionInstrument, TradeAction, Strategy
+from algo.domain.strategy.strategy import Instrument,Segment,Exchange,Expiring, Expiry, PositionInstrument, TradeAction, Strategy, Type
 from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO, InstrumentDTO
 
 class DummyStrategy(Strategy):
@@ -43,12 +43,12 @@ class DummyStrategy(Strategy):
 class DummyRepository:
     def list_strategies(self):
         return [
-            DummyStrategy("strat1", "Strategy One", "Strategy One", Instrument(segment=Segment.FNO, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT")),
-            DummyStrategy("strat2", "Strategy Two", "SStrategy Two", Instrument(segment=Segment.FNO, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT")),
+            DummyStrategy("strat1", "Strategy One", "Strategy One", Instrument(segment=Segment.FNO,type=Type.FUT, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT")),
+            DummyStrategy("strat2", "Strategy Two", "Strategy Two", Instrument(segment=Segment.FNO,type=Type.FUT, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT")),
         ]
 
 def test_strategy_dto_to_dict():
-    instr = Instrument(segment=Segment.FNO, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY,expiring=Expiring.CURRENT)
+    instr = Instrument(segment=Segment.FNO,type=Type.FUT, exchange=Exchange.NSE, instrument_key="NIFTY23JUNFUT", expiry=Expiry.MONTHLY,expiring=Expiring.CURRENT)
     strategy = DummyStrategy("strat1", "Strategy One", "First strategy", instr)
     dto = StrategyDTO(strategy)
     result = dto.to_dict()

@@ -32,6 +32,7 @@ class JsonStrategy(Strategy):
     def _get_parsed_instrument(self, instrument_data: Dict[str, Any]) -> Instrument:
         instrument = Instrument(
             segment=instrument_data.get("segment"),
+            type=instrument_data.get("type"),
             exchange=instrument_data.get("exchange"),
             expiry=instrument_data.get("expiry"),
             expiring=instrument_data.get("expiring"),

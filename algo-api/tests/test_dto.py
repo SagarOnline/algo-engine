@@ -3,7 +3,7 @@ import pytest
 from algo.application.run_backtest_usecase import TradableDTO,PositionDTO, BackTestReportDTO
 from algo.application.util import fmt_currency, fmt_datetime, fmt_percent
 from algo.domain.backtest.report import BackTestReport
-from algo.domain.strategy.strategy import Exchange, Instrument, Segment, TradeAction
+from algo.domain.strategy.strategy import Exchange, Instrument, Segment, TradeAction, Type
 
 from datetime import datetime
 
@@ -11,7 +11,7 @@ from algo.domain.strategy.tradable_instrument import Position, PositionType, Tra
 
 @pytest.fixture
 def mock_tradable():
-    instrument = Instrument(Segment.EQ, Exchange.NSE, "NSE_INE869I01013")
+    instrument = Instrument(Segment.EQ, type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_INE869I01013")
     tradable = TradableInstrument(instrument)
     tradable.add_position(datetime(2025, 9, 12, 9, 15, 0), 100.0, TradeAction.BUY, 10)
     tradable.exit_position(datetime(2025, 9, 12, 15, 30, 0), 110.0, TradeAction.SELL, 10)
