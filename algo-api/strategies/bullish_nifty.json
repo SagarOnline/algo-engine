@@ -4,9 +4,6 @@
   "description": "A simple bullish strategy for Nifty using EMA crossover.",
   "instrument": {
     "type": "EQ",
-    "expiry": "MONTHLY",
-    "expiring": "NEXT",
-    "atm": -50,
     "instrument_key": "NSE_INDEX|Nifty 50",
     "exchange": "NSE"
   },
@@ -18,7 +15,6 @@
       "type": "FUT",
       "expiry": "MONTHLY",
       "expiring": "NEXT",
-      "atm": -50,
       "instrument_key": "NSE_INDEX|Nifty 50",
       "exchange": "NSE"
     }

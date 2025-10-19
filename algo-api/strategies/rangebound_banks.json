@@ -4,9 +4,6 @@
   "description": "A simple rangebound strategy for Banks using EMA crossover.",
   "instrument": {
     "type": "EQ",
-    "expiry": "MONTHLY",
-    "expiring": "NEXT",
-    "atm": -50,
     "instrument_key": "NSE_INDEX|Nifty 50",
     "exchange": "NSE"
   },
@@ -18,7 +15,6 @@
       "type": "FUT",
       "expiry": "MONTHLY",
       "expiring": "NEXT",
-      "atm": -50,
       "instrument_key": "NSE_FO|64103",
       "exchange": "NSE"
     }
