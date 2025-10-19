@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, List
 from enum import Enum
 
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
-from .strategy import Strategy, Instrument, TradeAction
+from .strategy import Exchange, Strategy, Instrument, TradeAction, Type
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from .tradable_instrument_repository import TradableInstrumentRepository
@@ -138,7 +138,7 @@ class StrategyEvaluator:
         # Get instrument details for trading window lookup
         instrument = self.strategy.get_instrument()
         exchange = instrument.exchange
-        segment = instrument.segment
+        type = instrument.type
         
         # Calculate the next timestamp based on timeframe
         if timeframe == Timeframe.ONE_MINUTE:
@@ -153,7 +153,7 @@ class StrategyEvaluator:
             next_timestamp = timestamp + timedelta(hours=1)
         elif timeframe == Timeframe.ONE_DAY:
             # For daily timeframe, move to next trading day
-            return self._get_next_trading_day_opening(timestamp, exchange, segment)
+            return self._get_next_trading_day_opening(timestamp, exchange, type)
         elif timeframe == Timeframe.ONE_WEEK:
             # For weekly timeframe, move to next week's first trading day
             next_timestamp = timestamp + timedelta(weeks=1)
@@ -163,27 +163,27 @@ class StrategyEvaluator:
         # For intraday timeframes, check if next timestamp is within trading window
         trading_window_service = services.get_trading_window_service()
         next_date = next_timestamp.date()
-        trading_window = trading_window_service.get_trading_window(next_date, exchange, segment)
+        trading_window = trading_window_service.get_trading_window(next_date, exchange, type)
         
         # If no trading window found, move to next trading day
         if trading_window is None:
-            return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
+            return self._get_next_trading_day_opening(next_timestamp, exchange, type)
         
         # Use the TradingWindow.is_within_trading_window() method to check if next timestamp is valid
         if trading_window.is_within_trading_window(next_timestamp):
             return next_timestamp
         else:
             # Next timestamp is not within trading window, move to next trading day
-            return self._get_next_trading_day_opening(next_timestamp, exchange, segment)
+            return self._get_next_trading_day_opening(next_timestamp, exchange, type)
     
-    def _get_next_trading_day_opening(self, timestamp, exchange: str, segment: str):
+    def _get_next_trading_day_opening(self, timestamp, exchange: Exchange, type: Type):
         """
         Get the next trading day opening timestamp.
         
         Args:
             timestamp: Current timestamp
             exchange: Exchange name
-            segment: Market segment
+            type: Instrument Type
             
         Returns:
             datetime: Next trading day opening timestamp
@@ -197,7 +197,7 @@ class StrategyEvaluator:
         
         while attempts < max_attempts:
             trading_window_service = services.get_trading_window_service()
-            trading_window = trading_window_service.get_trading_window(next_day, exchange, segment)
+            trading_window = trading_window_service.get_trading_window(next_day, exchange, type)
             
             if trading_window is not None and trading_window.get_trading_duration_minutes() > 0:
                 # Found a trading day, return opening time

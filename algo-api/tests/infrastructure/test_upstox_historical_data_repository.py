@@ -4,7 +4,7 @@ from algo.domain.timeframe import Timeframe
 from unittest.mock import patch, MagicMock
 from datetime import date, timedelta
 from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
-from algo.domain.strategy.strategy import Exchange, Instrument, Segment, Type
+from algo.domain.strategy.strategy import Exchange, Instrument, Type
 from algo.domain.timeframe import Timeframe
 from algo.domain.backtest.historical_data import HistoricalData
 
@@ -36,7 +36,7 @@ def test_parse_timeframe_invalid():
         
 @pytest.fixture
 def instrument():
-    return Instrument(segment=Segment.EQ,type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_EQ|INE467B01029")
+    return Instrument(type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_EQ|INE467B01029")
 
 @pytest.fixture
 def timeframe():

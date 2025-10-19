@@ -1,6 +1,7 @@
 {
   "exchange": "NSE",
   "segment": "FNO",
+  "type": "FUT",
   "year": 2025,
 
   "default_trading_windows": [

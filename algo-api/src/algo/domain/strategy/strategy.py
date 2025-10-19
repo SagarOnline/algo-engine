@@ -48,15 +48,14 @@ class RiskManagement:
         
 class Instrument:
     def __init__(self, 
-        segment: Segment,
         exchange: Exchange,
+        type: Type,
         instrument_key: str,
         expiry: Optional[Expiry] = None,
         expiring: Optional[Expiring] = None, 
         atm: Optional[int] = None,
-        type: Optional[Type] = None
+        
     ):
-        self.segment = Segment(segment)
         self.exchange = Exchange(exchange)
         self.instrument_key = instrument_key
         self.expiry = Expiry(expiry) if expiry else None
@@ -66,7 +65,6 @@ class Instrument:
         
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "segment": self.segment.value,
             "exchange": self.exchange.value,
             "instrument_key": self.instrument_key,
             "expiry": self.expiry.value if self.expiry else None,
@@ -80,7 +78,6 @@ class Instrument:
         if not isinstance(other, Instrument):
             return False
         return (
-            self.segment == other.segment and
             self.exchange == other.exchange and
             self.instrument_key == other.instrument_key and
             self.expiry == other.expiry and
