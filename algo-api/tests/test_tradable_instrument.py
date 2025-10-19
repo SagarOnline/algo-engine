@@ -1,10 +1,10 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy.strategy import Instrument, Segment, TradeAction, Type
+from algo.domain.strategy.strategy import Exchange, Instrument, TradeAction, Type
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 
 def make_instrument():
-    return Instrument(segment= Segment.EQ, exchange= "NSE", instrument_key= "NSE_TEST_INSTRUMENT", type=Type.EQ )
+    return Instrument(type=Type.EQ, exchange=Exchange.NSE, instrument_key="NSE_TEST_INSTRUMENT")
 
 def test_add_position_creates_trade():
     instr = make_instrument()

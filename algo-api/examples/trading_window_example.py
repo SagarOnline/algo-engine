@@ -4,6 +4,7 @@ Example demonstrating usage of TradingWindowService and TradingWindow classes.
 from datetime import date, time
 import logging
 
+from algo.domain.strategy.strategy import Exchange, Type
 from algo.domain.trading.trading_window_service import TradingWindowService
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
 
@@ -24,43 +25,43 @@ def main():
     # Display available exchange-segment combinations
     exchanges_segments = service.get_available_exchanges_segments()
     print(f"\n📊 Available exchange-segment combinations: {len(exchanges_segments)}")
-    for exchange, segment in exchanges_segments:
-        years = service.get_available_years(exchange, segment)
-        print(f"   - {exchange}-{segment}: Years {years}")
+    for exchange, type in exchanges_segments:
+        years = service.get_available_years(exchange, type)
+        print(f"   - {exchange}-{type}: Years {years}")
     
-    # Example queries for NSE FNO
-    exchange = "NSE"
-    segment = "FNO"
+    # Example queries for NSE FUT
+    exchange = Exchange.NSE
+    type = Type.FUT
     
-    print(f"\n🔍 Examples for {exchange}-{segment}:")
+    print(f"\n🔍 Examples for {exchange}-{type}:")
     
     # Check regular trading day
     regular_date = date(2024, 11, 5)
-    check_trading_day(service, regular_date, exchange, segment)
+    check_trading_day(service, regular_date, exchange, type)
     
     # Check holiday
     christmas = date(2024, 12, 25)
-    check_trading_day(service, christmas, exchange, segment)
+    check_trading_day(service, christmas, exchange, type)
     
     # Check special trading day (Muhurat trading)
     muhurat_date = date(2024, 11, 1)
-    check_trading_day(service, muhurat_date, exchange, segment)
+    check_trading_day(service, muhurat_date, exchange, type)
     
     # Get all holidays for 2024
-    print(f"\n🎄 Holidays for {exchange}-{segment} in 2024:")
-    holidays = service.get_holidays(2024, exchange, segment)
+    print(f"\n🎄 Holidays for {exchange}-{type} in 2024:")
+    holidays = service.get_holidays(2024, exchange, type)
     for holiday in holidays:
         print(f"   - {holiday.date}: {holiday.description}")
     
     # Get all special trading days for 2024
-    print(f"\n⭐ Special trading days for {exchange}-{segment} in 2024:")
-    special_days = service.get_special_trading_days(2024, exchange, segment)
+    print(f"\n⭐ Special trading days for {exchange}-{type} in 2024:")
+    special_days = service.get_special_trading_days(2024, exchange, type)
     for special_day in special_days:
         print(f"   - {special_day.date}: {special_day.description} "
               f"({special_day.open_time} - {special_day.close_time})")
 
 
-def check_trading_day(service: TradingWindowService, target_date: date, exchange: str, segment: str):
+def check_trading_day(service: TradingWindowService, target_date: date, exchange: Exchange, type: Type):
     """
     Check and display information about a specific trading day.
     
@@ -68,12 +69,12 @@ def check_trading_day(service: TradingWindowService, target_date: date, exchange
         service: TradingWindowService instance
         target_date: Date to check
         exchange: Exchange name
-        segment: Market segment
+        type: Instrument type
     """
-    print(f"\n📅 Checking {target_date} for {exchange}-{segment}:")
+    print(f"\n📅 Checking {target_date} for {exchange}-{type}:")
     
     # Get trading window
-    window = service.get_trading_window(target_date, exchange, segment)
+    window = service.get_trading_window(target_date, exchange, type)
     
     if window is None:
         print("   ❌ No trading window configuration found")

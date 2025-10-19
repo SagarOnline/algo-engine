@@ -6,7 +6,6 @@ from algo.domain.strategy.strategy import Instrument, PositionInstrument, Strate
 class InstrumentDTO:
     def __init__(self, instrument: Instrument):
         self._instrument = instrument
-        self.segment = instrument.segment.name if instrument.segment else None
         self.type = instrument.type.name if instrument.type else None
         self.exchange = instrument.exchange.name if instrument.exchange else None
         self.instrument_key = instrument.instrument_key
@@ -29,7 +28,6 @@ class InstrumentDTO:
 
     def to_dict(self):
         return {
-            "segment": self.segment,
             "type": self.type,
             "exchange": str(self.exchange),
             "instrument_key": str(self.instrument_key),

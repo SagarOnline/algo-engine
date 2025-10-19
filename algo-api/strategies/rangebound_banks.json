@@ -3,7 +3,6 @@
   "display_name": "Rangebound Banks",
   "description": "A simple rangebound strategy for Banks using EMA crossover.",
   "instrument": {
-    "segment": "EQ",
     "type": "EQ",
     "expiry": "MONTHLY",
     "expiring": "NEXT",
@@ -16,7 +15,6 @@
   "position": {
     "action": "BUY",
     "instrument": {
-      "segment": "FNO",
       "type": "FUT",
       "expiry": "MONTHLY",
       "expiring": "NEXT",

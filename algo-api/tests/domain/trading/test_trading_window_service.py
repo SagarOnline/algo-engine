@@ -4,7 +4,7 @@ Tests for the TradingWindowService and TradingWindow classes.
 import pytest
 from datetime import date, time, datetime
 
-from algo.domain.strategy.strategy import Exchange, Segment
+from algo.domain.strategy.strategy import Exchange, Type
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
 from algo.domain.trading.trading_window_service import TradingWindowService
 
@@ -17,7 +17,7 @@ class TestTradingWindow:
         window = TradingWindow(
             date=date(2024, 11, 5),
             exchange=Exchange.NSE,
-            segment=Segment.FNO,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -26,7 +26,7 @@ class TestTradingWindow:
         
         assert window.date == date(2024, 11, 5)
         assert window.exchange == Exchange.NSE
-        assert window.segment == Segment.FNO
+        assert window.type == Type.FUT
         assert window.window_type == TradingWindowType.DEFAULT
         assert window.open_time == time(9, 15)
         assert window.close_time == time(15, 30)
@@ -38,8 +38,8 @@ class TestTradingWindow:
         """Test creating a holiday trading window."""
         window = TradingWindow(
             date=date(2024, 12, 25),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.HOLIDAY,
             open_time=None,
             close_time=None,
@@ -56,8 +56,8 @@ class TestTradingWindow:
         """Test creating a special trading window."""
         window = TradingWindow(
             date=date(2024, 11, 1),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.SPECIAL,
             open_time=time(18, 0),
             close_time=time(19, 0),
@@ -75,8 +75,8 @@ class TestTradingWindow:
         with pytest.raises(ValueError, match="Holiday trading windows cannot have open/close times"):
             TradingWindow(
                 date=date(2024, 12, 25),
-                exchange="NSE",
-                segment="FNO",
+                exchange=Exchange.NSE,
+                type=Type.FUT,
                 window_type=TradingWindowType.HOLIDAY,
                 open_time=time(9, 15),
                 close_time=time(15, 30),
@@ -88,8 +88,8 @@ class TestTradingWindow:
         with pytest.raises(ValueError, match="Non-holiday trading windows must have both open and close times"):
             TradingWindow(
                 date=date(2024, 11, 5),
-                exchange="NSE",
-                segment="FNO",
+                exchange=Exchange.NSE,
+                type=Type.FUT,
                 window_type=TradingWindowType.DEFAULT,
                 open_time=None,
                 close_time=None,
@@ -101,8 +101,8 @@ class TestTradingWindow:
         with pytest.raises(ValueError, match="Open time must be before close time"):
             TradingWindow(
                 date=date(2024, 11, 5),
-                exchange="NSE",
-                segment="FNO",
+                exchange=Exchange.NSE,
+                type=Type.FUT,
                 window_type=TradingWindowType.DEFAULT,
                 open_time=time(15, 30),
                 close_time=time(9, 15),
@@ -113,8 +113,8 @@ class TestTradingWindow:
         """Test trading duration calculation."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -128,8 +128,8 @@ class TestTradingWindow:
         """Test that holiday duration is None."""
         window = TradingWindow(
             date=date(2024, 12, 25),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.HOLIDAY,
             open_time=None,
             close_time=None,
@@ -142,8 +142,8 @@ class TestTradingWindow:
         """Test market open time checking."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -161,7 +161,7 @@ class TestTradingWindow:
         window = TradingWindow(
             date=date(2024, 11, 5),
             exchange=Exchange.NSE,
-            segment=Segment.FNO,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -173,7 +173,7 @@ class TestTradingWindow:
         
         assert dict_repr["date"] == "2024-11-05"
         assert dict_repr["exchange"] == "NSE"
-        assert dict_repr["segment"] == "FNO"
+        assert dict_repr["type"] == "FUT"
         assert dict_repr["window_type"] == "DEFAULT"
         assert dict_repr["open_time"] == "09:15"
         assert dict_repr["close_time"] == "15:30"
@@ -185,7 +185,7 @@ class TestTradingWindow:
         data = {
             "date": "2024-11-05",
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "window_type": "DEFAULT",
             "open_time": "09:15",
             "close_time": "15:30",
@@ -197,7 +197,7 @@ class TestTradingWindow:
         
         assert window.date == date(2024, 11, 5)
         assert window.exchange == Exchange.NSE
-        assert window.segment == Segment.FNO
+        assert window.type == Type.FUT
         assert window.window_type == TradingWindowType.DEFAULT
         assert window.open_time == time(9, 15)
         assert window.close_time == time(15, 30)
@@ -209,7 +209,7 @@ class TestTradingWindow:
         window = TradingWindow(
             date=date(2024, 11, 5),
             exchange=Exchange.NSE,
-            segment=Segment.FNO,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -237,8 +237,8 @@ class TestTradingWindow:
         """Test is_within_trading_window for a holiday."""
         holiday_window = TradingWindow(
             date=date(2024, 12, 25),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.HOLIDAY,
             open_time=None,
             close_time=None,
@@ -259,8 +259,8 @@ class TestTradingWindow:
         """Test is_within_trading_window for a special trading day."""
         special_window = TradingWindow(
             date=date(2024, 11, 1),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.SPECIAL,
             open_time=time(18, 0),
             close_time=time(19, 0),
@@ -287,8 +287,8 @@ class TestTradingWindow:
         # Create a trading window that represents a weekly holiday (Saturday)
         weekly_holiday_window = TradingWindow(
             date=date(2024, 11, 2),  # Saturday
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.HOLIDAY,
             open_time=None,
             close_time=None,
@@ -309,8 +309,8 @@ class TestTradingWindow:
         """Test edge cases for is_within_trading_window."""
         window = TradingWindow(
             date=date(2024, 11, 5),
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.DEFAULT,
             open_time=time(9, 15),
             close_time=time(15, 30),
@@ -334,8 +334,8 @@ class TestTradingWindow:
         """Test is_within_trading_window for Budget Day special trading (from 2025 config)."""
         budget_day_window = TradingWindow(
             date=date(2025, 2, 1),  # Saturday Budget Day
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.SPECIAL,
             open_time=time(9, 0),
             close_time=time(13, 0),
@@ -359,8 +359,8 @@ class TestTradingWindow:
         """Test is_within_trading_window for Muhurat Trading special session (from 2025 config)."""
         muhurat_window = TradingWindow(
             date=date(2025, 10, 21),  # Saturday Muhurat Trading
-            exchange="NSE",
-            segment="FNO",
+            exchange=Exchange.NSE,
+            type=Type.FUT,
             window_type=TradingWindowType.SPECIAL,
             open_time=time(13, 45),
             close_time=time(14, 45),
@@ -390,7 +390,7 @@ class TestTradingWindowService:
         """Sample trading window configuration data."""
         return {
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [
                 {
@@ -433,7 +433,7 @@ class TestTradingWindowService:
         """Sample config data without weekly holidays for comparison tests."""
         return {
             "exchange": "BSE",
-            "segment": "EQ",
+            "type": "EQ",
             "year": 2024,
             "default_trading_windows": [
                 {
@@ -457,7 +457,7 @@ class TestTradingWindowService:
         
         assert service.config_data_list == config_data_list
 
-        years = service.get_available_years(exchange=Exchange.NSE, segment=Segment.FNO)
+        years = service.get_available_years(exchange=Exchange.NSE, type=Type.FUT)
         assert 2024 in years
     
     def test_service_initialization_invalid_config(self):
@@ -465,7 +465,7 @@ class TestTradingWindowService:
         invalid_config = [
             {
                 "exchange": "NSE",
-                # Missing required fields like 'segment', 'year', etc.
+                # Missing required fields like 'type', 'year', etc.
                 "invalid_field": "value"
             }
         ]
@@ -478,7 +478,7 @@ class TestTradingWindowService:
         service = TradingWindowService(config_data_list)
         
         christmas = date(2024, 12, 25)
-        window = service.get_trading_window(christmas, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(christmas, Exchange.NSE, Type.FUT)
 
         assert window is not None
         assert window.is_holiday
@@ -491,7 +491,7 @@ class TestTradingWindowService:
         service = TradingWindowService(config_data_list)
         
         muhurat_date = date(2024, 11, 1)
-        window = service.get_trading_window(muhurat_date, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(muhurat_date, Exchange.NSE, Type.FUT)
 
         assert window is not None
         assert window.is_special_trading_day
@@ -504,7 +504,7 @@ class TestTradingWindowService:
         service = TradingWindowService(config_data_list)
         
         regular_date = date(2024, 11, 5)  # A regular trading day
-        window = service.get_trading_window(regular_date, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(regular_date, Exchange.NSE, Type.FUT)
 
         assert window is not None
         assert window.is_regular_trading_day
@@ -516,39 +516,39 @@ class TestTradingWindowService:
         """Test holiday checking."""
         service = TradingWindowService(config_data_list)
 
-        assert service.is_holiday(date(2024, 12, 25), Exchange.NSE, Segment.FNO)  # Christmas
-        assert service.is_holiday(date(2024, 1, 26), Exchange.NSE, Segment.FNO)   # Republic Day
-        assert not service.is_holiday(date(2024, 11, 5), Exchange.NSE, Segment.FNO)  # Regular day
+        assert service.is_holiday(date(2024, 12, 25), Exchange.NSE, Type.FUT)  # Christmas
+        assert service.is_holiday(date(2024, 1, 26), Exchange.NSE, Type.FUT)   # Republic Day
+        assert not service.is_holiday(date(2024, 11, 5), Exchange.NSE, Type.FUT)  # Regular day
 
     def test_is_special_trading_day_check(self, config_data_list):
         """Test special trading day checking."""
         service = TradingWindowService(config_data_list)
 
-        assert service.is_special_trading_day(date(2024, 11, 1), Exchange.NSE, Segment.FNO)  # Muhurat
-        assert not service.is_special_trading_day(date(2024, 12, 25), Exchange.NSE, Segment.FNO)  # Holiday
-        assert not service.is_special_trading_day(date(2024, 11, 5), Exchange.NSE, Segment.FNO)   # Regular
+        assert service.is_special_trading_day(date(2024, 11, 1), Exchange.NSE, Type.FUT)  # Muhurat
+        assert not service.is_special_trading_day(date(2024, 12, 25), Exchange.NSE, Type.FUT)  # Holiday
+        assert not service.is_special_trading_day(date(2024, 11, 5), Exchange.NSE, Type.FUT)   # Regular
 
     def test_get_trading_hours(self, config_data_list):
         """Test trading hours retrieval."""
         service = TradingWindowService(config_data_list)
         
         # Regular trading day
-        regular_hours = service.get_trading_hours(date(2024, 11, 5), Exchange.NSE, Segment.FNO)
+        regular_hours = service.get_trading_hours(date(2024, 11, 5), Exchange.NSE, Type.FUT)
         assert regular_hours == (time(9, 15), time(15, 30))
         
         # Special trading day
-        special_hours = service.get_trading_hours(date(2024, 11, 1), Exchange.NSE, Segment.FNO)
+        special_hours = service.get_trading_hours(date(2024, 11, 1), Exchange.NSE, Type.FUT)
         assert special_hours == (time(18, 0), time(19, 0))
         
         # Holiday (no trading)
-        holiday_hours = service.get_trading_hours(date(2024, 12, 25), Exchange.NSE, Segment.FNO)
+        holiday_hours = service.get_trading_hours(date(2024, 12, 25), Exchange.NSE, Type.FUT)
         assert holiday_hours is None
     
     def test_get_holidays(self, config_data_list):
         """Test retrieving all holidays for a year."""
         service = TradingWindowService(config_data_list)
         
-        holidays = service.get_holidays(2024, Exchange.NSE, Segment.FNO)
+        holidays = service.get_holidays(2024, Exchange.NSE, Type.FUT)
         
         assert len(holidays) == 2
         assert holidays[0].date == date(2024, 1, 26)  # Republic Day (sorted by date)
@@ -561,28 +561,28 @@ class TestTradingWindowService:
         """Test retrieving all special trading days for a year."""
         service = TradingWindowService(config_data_list)
 
-        special_days = service.get_special_trading_days(2024, Exchange.NSE, Segment.FNO)
+        special_days = service.get_special_trading_days(2024, Exchange.NSE, Type.FUT)
 
         assert len(special_days) == 1
         assert special_days[0].date == date(2024, 11, 1)  # Muhurat Trading
         assert special_days[0].is_special_trading_day
     
-    def test_non_existent_exchange_segment(self, config_data_list):
-        """Test querying non-existent exchange-segment combination."""
+    def test_non_existent_segment(self, config_data_list):
+        """Test querying non-existent exchange-instrumenttype combination."""
         service = TradingWindowService(config_data_list)
 
-        window = service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Segment.EQ)
+        window = service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Type.EQ)
         assert window is None
 
-        assert not service.is_holiday(date(2024, 12, 25), Exchange.BSE, Segment.EQ)
-        assert service.get_trading_hours(date(2024, 11, 5), Exchange.BSE, Segment.EQ) is None
-        assert service.get_holidays(2024, Exchange.BSE, Segment.EQ) == []
+        assert not service.is_holiday(date(2024, 12, 25), Exchange.BSE, Type.EQ)
+        assert service.get_trading_hours(date(2024, 11, 5), Exchange.BSE, Type.EQ) is None
+        assert service.get_holidays(2024, Exchange.BSE, Type.EQ) == []
     
     def test_weekly_holidays_validation_valid_config(self):
         """Test validation of valid weekly holidays configuration."""
         valid_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": [
@@ -599,7 +599,7 @@ class TestTradingWindowService:
         """Test validation failure for invalid day names in weekly holidays."""
         invalid_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": [
@@ -614,7 +614,7 @@ class TestTradingWindowService:
         """Test validation failure for missing day_of_week field."""
         invalid_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": [
@@ -629,7 +629,7 @@ class TestTradingWindowService:
         """Test validation failure for non-object weekly holiday entries."""
         invalid_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": ["SATURDAY", "SUNDAY"]  # Should be objects
@@ -644,7 +644,7 @@ class TestTradingWindowService:
         
         # November 2, 2024 is a Saturday
         saturday_date = date(2024, 11, 2)
-        window = service.get_trading_window(saturday_date, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(saturday_date, Exchange.NSE, Type.FUT)
 
         assert window is not None
         assert window.is_holiday
@@ -659,7 +659,7 @@ class TestTradingWindowService:
         
         # November 3, 2024 is a Sunday
         sunday_date = date(2024, 11, 3)
-        window = service.get_trading_window(sunday_date, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(sunday_date, Exchange.NSE, Type.FUT)
 
         assert window is not None
         assert window.is_holiday
@@ -674,7 +674,7 @@ class TestTradingWindowService:
         
         # November 1, 2024 is a Friday (not a weekend)
         friday_date = date(2024, 11, 1)
-        window = service.get_trading_window(friday_date, Exchange.NSE, Segment.FNO)
+        window = service.get_trading_window(friday_date, Exchange.NSE, Type.FUT)
 
         # Should be special trading day (Muhurat), not weekly holiday
         assert window is not None
@@ -685,7 +685,7 @@ class TestTradingWindowService:
         """Test configuration with all days as weekly holidays."""
         all_days_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": [
@@ -704,7 +704,7 @@ class TestTradingWindowService:
         # Test each day of the week
         for day_offset in range(7):
             test_date = date(2024, 11, 4 + day_offset)  # Starting from Monday Nov 4, 2024
-            window = service.get_trading_window(test_date, Exchange.NSE, Segment.FNO)
+            window = service.get_trading_window(test_date, Exchange.NSE, Type.FUT)
 
             assert window is not None
             assert window.is_holiday
@@ -714,7 +714,7 @@ class TestTradingWindowService:
         """Test that day names are case insensitive."""
         mixed_case_config = [{
             "exchange": "NSE",
-            "segment": "FNO",
+            "type": "FUT",
             "year": 2024,
             "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
             "weekly_holidays": [
@@ -727,15 +727,15 @@ class TestTradingWindowService:
         service = TradingWindowService(mixed_case_config)
         
         # Test Saturday (Nov 2, 2024)
-        saturday_window = service.get_trading_window(date(2024, 11, 2), Exchange.NSE, Segment.FNO)
+        saturday_window = service.get_trading_window(date(2024, 11, 2), Exchange.NSE, Type.FUT)
         assert saturday_window.is_holiday
         
         # Test Sunday (Nov 3, 2024)
-        sunday_window = service.get_trading_window(date(2024, 11, 3), Exchange.NSE, Segment.FNO)
+        sunday_window = service.get_trading_window(date(2024, 11, 3), Exchange.NSE, Type.FUT)
         assert sunday_window.is_holiday
         
         # Test Friday (Nov 1, 2024) - should override special day
-        friday_window = service.get_trading_window(date(2024, 11, 1), Exchange.NSE, Segment.FNO)
+        friday_window = service.get_trading_window(date(2024, 11, 1), Exchange.NSE, Type.FUT)
         assert friday_window.is_holiday  # Weekly holiday takes precedence
     
     def test_weekly_holidays_without_configuration(self, config_data_without_weekly_holidays):
@@ -744,7 +744,7 @@ class TestTradingWindowService:
         
         # November 2, 2024 is a Saturday, but no weekly holidays configured
         saturday_date = date(2024, 11, 2)
-        window = service.get_trading_window(saturday_date, Exchange.BSE, Segment.EQ)
+        window = service.get_trading_window(saturday_date, Exchange.BSE, Type.EQ)
 
         # Should generate default trading window since no weekly holidays configured
         assert window is not None
@@ -758,9 +758,9 @@ class TestTradingWindowService:
         
         # Access the internal storage to verify conversion
         assert hasattr(service, '_weekly_holidays')
-        
-        weekly_holidays = service._weekly_holidays.get("NSE-FNO", {}).get(2024, [])
-        
+
+        weekly_holidays = service._weekly_holidays.get("NSE-FUT", {}).get(2024, [])
+
         # Should contain numeric values for Saturday (5) and Sunday (6)
         assert 5 in weekly_holidays  # Saturday
         assert 6 in weekly_holidays  # Sunday
@@ -771,14 +771,14 @@ class TestTradingWindowService:
         multi_year_config = [
             {
                 "exchange": "NSE",
-                "segment": "FNO",
+                "type": "FUT",
                 "year": 2024,
                 "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
                 "weekly_holidays": [{"day_of_week": "SATURDAY"}, {"day_of_week": "SUNDAY"}]
             },
             {
                 "exchange": "NSE",
-                "segment": "FNO",
+                "type": "FUT",
                 "year": 2025,
                 "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
                 "weekly_holidays": [{"day_of_week": "FRIDAY"}, {"day_of_week": "SATURDAY"}, {"day_of_week": "SUNDAY"}]
@@ -791,8 +791,8 @@ class TestTradingWindowService:
         saturday_2024 = date(2024, 11, 2)  # Saturday
         friday_2024 = date(2024, 11, 1)    # Friday
 
-        saturday_window_2024 = service.get_trading_window(saturday_2024, Exchange.NSE, Segment.FNO)
-        friday_window_2024 = service.get_trading_window(friday_2024, Exchange.NSE, Segment.FNO)
+        saturday_window_2024 = service.get_trading_window(saturday_2024, Exchange.NSE, Type.FUT)
+        friday_window_2024 = service.get_trading_window(friday_2024, Exchange.NSE, Type.FUT)
 
         assert saturday_window_2024.is_holiday  # Saturday is weekly holiday in 2024
         assert not friday_window_2024.is_holiday or "special_trading" in friday_window_2024.metadata  # Friday is not weekly holiday in 2024
@@ -801,8 +801,8 @@ class TestTradingWindowService:
         saturday_2025 = date(2025, 11, 1)  # Saturday
         friday_2025 = date(2025, 10, 31)   # Friday
 
-        saturday_window_2025 = service.get_trading_window(saturday_2025, Exchange.NSE, Segment.FNO)
-        friday_window_2025 = service.get_trading_window(friday_2025, Exchange.NSE, Segment.FNO)
+        saturday_window_2025 = service.get_trading_window(saturday_2025, Exchange.NSE, Type.FUT)
+        friday_window_2025 = service.get_trading_window(friday_2025, Exchange.NSE, Type.FUT)
 
         assert saturday_window_2025.is_holiday  # Saturday is weekly holiday in 2025
         assert friday_window_2025.is_holiday    # Friday is weekly holiday in 2025

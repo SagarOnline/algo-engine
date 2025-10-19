@@ -2,7 +2,6 @@ from flask import Flask
 from flask_cors import CORS
 from algo.infrastructure.api.backtest_controller import backtest_bp
 from algo.infrastructure.api.strategy_controller import strategy_bp
-from algo.infrastructure.api.trading_window_controller import trading_window_bp
 from algo.infrastructure.service_configuration import register_all_services
 
 app = Flask(__name__)
@@ -13,7 +12,6 @@ register_all_services()
 
 app.register_blueprint(backtest_bp)
 app.register_blueprint(strategy_bp)
-app.register_blueprint(trading_window_bp)
 
 @app.route('/')
 def health():

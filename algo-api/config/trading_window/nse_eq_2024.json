@@ -1,6 +1,7 @@
 {
   "exchange": "NSE",
   "segment": "EQ",
+  "type": "EQ",
   "year": 2024,
 
   "default_trading_windows": [

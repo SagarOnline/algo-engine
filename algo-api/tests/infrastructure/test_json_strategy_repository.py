@@ -46,7 +46,7 @@ def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital
         "name": strategy_name,
         "display_name": strategy_name.replace("_", " ").title() ,
         "instrument": {
-            "segment": "FNO",
+            "type": "FUT",
             "expiry": "MONTHLY",
             "expiring": "NEXT",
             "atm": -50,
@@ -58,7 +58,7 @@ def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital
         "position": {
             "action": "BUY",
             "instrument": {
-                "segment": "FNO",
+                "type": "FUT",
                 "expiry": "MONTHLY",
                 "expiring": "NEXT",
                 "atm": -50,
