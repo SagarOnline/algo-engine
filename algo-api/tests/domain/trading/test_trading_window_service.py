@@ -4,7 +4,8 @@ Tests for the TradingWindowService and TradingWindow classes.
 import pytest
 from datetime import date, time, datetime
 
-from algo.domain.strategy.strategy import Exchange, Type
+from algo.domain.instrument.instrument import Type
+from algo.domain.instrument.instrument import Exchange
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
 from algo.domain.trading.trading_window_service import TradingWindowService
 

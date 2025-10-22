@@ -1,4 +1,5 @@
 import pytest
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Type
 from algo.infrastructure.jsonstrategy import JsonStrategy
 import pytest
 import json
@@ -7,10 +8,6 @@ from algo.domain.strategy.strategy import (
     Condition,
     Expression,
     TradeAction,
-    Exchange,
-    Expiry,
-    Expiring,
-    Type,
 )
 from algo.domain.timeframe import Timeframe
 

@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Any
-from algo.domain.strategy.strategy import Instrument, PositionInstrument, Strategy
+from algo.domain.instrument.instrument import Instrument
+from algo.domain.strategy.strategy import PositionInstrument, Strategy
 from algo.domain.strategy.strategy import RuleSet,Condition,Expression
 from algo.domain.timeframe import Timeframe
 from algo.domain.strategy.strategy import RiskManagement, StopLoss, StopLossType

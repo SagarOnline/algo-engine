@@ -4,7 +4,8 @@ Example demonstrating usage of TradingWindowService and TradingWindow classes.
 from datetime import date, time
 import logging
 
-from algo.domain.strategy.strategy import Exchange, Type
+from algo.domain.instrument.instrument import Type
+from algo.domain.instrument.instrument import Exchange
 from algo.domain.trading.trading_window_service import TradingWindowService
 from algo.domain.trading.trading_window import TradingWindow, TradingWindowType
 

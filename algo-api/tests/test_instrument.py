@@ -1,5 +1,6 @@
 import pytest
-from algo.domain.strategy.strategy import Instrument, Exchange, Expiry, Expiring, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Type
+from algo.domain.instrument.instrument import Instrument
 
 def test_instrument_equality_basic():
     inst1 = Instrument(

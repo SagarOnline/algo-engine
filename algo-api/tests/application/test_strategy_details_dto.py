@@ -1,6 +1,7 @@
 import pytest
 from algo.application.strategy_usecases import PositionInstrumentDTO, StrategyDetailsDTO, InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Exchange, Expiry, Expiring, PositionInstrument, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Instrument, Type
+from algo.domain.strategy.strategy import PositionInstrument
 
 class DummyStrategy:
     def get_name(self):

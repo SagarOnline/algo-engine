@@ -4,8 +4,9 @@ from datetime import datetime, date
 from unittest.mock import Mock, MagicMock, patch
 
 from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
+from algo.domain.instrument.instrument import Exchange, Instrument, Type
 from algo.domain.strategy.strategy_evaluator import TradeSignal, PositionAction
-from algo.domain.strategy.strategy import Instrument, Exchange, TradeAction, Type
+from algo.domain.strategy.strategy import TradeAction
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.timeframe import Timeframe

@@ -1,6 +1,7 @@
 import pytest
 from algo.application.strategy_usecases import InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Exchange, Expiry, Expiring, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Type
+from algo.domain.instrument.instrument import Instrument
 
 def make_instrument():
     return Instrument(

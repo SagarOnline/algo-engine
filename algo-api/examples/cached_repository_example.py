@@ -8,7 +8,7 @@ by caching complete historical data and serving subsets from memory.
 from datetime import date
 from algo.infrastructure.upstox.cached_upstox_historical_data_repository import CachedUpstoxHistoricalDataRepository
 from algo.infrastructure.upstox.upstox_historical_data_repository import UpstoxHistoricalDataRepository
-from algo.domain.strategy.strategy import Instrument
+from algo.domain.instrument.instrument import Instrument
 from algo.domain.timeframe import Timeframe
 
 

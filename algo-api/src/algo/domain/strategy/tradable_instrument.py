@@ -1,7 +1,8 @@
 # Transaction domain class
 from enum import Enum
 from typing import List
-from algo.domain.strategy.strategy import Instrument, TradeAction
+from algo.domain.instrument.instrument import Instrument
+from algo.domain.strategy.strategy import TradeAction
 
 
 from datetime import datetime

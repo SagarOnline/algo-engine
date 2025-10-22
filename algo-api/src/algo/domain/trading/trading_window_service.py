@@ -7,8 +7,10 @@ from datetime import date, time, datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
+from ..instrument.instrument import Type
+
 from .trading_window import TradingWindow, TradingWindowType
-from ..strategy.strategy import Exchange, Type
+from ..instrument.instrument import Exchange
 
 logger = logging.getLogger(__name__)
 

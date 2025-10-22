@@ -3,8 +3,9 @@ from datetime import datetime, date, timedelta, timezone
 from unittest.mock import Mock, MagicMock, ANY, patch
 
 from algo.domain.backtest import historical_data
+from algo.domain.instrument.instrument import Exchange, Instrument, Type
 from algo.domain.strategy.strategy_evaluator import StrategyEvaluator, TradeSignal, PositionAction
-from algo.domain.strategy.strategy import Strategy, Instrument, Exchange, TradeAction, Type
+from algo.domain.strategy.strategy import Strategy, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository

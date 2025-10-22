@@ -1,10 +1,11 @@
 import pytest
+from algo.domain.instrument.instrument import Exchange, Type
 from algo.infrastructure.upstox.upstox_historical_data_repository import parse_timeframe
 from algo.domain.timeframe import Timeframe
 from unittest.mock import patch, MagicMock
 from datetime import date, timedelta
 from algo.infrastructure.upstox.upstox_historical_data_repository import UpstoxHistoricalDataRepository
-from algo.domain.strategy.strategy import Exchange, Instrument, Type
+from algo.domain.instrument.instrument import Instrument
 from algo.domain.timeframe import Timeframe
 from algo.domain.backtest.historical_data import HistoricalData
 

@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
-from algo.domain.strategy.strategy import Instrument,Exchange,Expiring, Expiry, PositionInstrument, TradeAction, Strategy, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Instrument, Type
+from algo.domain.strategy.strategy import PositionInstrument, TradeAction, Strategy
 from algo.application.strategy_usecases import StrategyUseCase, StrategyDTO, InstrumentDTO
 
 class DummyStrategy(Strategy):
