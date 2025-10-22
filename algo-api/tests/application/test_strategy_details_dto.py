@@ -16,7 +16,7 @@ class DummyStrategy:
             exchange=Exchange.NSE,
             instrument_key="NSE_INDEX|Nifty 50",
             expiry=Expiry.MONTHLY,
-            expiring=Expiring.NEXT,
+            expiring=Expiring.NEXT1,
             atm=-50
         )
     def get_timeframe(self):

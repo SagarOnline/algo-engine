@@ -23,7 +23,7 @@ def sample_json():
         "instrument": {
             "type": "FUT",
             "expiry": "MONTHLY",
-            "expiring": "NEXT",
+            "expiring": "NEXT1",
             "atm": -50,
             "instrument_key": "NIFTY",
             "exchange": "NSE",
@@ -35,7 +35,7 @@ def sample_json():
             "instrument": {
                 "type": "FUT",
                 "expiry": "MONTHLY",
-                "expiring": "NEXT",
+                "expiring": "NEXT1",
                 "atm": -50,
                 "instrument_key": "NIFTY",
                 "exchange": "NSE",
@@ -130,7 +130,7 @@ def test_instrument(strategy):
     assert strategy.get_instrument().type == Type.FUT
     assert strategy.get_instrument().exchange == Exchange.NSE
     assert strategy.get_instrument().expiry == Expiry.MONTHLY
-    assert strategy.get_instrument().expiring == Expiring.NEXT
+    assert strategy.get_instrument().expiring == Expiring.NEXT1
     assert strategy.get_instrument().atm == -50
     assert strategy.get_instrument().instrument_key == "NIFTY"
 
@@ -150,7 +150,7 @@ def test_position(strategy):
     assert strategy.get_position_instrument().instrument.atm == -50
     assert strategy.get_position_instrument().instrument.exchange == Exchange.NSE
     assert strategy.get_position_instrument().instrument.expiry == Expiry.MONTHLY
-    assert strategy.get_position_instrument().instrument.expiring == Expiring.NEXT
+    assert strategy.get_position_instrument().instrument.expiring == Expiring.NEXT1
     assert strategy.get_position_instrument().instrument.instrument_key == "NIFTY"
 
 

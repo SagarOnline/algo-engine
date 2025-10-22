@@ -48,7 +48,7 @@ def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital
         "instrument": {
             "type": "FUT",
             "expiry": "MONTHLY",
-            "expiring": "NEXT",
+            "expiring": "NEXT1",
             "atm": -50,
             "instrument_key": "NSE_INDEX|Nifty 50",
             "exchange": "NSE",
@@ -60,7 +60,7 @@ def _get_strategy_data(strategy_name="bullish_nifty", timeframe="15min", capital
             "instrument": {
                 "type": "FUT",
                 "expiry": "MONTHLY",
-                "expiring": "NEXT",
+                "expiring": "NEXT1",
                 "atm": -50,
                 "instrument_key": "NSE_FO|64103",
                 "exchange": "NSE",

@@ -97,7 +97,7 @@ def test_instrument_inequality_expiring():
     inst2 = Instrument(
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiring=Expiring.NEXT,
+        expiring=Expiring.NEXT1,
         type=Type.PE
     )
     assert inst1 != inst2

@@ -3,7 +3,7 @@
   "display_name": "Rangebound Banks",
   "description": "A simple rangebound strategy for Banks using EMA crossover.",
   "instrument": {
-    "type": "EQ",
+    "type": "INDEX",
     "instrument_key": "NSE_INDEX|Nifty 50",
     "exchange": "NSE"
   },

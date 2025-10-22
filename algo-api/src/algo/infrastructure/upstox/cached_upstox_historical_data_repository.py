@@ -4,7 +4,7 @@ from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Instrument
 from algo.domain.timeframe import Timeframe
-from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
+from algo.infrastructure.upstox.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 
 
 class CachedUpstoxHistoricalDataRepository(HistoricalDataRepository):

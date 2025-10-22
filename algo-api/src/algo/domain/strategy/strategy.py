@@ -16,6 +16,7 @@ class Type(Enum):
     CE = "CE"
     PE = "PE"
     EQ = "EQ"
+    INDEX = "INDEX"
 
 class Exchange(Enum):
     NSE = "NSE"
@@ -27,7 +28,8 @@ class Expiry(Enum):
 
 class Expiring(Enum):
     CURRENT = "CURRENT"
-    NEXT = "NEXT"
+    NEXT1 = "NEXT1"
+    NEXT2 = "NEXT2"
 
 class TradeAction(Enum):
     BUY = "BUY"

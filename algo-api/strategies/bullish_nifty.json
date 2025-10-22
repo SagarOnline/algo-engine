@@ -3,7 +3,7 @@
   "display_name": "Bullish Nifty",
   "description": "A simple bullish strategy for Nifty using EMA crossover.",
   "instrument": {
-    "type": "EQ",
+    "type": "INDEX",
     "instrument_key": "NSE_INDEX|Nifty 50",
     "exchange": "NSE"
   },

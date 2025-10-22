@@ -43,6 +43,13 @@ class TradingWindowConfig:
         )
 
 
+class InstrumentMappingConfig:
+    def __init__(self, config_dir: str):
+        self.config_dir = get_value(
+            config_dir, "INSTRUMENT_MAPPING.CONFIG_DIR", "./config/instruments/"
+        )
+
+
 class BacktestEngineConfig:
     def __init__(
         self,
@@ -73,10 +80,11 @@ class BacktestEngineConfig:
 
 
 class Config:
-    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, trading_window_config: TradingWindowConfig):
+    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, trading_window_config: TradingWindowConfig, instrument_mapping_config: InstrumentMappingConfig):
         self.backtest_engine = backtest_engine
         self.broker_api = broker_api
         self.trading_window_config = trading_window_config
+        self.instrument_mapping_config = instrument_mapping_config
 
     @staticmethod
     def from_dict(config_dict):
@@ -100,4 +108,10 @@ class Config:
             config_dir=trading_window_dict.get("config_dir", "./config/trading_window/")
         )
         
-        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, trading_window_config=trading_window_config)
+        # Add instrument mapping configuration
+        instrument_mapping_dict = config_dict.get("instrument_mapping", {})
+        instrument_mapping_config = InstrumentMappingConfig(
+            config_dir=instrument_mapping_dict.get("config_dir", "./config/instruments/")
+        )
+        
+        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, trading_window_config=trading_window_config, instrument_mapping_config=instrument_mapping_config)

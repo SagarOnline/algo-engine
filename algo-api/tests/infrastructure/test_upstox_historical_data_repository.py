@@ -1,9 +1,9 @@
 import pytest
-from algo.infrastructure.upstox_historical_data_repository import parse_timeframe
+from algo.infrastructure.upstox.upstox_historical_data_repository import parse_timeframe
 from algo.domain.timeframe import Timeframe
 from unittest.mock import patch, MagicMock
 from datetime import date, timedelta
-from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
+from algo.infrastructure.upstox.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 from algo.domain.strategy.strategy import Exchange, Instrument, Type
 from algo.domain.timeframe import Timeframe
 from algo.domain.backtest.historical_data import HistoricalData
@@ -48,7 +48,7 @@ def timeframe():
 def repo():
     return UpstoxHistoricalDataRepository()
 
-@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_success(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_response = MagicMock()
@@ -68,7 +68,7 @@ def test_get_historical_data_success(mock_api_instance, repo, instrument, timefr
     assert result.data[0]["open"] == 100
     assert result.data[1]["close"] == 110
 
-@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_empty(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_response = MagicMock()
@@ -82,7 +82,7 @@ def test_get_historical_data_empty(mock_api_instance, repo, instrument, timefram
     assert isinstance(result, HistoricalData)
     assert result.data == []
 
-@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_api_exception(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     from upstox_client.rest import ApiException
@@ -95,7 +95,7 @@ def test_get_historical_data_api_exception(mock_api_instance, repo, instrument, 
         repo.get_historical_data(instrument, start, end, timeframe)
     assert "Exception when calling Upstox API" in str(excinfo.value)
 
-@patch("algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
 def test_get_historical_data_unexpected_exception(mock_api_instance, repo, instrument, timeframe):
     mock_api = MagicMock()
     mock_api.get_historical_candle_data1.side_effect = Exception("Some error")
@@ -185,7 +185,7 @@ def test_split_date_range_no_limit(repo):
     assert len(segments) == 1
     assert segments[0] == (start_date, end_date)
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_single_segment(mock_api_instance, repo, instrument):
     """Test get_historical_data when only single API call is needed."""
     # Mock API response
@@ -210,7 +210,7 @@ def test_get_historical_data_single_segment(mock_api_instance, repo, instrument)
     assert isinstance(result, HistoricalData)
     assert len(result.data) == 2
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_multiple_segments(mock_api_instance, repo, instrument):
     """Test get_historical_data when multiple API calls are needed."""
     # Mock API responses for multiple segments
@@ -243,7 +243,7 @@ def test_get_historical_data_multiple_segments(mock_api_instance, repo, instrume
     assert result.data[0]["timestamp"].strftime("%Y-%m-%d") == "2023-01-01"
     assert result.data[1]["timestamp"].strftime("%Y-%m-%d") == "2023-02-01"
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_parallel_execution(mock_api_instance, repo, instrument):
     """Test get_historical_data with parallel execution for multiple segments."""
     # Mock API responses for multiple segments
@@ -287,7 +287,7 @@ def test_get_historical_data_parallel_execution(mock_api_instance, repo, instrum
     assert result.data[0]["timestamp"].strftime("%Y-%m-%d") == "2023-01-01"
     assert result.data[-1]["timestamp"].strftime("%Y-%m-%d") == "2023-03-01"
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_parallel_execution_with_exception(mock_api_instance, repo, instrument):
     """Test get_historical_data handles exceptions in parallel execution with retry logic."""
     from upstox_client.rest import ApiException
@@ -320,7 +320,7 @@ def test_get_historical_data_parallel_execution_with_exception(mock_api_instance
     with pytest.raises(RuntimeError, match="Failed to fetch 1 out of 2 segments"):
         repo.get_historical_data(instrument, start_date, end_date, timeframe)
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_fetch_segment_with_metadata(mock_api_instance, repo, instrument):
     """Test the _fetch_segment_with_metadata wrapper method."""
     with patch.object(repo, '_fetch_historical_data_segment') as mock_fetch:
@@ -337,8 +337,8 @@ def test_fetch_segment_with_metadata(mock_api_instance, repo, instrument):
         assert result_data == [{"test": "data"}]
         mock_fetch.assert_called_once_with(instrument, start_date, end_date, timeframe)
 
-@patch('algo.infrastructure.upstox_historical_data_repository.time.sleep')
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.time.sleep')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_fetch_segment_with_retry_success_after_failure(mock_api_instance, mock_sleep, repo, instrument):
     """Test _fetch_segment_with_retry succeeds after initial failures."""
     from upstox_client.rest import ApiException
@@ -374,8 +374,8 @@ def test_fetch_segment_with_retry_success_after_failure(mock_api_instance, mock_
     mock_sleep.assert_any_call(1)  # First retry wait
     mock_sleep.assert_any_call(2)  # Second retry wait
 
-@patch('algo.infrastructure.upstox_historical_data_repository.time.sleep')
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.time.sleep')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_fetch_segment_with_retry_fails_after_max_attempts(mock_api_instance, mock_sleep, repo, instrument):
     """Test _fetch_segment_with_retry fails after maximum retry attempts."""
     from upstox_client.rest import ApiException
@@ -398,7 +398,7 @@ def test_fetch_segment_with_retry_fails_after_max_attempts(mock_api_instance, mo
     # Should have slept twice (after first and second failures, not after third)
     assert mock_sleep.call_count == 2
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_parallel_with_retry_some_segments_fail(mock_api_instance, repo, instrument):
     """Test get_historical_data handles mixed success/failure scenarios with retry."""
     from upstox_client.rest import ApiException
@@ -430,7 +430,7 @@ def test_get_historical_data_parallel_with_retry_some_segments_fail(mock_api_ins
     with pytest.raises(RuntimeError, match="Failed to fetch 1 out of 2 segments"):
         repo.get_historical_data(instrument, start_date, end_date, timeframe)
 
-@patch('algo.infrastructure.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
+@patch('algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance')
 def test_get_historical_data_parallel_with_retry_all_segments_succeed(mock_api_instance, repo, instrument):
     """Test get_historical_data succeeds when all segments succeed after retries."""
     from upstox_client.rest import ApiException
