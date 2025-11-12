@@ -2,10 +2,11 @@ import os
 import csv
 import tempfile
 import pytest
+from datetime import datetime
 from unittest.mock import patch, MagicMock
 from algo.infrastructure.upstox.upstox_instrument_service import UpstoxInstrumentService
 from algo.domain.instrument.broker_instrument import BrokerInstrument
-from algo.domain.instrument.instrument import Instrument, Type, Exchange, Expiry
+from algo.domain.instrument.instrument import Expiring, Instrument, Type, Exchange, Expiry
 
 
 class TestUpstoxInstrumentService:
@@ -71,21 +72,22 @@ class TestUpstoxInstrumentService:
         
         assert csv_path == expected_path
 
-    def test_get_broker_instrument_success(self, mock_config, sample_instrument):
+    # TODO : add tests for all instrument types
+    def test_get_broker_instrument_of_index_type_success(self, mock_config, sample_instrument):
         """Test successful broker instrument retrieval from CSV"""
         temp_dir, upstox_dir = mock_config
         
         # Create CSV file with sample data
         csv_data = [{
-            'instrument_key': 'NSE_NIFTY',
-            'trading_key': 'NIFTY_INDEX',
+            'instrument_key': 'NSE_INDEX|Nifty 50',
+            'exchange_token': '26000',
             'instrument_type': 'INDEX',
             'exchange': 'NSE',
             'trading_symbol': 'NIFTY',
-            'underlying_key': 'NIFTY',
+            'underlying_key': '',
             'expiry': '',
             'lot_size': '',
-            'tick_size': '0.05',
+            'tick_size': '',
             'strike_price': ''
         }]
         
@@ -95,40 +97,47 @@ class TestUpstoxInstrumentService:
         broker_instrument = service.get_broker_instrument(sample_instrument)
         
         assert broker_instrument is not None
-        assert broker_instrument.instrument_key == 'NSE_NIFTY'
-        assert broker_instrument.trading_key == 'NIFTY_INDEX'
+        assert broker_instrument.instrument_key == 'NSE_INDEX|Nifty 50'
+        assert broker_instrument.trading_key == '26000'
         assert broker_instrument.instrument_type == Type.INDEX
         assert broker_instrument.exchange == Exchange.NSE
         assert broker_instrument.trading_symbol == 'NIFTY'
-        assert broker_instrument.underlying_key == 'NIFTY'
+        assert broker_instrument.underlying_key is None
         assert broker_instrument.expiry is None
         assert broker_instrument.lot_size is None
-        assert broker_instrument.tick_size == 0.05
+        assert broker_instrument.tick_size is None
         assert broker_instrument.strike_price is None
 
-    def test_get_broker_instrument_with_all_fields(self, mock_config):
+    @patch('algo.domain.trading.nse.get_current_monthly_expiry')
+    def test_get_broker_instrument_with_all_fields(self, mock_nse_expiry, mock_config):
         """Test broker instrument retrieval with all fields populated"""
         temp_dir, upstox_dir = mock_config
+        
+        # Mock NSE expiry function to return expected date
+        # The CSV has timestamp 1761676199000 which corresponds to October 28, 2025
+        expected_expiry_date = datetime(2025, 10, 28, 15, 29)  # October 28, 2025 15:29
+        mock_nse_expiry.return_value = expected_expiry_date
         
         instrument = Instrument(
             exchange=Exchange.NSE,
             type=Type.FUT,
             instrument_key="NSE_NIFTY24JAN",
-            expiry=Expiry.MONTHLY
+            expiry=Expiry.MONTHLY,
+            expiring=Expiring.CURRENT
         )
         
-        # Create CSV file with all fields
+        # Create CSV file with all fields - using original format
         csv_data = [{
-            'instrument_key': 'NSE_NIFTY24JAN',
-            'trading_key': 'NIFTY24JAN',
+            'instrument_key': 'NSE_FO|52168',
+            'exchange_token': '52168',
             'instrument_type': 'FUT',
             'exchange': 'NSE',
-            'trading_symbol': 'NIFTY24JAN',
-            'underlying_key': 'NIFTY',
-            'expiry': 'MONTHLY',
-            'lot_size': '50',
-            'tick_size': '0.05',
-            'strike_price': '22000.0'
+            'trading_symbol': 'NIFTY FUT 28 OCT 25',
+            'underlying_key': 'NSE_INDEX|Nifty 50',
+            'expiry': '1761676199000', # Tuesday, October 28, 2025 03:29:59 PM (GMT+05:30)
+            'lot_size': '75',
+            'tick_size': '10',
+            'strike_price': '0'
         }]
         
         self.create_csv_file(upstox_dir, "NSE_NIFTY24JAN.csv", csv_data)
@@ -136,17 +145,22 @@ class TestUpstoxInstrumentService:
         service = UpstoxInstrumentService()
         broker_instrument = service.get_broker_instrument(instrument)
         
+        # Verify NSE function was called with correct parameters
+        mock_nse_expiry.assert_called_once_with(
+            exchange=Exchange.NSE,
+            instrument_type=Type.FUT
+        )
+        
         assert broker_instrument is not None
-        assert broker_instrument.instrument_key == 'NSE_NIFTY24JAN'
-        assert broker_instrument.trading_key == 'NIFTY24JAN'
+        assert broker_instrument.instrument_key == 'NSE_FO|52168'
+        assert broker_instrument.trading_key == '52168'
         assert broker_instrument.instrument_type == Type.FUT
         assert broker_instrument.exchange == Exchange.NSE
-        assert broker_instrument.trading_symbol == 'NIFTY24JAN'
-        assert broker_instrument.underlying_key == 'NIFTY'
-        assert broker_instrument.expiry == Expiry.MONTHLY
-        assert broker_instrument.lot_size == 50
-        assert broker_instrument.tick_size == 0.05
-        assert broker_instrument.strike_price == 22000.0
+        assert broker_instrument.trading_symbol == 'NIFTY FUT 28 OCT 25'
+        assert broker_instrument.underlying_key == 'NSE_INDEX|Nifty 50'
+        assert broker_instrument.lot_size == 75
+        assert broker_instrument.tick_size == 10.0
+        assert broker_instrument.strike_price == 0.0
 
     def test_get_broker_instrument_file_not_found(self, mock_config, sample_instrument):
         """Test when CSV file doesn't exist"""
@@ -182,8 +196,7 @@ class TestUpstoxInstrumentService:
         service = UpstoxInstrumentService()
         broker_instrument = service.get_broker_instrument(sample_instrument)
         
-        # Should handle gracefully and return a broker instrument with defaults
-        assert broker_instrument is not None
+        assert broker_instrument is None
 
     def test_get_broker_instrument_invalid_enum_values(self, mock_config, sample_instrument):
         """Test with invalid enum values in CSV"""
@@ -211,46 +224,12 @@ class TestUpstoxInstrumentService:
         # Should handle errors gracefully and return None
         assert broker_instrument is None
 
-    def test_get_broker_instrument_partial_data(self, mock_config, sample_instrument):
-        """Test with partial data in CSV"""
-        temp_dir, upstox_dir = mock_config
-        
-        # Create CSV with only required fields
-        csv_data = [{
-            'instrument_key': 'NSE_NIFTY',
-            'trading_key': 'NIFTY_INDEX',
-            'instrument_type': 'INDEX',
-            'exchange': 'NSE',
-            'trading_symbol': 'NIFTY',
-            'underlying_key': '',
-            'expiry': '',
-            'lot_size': '',
-            'tick_size': '',
-            'strike_price': ''
-        }]
-        
-        self.create_csv_file(upstox_dir, "NSE_NIFTY.csv", csv_data)
-        
-        service = UpstoxInstrumentService()
-        broker_instrument = service.get_broker_instrument(sample_instrument)
-        
-        assert broker_instrument is not None
-        assert broker_instrument.instrument_key == 'NSE_NIFTY'
-        assert broker_instrument.trading_key == 'NIFTY_INDEX'
-        assert broker_instrument.instrument_type == Type.INDEX
-        assert broker_instrument.exchange == Exchange.NSE
-        assert broker_instrument.trading_symbol == 'NIFTY'
-        assert broker_instrument.underlying_key is None
-        assert broker_instrument.expiry is None
-        assert broker_instrument.lot_size is None
-        assert broker_instrument.tick_size is None
-        assert broker_instrument.strike_price is None
 
     def test_get_broker_instrument_fallback_to_instrument_data(self, mock_config, sample_instrument_with_expiry):
         """Test fallback to original instrument data when CSV fields are missing"""
         temp_dir, upstox_dir = mock_config
         
-        # Create CSV with missing fields - should fallback to instrument data
+        # Create CSV with missing fields - should return none
         csv_data = [{
             'trading_key': 'NSE_NIFTY24JAN',
             'trading_symbol': 'NIFTY24JAN',
@@ -261,13 +240,7 @@ class TestUpstoxInstrumentService:
         service = UpstoxInstrumentService()
         broker_instrument = service.get_broker_instrument(sample_instrument_with_expiry)
         
-        assert broker_instrument is not None
-        assert broker_instrument.instrument_key == sample_instrument_with_expiry.instrument_key
-        assert broker_instrument.trading_key == 'NSE_NIFTY24JAN'
-        assert broker_instrument.instrument_type == sample_instrument_with_expiry.type
-        assert broker_instrument.exchange == sample_instrument_with_expiry.exchange
-        assert broker_instrument.trading_symbol == 'NIFTY24JAN'
-        assert broker_instrument.expiry == sample_instrument_with_expiry.expiry
+        assert broker_instrument is  None
 
     @patch('builtins.print')
     def test_error_handling_and_logging(self, mock_print, mock_config, sample_instrument):
@@ -291,40 +264,252 @@ class TestUpstoxInstrumentService:
             mock_print.assert_called_once()
             assert "Error loading broker instrument" in mock_print.call_args[0][0]
 
-    def test_multiple_calls_always_read_fresh_data(self, mock_config, sample_instrument):
+    @patch('algo.domain.trading.nse.get_current_monthly_expiry')
+    def test_multiple_calls_always_read_fresh_data(self, mock_nse_expiry, mock_config):
         """Test that multiple calls always read fresh data (no caching)"""
         temp_dir, upstox_dir = mock_config
         
         # Create initial CSV file
         csv_data = [{
-            'instrument_key': 'NSE_NIFTY',
-            'trading_key': 'NIFTY_INDEX_OLD',
-            'instrument_type': 'INDEX',
+            'instrument_key': 'NSE_FO|52168',
+            'exchange_token': '52168',
+            'instrument_type': 'FUT',
             'exchange': 'NSE',
-            'trading_symbol': 'NIFTY_OLD',
+            'trading_symbol': 'NIFTY FUT 28 OCT 25',
+            'underlying_key': 'NSE_INDEX|Nifty 50',
+            'expiry': '1761676199000', # Tuesday, October 28, 2025 03:29:59 PM (GMT+05:30)
+            'lot_size': '75',
+            'tick_size': '10',
+            'strike_price': '0'
         }]
         
         csv_path = self.create_csv_file(upstox_dir, "NSE_NIFTY.csv", csv_data)
         
         service = UpstoxInstrumentService()
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            expiry=Expiry.MONTHLY,
+            expiring=Expiring.CURRENT,
+            instrument_key="NSE_NIFTY"
+        )
         
         # First call
-        broker_instrument1 = service.get_broker_instrument(sample_instrument)
-        assert broker_instrument1.trading_key == 'NIFTY_INDEX_OLD'
-        assert broker_instrument1.trading_symbol == 'NIFTY_OLD'
+        
+        # Mock NSE expiry function to return expected date
+        # The CSV has timestamp 1761676199000 which corresponds to October 28, 2025
+        expected_expiry_date = datetime(2025, 10, 28, 15, 29)  # October 28, 2025 15:29
+        mock_nse_expiry.return_value = expected_expiry_date
+        
+        broker_instrument1 = service.get_broker_instrument(instrument)
+        assert broker_instrument1.trading_key == '52168'
+        assert broker_instrument1.trading_symbol == 'NIFTY FUT 28 OCT 25'
         
         # Update CSV file
         updated_csv_data = [{
-            'instrument_key': 'NSE_NIFTY',
-            'trading_key': 'NIFTY_INDEX_NEW',
-            'instrument_type': 'INDEX',
+            'instrument_key': 'NSE_FO|37054',
+            'exchange_token': '37054',
+            'instrument_type': 'FUT',
             'exchange': 'NSE',
-            'trading_symbol': 'NIFTY_NEW',
+            'trading_symbol': 'NIFTY FUT 25 NOV 25',
+            'underlying_key': 'NSE_INDEX|Nifty 50',
+            'expiry': '1764095399000', # Tuesday, November 25, 2025 03:29:59 PM (GMT+05:30)
+            'lot_size': '75',
+            'tick_size': '10',
+            'strike_price': '0'
         }]
         
         self.create_csv_file(upstox_dir, "NSE_NIFTY.csv", updated_csv_data)
         
+        # Mock NSE expiry function to return expected date
+        # The CSV has timestamp 1764095399000 which corresponds to November 25, 2025
+        expected_expiry_date = datetime(2025, 11, 25, 15, 29)  # November 25, 2025 15:29
+        mock_nse_expiry.return_value = expected_expiry_date
+        
         # Second call should read fresh data
-        broker_instrument2 = service.get_broker_instrument(sample_instrument)
-        assert broker_instrument2.trading_key == 'NIFTY_INDEX_NEW'
-        assert broker_instrument2.trading_symbol == 'NIFTY_NEW'
+        broker_instrument2 = service.get_broker_instrument(instrument)
+        assert broker_instrument2.trading_key == '37054'
+        assert broker_instrument2.trading_symbol == 'NIFTY FUT 25 NOV 25'
+
+    @patch('algo.domain.trading.nse.get_next1_monthly_expiry')
+    def test_get_broker_instrument_fut_next1_expiry(self, mock_nse_expiry, mock_config):
+        """Test FUT instrument matching with NEXT1 expiry"""
+        temp_dir, upstox_dir = mock_config
+        
+        # Mock NSE expiry function for NEXT1
+        expected_expiry_date = datetime(2025, 11, 25, 15, 29)  # November 25, 2025
+        mock_nse_expiry.return_value = expected_expiry_date
+        
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            instrument_key="NSE_NIFTY_NEXT1",
+            expiry=Expiry.MONTHLY,
+            expiring=Expiring.NEXT1
+        )
+        
+        # Create CSV with matching expiry date
+        csv_data = [{
+            'instrument_key': 'NSE_FO|52169',
+            'trading_key': 'NIFTY_NEXT1_TRADING',
+            'instrument_type': 'FUT',
+            'exchange': 'NSE',
+            'trading_symbol': 'NIFTY FUT 25 NOV 25',
+            'expiry': '1764095399000',  # Matches NEXT1 expiry
+            'lot_size': '75'
+        }]
+        
+        self.create_csv_file(upstox_dir, "NSE_NIFTY_NEXT1.csv", csv_data)
+        
+        service = UpstoxInstrumentService()
+        broker_instrument = service.get_broker_instrument(instrument)
+        
+        # Verify NSE function was called with correct parameters
+        mock_nse_expiry.assert_called_once_with(
+            exchange=Exchange.NSE,
+            instrument_type=Type.FUT
+        )
+        
+        assert broker_instrument is not None
+        assert broker_instrument.trading_symbol == 'NIFTY FUT 25 NOV 25'
+
+    @patch('algo.domain.trading.nse.get_next2_monthly_expiry')
+    def test_get_broker_instrument_fut_next2_expiry(self, mock_nse_expiry, mock_config):
+        """Test FUT instrument matching with NEXT2 expiry"""
+        temp_dir, upstox_dir = mock_config
+        
+        # Mock NSE expiry function for NEXT2
+        expected_expiry_date = datetime(2025, 12, 30, 15, 29)  # December 30, 2025
+        mock_nse_expiry.return_value = expected_expiry_date
+        
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            instrument_key="NSE_NIFTY_NEXT2",
+            expiry=Expiry.MONTHLY,
+            expiring=Expiring.NEXT2
+        )
+        
+        # Create CSV with matching expiry date
+        csv_data = [{
+            'instrument_key': 'NSE_FO|52170',
+            'trading_key': 'NIFTY_NEXT2_TRADING',
+            'instrument_type': 'FUT',
+            'exchange': 'NSE',
+            'trading_symbol': 'NIFTY FUT 30 DEC 25',
+            'expiry': '1767119399000',  # Matches NEXT2 expiry
+            'lot_size': '75'
+        }]
+        
+        self.create_csv_file(upstox_dir, "NSE_NIFTY_NEXT2.csv", csv_data)
+        
+        service = UpstoxInstrumentService()
+        broker_instrument = service.get_broker_instrument(instrument)
+        
+        # Verify NSE function was called with correct parameters
+        mock_nse_expiry.assert_called_once_with(
+            exchange=Exchange.NSE,
+            instrument_type=Type.FUT
+        )
+        
+        assert broker_instrument is not None
+        assert broker_instrument.trading_symbol == 'NIFTY FUT 30 DEC 25'
+
+    @patch('algo.domain.trading.nse.get_current_monthly_expiry')
+    def test_get_broker_instrument_fut_expiry_mismatch(self, mock_nse_expiry, mock_config):
+        """Test FUT instrument when CSV expiry doesn't match NSE expiry"""
+        temp_dir, upstox_dir = mock_config
+        
+        # Mock NSE expiry function
+        expected_expiry_date = datetime(2025, 10, 28, 15, 29)
+        mock_nse_expiry.return_value = expected_expiry_date
+        
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            instrument_key="NSE_NIFTY_MISMATCH",
+            expiry=Expiry.MONTHLY,
+            expiring=Expiring.CURRENT
+        )
+        
+        # Create CSV with non-matching expiry date
+        csv_data = [{
+            'instrument_key': 'NSE_FO|52171',
+            'trading_key': 'NIFTY_MISMATCH_TRADING',
+            'instrument_type': 'FUT',
+            'exchange': 'NSE',
+            'trading_symbol': 'NIFTY FUT 15 OCT 25',
+            'expiry': '2025-10-15',  # Different from expected 2025-10-28
+            'lot_size': '75'
+        }]
+        
+        self.create_csv_file(upstox_dir, "NSE_NIFTY_MISMATCH.csv", csv_data)
+        
+        service = UpstoxInstrumentService()
+        broker_instrument = service.get_broker_instrument(instrument)
+        
+        # Should not find matching instrument due to expiry mismatch
+        assert broker_instrument is None
+
+    def test_get_broker_instrument_fut_no_expiry_requirement(self, mock_config):
+        """Test FUT instrument without MONTHLY expiry requirement"""
+        temp_dir, upstox_dir = mock_config
+        
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            instrument_key="NSE_NIFTY_NO_EXP",
+            expiry=None  # No expiry requirement
+        )
+        
+        # Create CSV data
+        csv_data = [{
+            'instrument_key': 'NSE_FO|52172',
+            'trading_key': 'NIFTY_NO_EXP_TRADING',
+            'instrument_type': 'FUT',
+            'exchange': 'NSE',
+            'trading_symbol': 'NIFTY FUT',
+            'expiry': '2025-10-28',
+            'lot_size': '75'
+        }]
+        
+        self.create_csv_file(upstox_dir, "NSE_NIFTY_NO_EXP.csv", csv_data)
+        
+        service = UpstoxInstrumentService()
+        broker_instrument = service.get_broker_instrument(instrument)
+        
+        # Should match since no expiry requirement
+        assert broker_instrument is not None
+        assert broker_instrument.trading_symbol == 'NIFTY FUT'
+
+    @patch('algo.domain.trading.nse.get_current_monthly_expiry')
+    def test_get_broker_instrument_fut_missing_expiring_returns_none(self, mock_nse_expiry, mock_config):
+        """Test that missing expiring field returns None"""
+        temp_dir, upstox_dir = mock_config
+        
+        instrument = Instrument(
+            exchange=Exchange.NSE,
+            type=Type.FUT,
+            instrument_key="NSE_NIFTY_NO_EXPIRING",
+            expiry=Expiry.MONTHLY,
+            expiring=None  # Missing expiring field
+        )
+        
+        # Create CSV data
+        csv_data = [{
+            'instrument_key': 'NSE_FO|52173',
+            'trading_key': 'NIFTY_NO_EXPIRING_TRADING',
+            'instrument_type': 'FUT',
+            'exchange': 'NSE',
+            'trading_symbol': 'NIFTY FUT',
+            'expiry': '2025-10-28',
+            'lot_size': '75'
+        }]
+        
+        self.create_csv_file(upstox_dir, "NSE_NIFTY_NO_EXPIRING.csv", csv_data)
+        
+        service = UpstoxInstrumentService()
+        
+        broker_instrument = service.get_broker_instrument(instrument)
+        assert broker_instrument is None
+
