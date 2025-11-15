@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 from algo.domain.config import Config, TradingWindowConfig, BacktestEngineConfig, BrokerAPIConfig, UpstoxConfig
 from algo.config_context import get_config, load_config
 from algo.infrastructure.service_configuration import register_all_services
-from algo.infrastructure.service_registry import service_registry, get_service
+from algo.domain.service_registry import service_registry, get_service
 from algo.domain.trading.trading_window_service import TradingWindowService
 
 

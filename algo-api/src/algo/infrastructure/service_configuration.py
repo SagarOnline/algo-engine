@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import json
 
-from algo.infrastructure.service_registry import register_service_instance
+from algo.domain.service_registry import register_service_instance
 from algo.domain.trading.trading_window_service import TradingWindowService
 from algo.config_context import get_config
 

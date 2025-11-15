@@ -1,8 +1,16 @@
 {
     "python.testing.pytestArgs": [
-        "tests"
+        "tests",
+        "--cov=src",
+        "--cov=tests",
+        "--cov-report=xml",
+        "--cov-report=html",
+        "--cov-report=term-missing"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+    "python.analysis.extraPaths": ["src"],
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.env"
 }
