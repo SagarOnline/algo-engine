@@ -549,3 +549,21 @@ def test_get_historical_data_parallel_with_retry_all_segments_succeed(mock_api_i
     assert isinstance(result, HistoricalData)
     assert len(result.data) == 2
 
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxInstrumentService")
+def test_get_historical_data_broker_instrument_not_found(mock_broker_service_class, repo, instrument, timeframe):
+    """Test get_historical_data raises ValueError when broker instrument is not found."""
+    # Mock the broker service instance to return None
+    mock_broker_service = MagicMock()
+    mock_broker_service.get_broker_instrument.return_value = None
+    mock_broker_service_class.return_value = mock_broker_service
+
+    start = date(2024, 1, 1)
+    end = date(2024, 1, 1)
+
+    # Should raise RuntimeError when broker instrument is not found
+    with pytest.raises(RuntimeError, match="Failed to fetch historical data"):
+        repo.get_historical_data(instrument, start, end, timeframe)
+    
+    # Verify the broker service was called correctly
+    mock_broker_service.get_broker_instrument.assert_called_once_with(instrument)
+

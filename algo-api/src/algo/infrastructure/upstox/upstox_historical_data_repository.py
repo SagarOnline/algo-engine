@@ -216,7 +216,7 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
         except ApiException as e:
             raise RuntimeError(f"Exception when calling Upstox API: {e}")
         except Exception as e:
-            raise RuntimeError(f"Unexpected error: {e}")
+            raise RuntimeError(f"Failed to fetch historical data: {e}")
 
     def api_instance(self):
         configuration = upstox_client.Configuration(sandbox=False)
