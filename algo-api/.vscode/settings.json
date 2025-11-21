@@ -1,12 +1,11 @@
 {
     "python.testing.pytestArgs": [
         "tests",
-        "--cov=src",
-        "--cov=tests",
-        "--cov-report=xml",
-        "--cov-report=html",
-        "--cov-report=term-missing"
+        "--no-cov",
+        
     ],
+    "coverage-gutters.showGutterCoverage": true,
+    "coverage-gutters.showLineCoverage": true,
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",

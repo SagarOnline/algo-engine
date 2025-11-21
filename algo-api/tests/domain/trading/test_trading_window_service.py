@@ -572,12 +572,18 @@ class TestTradingWindowService:
         """Test querying non-existent exchange-instrumenttype combination."""
         service = TradingWindowService(config_data_list)
 
-        window = service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Type.EQ)
-        assert window is None
+        # All methods should raise ValueError for non-existent segment
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-EQ 2024"):
+            service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Type.EQ)
 
-        assert not service.is_holiday(date(2024, 12, 25), Exchange.BSE, Type.EQ)
-        assert service.get_trading_hours(date(2024, 11, 5), Exchange.BSE, Type.EQ) is None
-        assert service.get_holidays(2024, Exchange.BSE, Type.EQ) == []
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-EQ 2024"):
+            service.is_holiday(date(2024, 12, 25), Exchange.BSE, Type.EQ)
+
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-EQ 2024"):
+            service.get_trading_hours(date(2024, 11, 5), Exchange.BSE, Type.EQ)
+
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-EQ 2024"):
+            service.get_holidays(2024, Exchange.BSE, Type.EQ)
     
     def test_weekly_holidays_validation_valid_config(self):
         """Test validation of valid weekly holidays configuration."""
@@ -807,6 +813,34 @@ class TestTradingWindowService:
 
         assert saturday_window_2025.is_holiday  # Saturday is weekly holiday in 2025
         assert friday_window_2025.is_holiday    # Friday is weekly holiday in 2025
+    
+    def test_get_trading_window_raises_error_for_missing_configuration(self):
+        """Test that get_trading_window raises ValueError for missing exchange-segment-year configuration."""
+        config_data = [{
+            "exchange": "NSE",
+            "type": "FUT", 
+            "year": 2024,
+            "default_trading_windows": [{"open_time": "09:15", "close_time": "15:30"}],
+            "weekly_holidays": []
+        }]
+        
+        service = TradingWindowService(config_data)
+        
+        # Test missing exchange-segment combination
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-EQ 2024"):
+            service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Type.EQ)
+        
+        # Test missing year
+        with pytest.raises(ValueError, match="No trading window configuration found for NSE-FUT 2025"):
+            service.get_trading_window(date(2025, 11, 5), Exchange.NSE, Type.FUT)
+        
+        # Test missing exchange
+        with pytest.raises(ValueError, match="No trading window configuration found for BSE-FUT 2024"):
+            service.get_trading_window(date(2024, 11, 5), Exchange.BSE, Type.FUT)
+        
+        # Test missing instrument type
+        with pytest.raises(ValueError, match="No trading window configuration found for NSE-EQ 2024"):
+            service.get_trading_window(date(2024, 11, 5), Exchange.NSE, Type.EQ)
 
 
 if __name__ == "__main__":

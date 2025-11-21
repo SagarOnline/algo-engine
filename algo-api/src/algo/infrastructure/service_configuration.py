@@ -3,7 +3,6 @@ Service configuration and registration module.
 """
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
 import json
 
 from algo.domain.service_registry import register_service_instance

@@ -300,8 +300,7 @@ class TradingWindowService:
         # Check if we have configuration for this exchange-segment-year
         if (segment_key not in self._trading_windows or 
             year not in self._trading_windows[segment_key]):
-            logger.warning(f"No trading window configuration found for {segment_key} {year}")
-            return None
+            raise ValueError(f"No trading window configuration found for {segment_key} {year}")
         
         year_cache = self._trading_windows[segment_key][year]
         
@@ -402,6 +401,9 @@ class TradingWindowService:
             
         Returns:
             True if the date is a holiday, False otherwise
+            
+        Raises:
+            ValueError: If no configuration found for exchange-segment-year combination
         """
         trading_window = self.get_trading_window(target_date, exchange, type)
         return trading_window is not None and trading_window.is_holiday
@@ -409,18 +411,21 @@ class TradingWindowService:
     def is_special_trading_day(self, target_date: date, exchange: Exchange, type: Type) -> bool:
         """
         Check if a specific date is a special trading day for the given exchange and instrument type.
-
+        
         Args:
             target_date: The date to check
             exchange: Exchange enum
             type: Instrument Type enum
-
+            
         Returns:
             True if the date is a special trading day, False otherwise
+            
+        Raises:
+            ValueError: If no configuration found for exchange-segment-year combination
         """
         trading_window = self.get_trading_window(target_date, exchange, type)
         return trading_window is not None and trading_window.is_special_trading_day
-    
+
     def get_trading_hours(
         self, 
         target_date: date, 
@@ -437,6 +442,9 @@ class TradingWindowService:
 
         Returns:
             Tuple of (open_time, close_time) if market is open, None if holiday
+            
+        Raises:
+            ValueError: If no configuration found for exchange-segment-year combination
         """
         trading_window = self.get_trading_window(target_date, exchange, type)
         
@@ -456,12 +464,15 @@ class TradingWindowService:
 
         Returns:
             List of holiday TradingWindow objects
+            
+        Raises:
+            ValueError: If no configuration found for exchange-segment-year combination
         """
         segment_key = f"{exchange.value}-{type.value}"
         
         if (segment_key not in self._trading_windows or 
             year not in self._trading_windows[segment_key]):
-            return []
+            raise ValueError(f"No trading window configuration found for {exchange.value}-{type.value} {year}")
         
         year_cache = self._trading_windows[segment_key][year]
         
@@ -483,12 +494,15 @@ class TradingWindowService:
 
         Returns:
             List of special trading day TradingWindow objects
+            
+        Raises:
+            ValueError: If no configuration found for exchange-segment-year combination
         """
         segment_key = f"{exchange.value}-{type.value}"
         
         if (segment_key not in self._trading_windows or 
             year not in self._trading_windows[segment_key]):
-            return []
+            raise ValueError(f"No trading window configuration found for {exchange.value}-{type.value} {year}")
         
         year_cache = self._trading_windows[segment_key][year]
         

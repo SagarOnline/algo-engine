@@ -14,6 +14,8 @@ import upstox_client
 from upstox_client.rest import ApiException
 
 from algo.infrastructure.access_token import AccessToken
+from algo.infrastructure.upstox.upstox_instrument_service import UpstoxInstrumentService
+from algo.domain.instrument.broker_instrument import BrokerInstrument
 
 def parse_timeframe(timeframe: Timeframe) -> Tuple[str, str]:
         tf = timeframe.value if hasattr(timeframe, 'value') else str(timeframe)
@@ -76,16 +78,17 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
             current_start = current_end + timedelta(days=1)
         
         return segments
-    
-    def _fetch_historical_data_segment(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> List[dict]:
+
+    def _fetch_historical_data_segment(self, broker_instrument: BrokerInstrument, start_date: date, end_date: date, timeframe: Timeframe) -> List[dict]:
         """Fetch historical data for a single date segment."""
+        
         date_str_from = start_date.strftime("%Y-%m-%d")
         date_str_to = end_date.strftime("%Y-%m-%d")
         interval, unit = parse_timeframe(timeframe)
         api_instance = self.api_instance()
         
         response = api_instance.get_historical_candle_data1(
-            instrument_key=instrument.instrument_key,
+            instrument_key=broker_instrument.instrument_key,
             interval=interval,
             unit=unit,
             from_date=date_str_from,
@@ -110,20 +113,20 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
         ]
         return data
     
-    def _fetch_segment_with_metadata(self, args: Tuple[Instrument, date, date, Timeframe]) -> Tuple[date, List[dict]]:
+    def _fetch_segment_with_metadata(self, args: Tuple[BrokerInstrument, date, date, Timeframe]) -> Tuple[date, List[dict]]:
         """Wrapper for _fetch_historical_data_segment that returns metadata for sorting."""
-        instrument, start_date, end_date, timeframe = args
-        data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
+        broker_instrument, start_date, end_date, timeframe = args
+        data = self._fetch_historical_data_segment(broker_instrument, start_date, end_date, timeframe)
         return (start_date, data)
-    
-    def _fetch_segment_with_retry(self, args: Tuple[Instrument, date, date, Timeframe], max_retries: int = 3) -> Tuple[date, List[dict]]:
+
+    def _fetch_segment_with_retry(self, args: Tuple[BrokerInstrument, date, date, Timeframe], max_retries: int = 3) -> Tuple[date, List[dict]]:
         """Fetch segment data with retry logic for failed attempts."""
-        instrument, start_date, end_date, timeframe = args
+        broker_instrument, start_date, end_date, timeframe = args
         last_exception = None
         
         for attempt in range(max_retries):
             try:
-                data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
+                data = self._fetch_historical_data_segment(broker_instrument, start_date, end_date, timeframe)
                 return (start_date, data)
             except Exception as exc:
                 last_exception = exc
@@ -139,6 +142,12 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
     
     def get_historical_data(self, instrument: Instrument, start_date: date, end_date: date, timeframe: Timeframe) -> HistoricalData:
         try:
+             # Get broker instrument from service
+            broker_service = UpstoxInstrumentService()
+            broker_instrument = broker_service.get_broker_instrument(instrument)
+            
+            if not broker_instrument:
+                raise ValueError(f"No broker instrument mapping found for {instrument.instrument_key}")
             # Calculate the maximum allowed days for this timeframe
             max_days = self._get_max_days_for_timeframe(timeframe)
             
@@ -147,14 +156,14 @@ class UpstoxHistoricalDataRepository(HistoricalDataRepository):
             
             if total_days <= max_days:
                 # Single API call is sufficient
-                data = self._fetch_historical_data_segment(instrument, start_date, end_date, timeframe)
+                data = self._fetch_historical_data_segment(broker_instrument, start_date, end_date, timeframe)
                 return HistoricalData(data)
             else:
                 # Split into multiple segments and make parallel API calls
                 segments = self._split_date_range(start_date, end_date, max_days)
                 
                 # Prepare arguments for parallel execution
-                segment_args = [(instrument, segment_start, segment_end, timeframe) 
+                segment_args = [(broker_instrument, segment_start, segment_end, timeframe) 
                                for segment_start, segment_end in segments]
                 
                 # Execute API calls in parallel with retry logic
