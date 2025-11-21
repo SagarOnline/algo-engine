@@ -125,8 +125,16 @@ def test_get_historical_data_api_exception(mock_api_instance, mock_broker_servic
         repo.get_historical_data(instrument, start, end, timeframe)
     assert "Exception when calling Upstox API" in str(excinfo.value)
 
+@patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxInstrumentService")
 @patch("algo.infrastructure.upstox.upstox_historical_data_repository.UpstoxHistoricalDataRepository.api_instance")
-def test_get_historical_data_unexpected_exception(mock_api_instance, repo, instrument, timeframe):
+def test_get_historical_data_unexpected_exception(mock_api_instance, mock_broker_service_class, repo, instrument, timeframe):
+     # Mock the broker service instance and its method
+    mock_broker_service = MagicMock()
+    mock_broker_instrument = MagicMock()
+    mock_broker_instrument.instrument_key = instrument.instrument_key
+    mock_broker_service.get_broker_instrument.return_value = mock_broker_instrument
+    mock_broker_service_class.return_value = mock_broker_service
+    
     mock_api = MagicMock()
     mock_api.get_historical_candle_data1.side_effect = Exception("Some error")
     mock_api_instance.return_value = mock_api
@@ -135,7 +143,7 @@ def test_get_historical_data_unexpected_exception(mock_api_instance, repo, instr
     end = date(2024, 1, 1)
     with pytest.raises(RuntimeError) as excinfo:
         repo.get_historical_data(instrument, start, end, timeframe)
-    assert "Unexpected error" in str(excinfo.value)
+    assert "Failed to fetch historical data" in str(excinfo.value)
 
 def test_get_max_days_for_timeframe_minutes(repo):
     """Test max days calculation for minute intervals."""
