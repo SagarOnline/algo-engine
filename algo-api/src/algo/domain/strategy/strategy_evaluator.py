@@ -2,8 +2,9 @@ import datetime
 from typing import Any, Dict, Optional, List
 from enum import Enum
 
+from ..instrument.instrument import Exchange, Instrument, Type
 from algo.domain.strategy.tradable_instrument import TradableInstrument, TriggerType
-from .strategy import Exchange, Strategy, Instrument, TradeAction, Type
+from .strategy import Strategy, TradeAction
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from .tradable_instrument_repository import TradableInstrumentRepository

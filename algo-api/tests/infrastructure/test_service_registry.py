@@ -4,7 +4,7 @@ Tests for the service registry and service configuration.
 import pytest
 from unittest.mock import patch, MagicMock
 
-from algo.infrastructure.service_registry import ServiceRegistry, service_registry, register_service_instance, get_service
+from algo.domain.service_registry import ServiceRegistry, service_registry, register_service_instance, get_service
 from algo.infrastructure.service_configuration import register_all_services
 from algo.domain.services import get_trading_window_service
 from algo.domain.trading.trading_window_service import TradingWindowService
@@ -93,11 +93,15 @@ class TestServiceConfiguration:
         """Set up test environment."""
         service_registry.clear_all()
     
+    @patch('algo.infrastructure.service_configuration.get_config')
     @patch('algo.infrastructure.service_configuration.Path')
     @patch('algo.infrastructure.service_configuration.json.load')
     @patch('builtins.open')
-    def test_register_all_services(self, mock_open, mock_json_load, mock_path):
+    def test_register_all_services(self, mock_open, mock_json_load, mock_path, mock_get_config):
         """Test registering all services."""
+        # Mock get_config to return None (use default config)
+        mock_get_config.return_value = None
+        
         # Mock configuration directory
         mock_config_dir = MagicMock()
         mock_config_dir.exists.return_value = True

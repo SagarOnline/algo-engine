@@ -1,5 +1,6 @@
 import pytest
-from algo.domain.strategy.strategy import Instrument, Exchange, Expiry, Expiring, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Type
+from algo.domain.instrument.instrument import Instrument
 
 def test_instrument_equality_basic():
     inst1 = Instrument(
@@ -97,7 +98,7 @@ def test_instrument_inequality_expiring():
     inst2 = Instrument(
         exchange=Exchange.BSE,
         instrument_key="BANKNIFTY23JUN18000PE",
-        expiring=Expiring.NEXT,
+        expiring=Expiring.NEXT1,
         type=Type.PE
     )
     assert inst1 != inst2

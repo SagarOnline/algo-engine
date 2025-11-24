@@ -6,7 +6,9 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
-from ..strategy.strategy import Exchange, Type
+from ..instrument.instrument import Type
+
+from ..instrument.instrument import Exchange
 
 
 class TradingWindowType(Enum):

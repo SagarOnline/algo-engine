@@ -4,7 +4,8 @@ from datetime import date, datetime
 from typing import Dict, Any, List
 
 from algo.domain.backtest.engine import BacktestEngine
-from algo.domain.strategy.strategy import Strategy,Instrument,Exchange,PositionInstrument,TradeAction,Type
+from algo.domain.instrument.instrument import Exchange, Instrument, Type
+from algo.domain.strategy.strategy import Strategy,PositionInstrument,TradeAction
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe

@@ -8,9 +8,12 @@
   "trading_window_config":{
     "config_dir": "./config/trading_window/"
   },
+  "instrument_mapping":{
+    "config_dir": "./config/instruments"
+  },
   "broker_api":{
     "upstox":{
-        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OGYzOTg3ZDY2YzgyNzBiNGIyMzNjM2MiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2MDc5NDc0OSwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzYwODI0ODAwfQ.PLgnyXwkcbb68_s9gbqB7hvoaGAepH8Ck6xk5RNgdSg"
+        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OTE4ZDZlMjVkNjFkNDRlYWI2MTZhMzMiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2MzIzNTU1NCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzYzMjQ0MDAwfQ.kVZszuBA1HfnoWQH4fHp8rloONkZw_XSRkTvykp93Xs"
     }
   }
 }

@@ -36,5 +36,6 @@ class BacktestEngine:
             start_date=start_date,
             end_date=end_date
         )
+
         report = backtest.run()
         return report

@@ -3,7 +3,7 @@ Service accessor utilities for easy access to registered services.
 """
 from typing import TypeVar
 
-from algo.infrastructure.service_registry import get_service
+from algo.domain.service_registry import get_service
 from algo.domain.trading.trading_window_service import TradingWindowService
 
 T = TypeVar('T')

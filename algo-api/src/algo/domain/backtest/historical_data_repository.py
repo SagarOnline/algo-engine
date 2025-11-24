@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 from .historical_data import HistoricalData
-from algo.domain.strategy.strategy import Instrument
+from algo.domain.instrument.instrument import Instrument
 from datetime import date
 from algo.domain.timeframe import Timeframe
 

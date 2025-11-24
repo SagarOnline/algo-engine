@@ -4,7 +4,7 @@ import pandas as pd
 from typing import List, Dict, Any
 from algo.domain.backtest.historical_data import HistoricalData
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
-from algo.domain.strategy.strategy import Instrument
+from algo.domain.instrument.instrument import Instrument
 from algo.domain.timeframe import Timeframe
 from algo import config_context
 

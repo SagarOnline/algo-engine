@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
-from algo.domain.strategy.strategy import Exchange, Instrument, Type
+from algo.domain.instrument.instrument import Exchange, Type
+from algo.domain.instrument.instrument import Instrument
 from algo.domain.strategy.tradable_instrument import Position
 from algo.domain.strategy.tradable_instrument import TriggerType
 from algo.domain.strategy.tradable_instrument import PositionType

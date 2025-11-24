@@ -5,7 +5,7 @@ from dotenv import load_dotenv, find_dotenv
 import json
 from algo.application.run_backtest_usecase import BackTestReportDTO
 from algo.domain.backtest.engine import BacktestEngine
-from algo.infrastructure.cached_upstox_historical_data_repository import CachedUpstoxHistoricalDataRepository
+from algo.infrastructure.upstox.cached_upstox_historical_data_repository import CachedUpstoxHistoricalDataRepository
 from algo.infrastructure.json_backtest_report_repository import JsonBacktestReportRepository
 from algo.infrastructure.jsonstrategy import JsonStrategy
 from algo.infrastructure.parquet_historical_data_repository import ParquetHistoricalDataRepository
@@ -14,7 +14,7 @@ from algo.domain.indicators.exceptions import InvalidStrategyConfiguration
 
 from algo.config_context import get_config
 from algo.domain.config import HistoricalDataBackend
-from algo.infrastructure.upstox_historical_data_repository import UpstoxHistoricalDataRepository
+from algo.infrastructure.upstox.upstox_historical_data_repository import UpstoxHistoricalDataRepository
 
 from algo.infrastructure.json_strategy_repository import JsonStrategyRepository
 

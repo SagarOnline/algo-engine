@@ -1,13 +1,14 @@
 import pytest
 from algo.application.strategy_usecases import InstrumentDTO
-from algo.domain.strategy.strategy import Instrument, Exchange, Expiry, Expiring, Type
+from algo.domain.instrument.instrument import Exchange, Expiring, Expiry, Type
+from algo.domain.instrument.instrument import Instrument
 
 def make_instrument():
     return Instrument(
         exchange=Exchange.NSE,
         instrument_key="NSE_INDEX|Nifty 50",
         expiry=Expiry.MONTHLY,
-        expiring=Expiring.NEXT,
+        expiring=Expiring.NEXT1,
         atm=-50,
         type=Type.FUT
     )
@@ -20,7 +21,7 @@ def test_instrument_dto_fields():
     assert dto.exchange == Exchange.NSE.name
     assert dto.instrument_key == "NSE_INDEX|Nifty 50"
     assert dto.expiry == Expiry.MONTHLY.name
-    assert dto.expiring == Expiring.NEXT.name
+    assert dto.expiring == Expiring.NEXT1.name
     assert dto.atm == -50
 
 def test_instrument_dto_display_name():
@@ -29,7 +30,7 @@ def test_instrument_dto_display_name():
     display = dto.get_display_name()
     assert "NSE_INDEX|Nifty 50, Exchange.NSE" not in display  # Should not show enum type
     assert "NSE_INDEX|Nifty 50" in display
-    assert "with NEXT MONTHLY expiry" in display
+    assert "with NEXT1 MONTHLY expiry" in display
     assert ", atm -50" in display
 
 def test_instrument_dto_to_dict():
@@ -40,6 +41,6 @@ def test_instrument_dto_to_dict():
     assert d["exchange"] == str(Exchange.NSE.name)
     assert d["instrument_key"] == "NSE_INDEX|Nifty 50"
     assert d["expiry"] == str(Expiry.MONTHLY.name)
-    assert d["expiring"] == str(Expiring.NEXT.name)
+    assert d["expiring"] == str(Expiring.NEXT1.name)
     assert d["atm"] == -50
     assert "display_name" in d
