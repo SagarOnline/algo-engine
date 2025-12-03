@@ -4,7 +4,7 @@
     {
       "name": "Backtest",
       "type": "debugpy",
-      "request": "launch",
+      "request": "launch", 
       "program": "${workspaceFolder}/src/algo/main.py",
       "console": "integratedTerminal",
       "justMyCode": true,

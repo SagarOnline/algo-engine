@@ -49,7 +49,6 @@ build/
 .flutter-plugins
 .flutter-plugins-dependencies
 
-
 # Web related
 /web/build/
 
@@ -82,4 +81,5 @@ build/
 
 # Additional Flutter generated files
 **/generated_plugin_registrant.dart
+.metadata
 ephemeral/

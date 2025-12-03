@@ -14,7 +14,7 @@
     "instrument": {
       "type": "CE",
       "expiry": "MONTHLY",
-      "expiring": "NEXT",
+      "expiring": "NEXT1",
       "atm": -50,
       "instrument_key": "NSE_INDEX|Nifty 50",
       "exchange": "NSE"
