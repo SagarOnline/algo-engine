@@ -26,16 +26,15 @@
       {
         "operator": ">",
         "left": {
-          "type": "ema",
+          "type": "price",
           "params": {
-            "period": 20,
             "price": "close"
           }
         },
         "right": {
           "type": "ema",
           "params": {
-            "period": 50,
+            "period": 20,
             "price": "close"
           }
         }
@@ -51,7 +50,24 @@
         "right": {
           "type": "ema",
           "params": {
+            "period": 200,
+            "price": "close"
+          }
+        }
+      },
+      {
+        "operator": ">",
+        "left": {
+          "type": "ema",
+          "params": {
             "period": 20,
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 50,
             "price": "close"
           }
         }

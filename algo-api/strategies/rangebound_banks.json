@@ -14,7 +14,7 @@
     "instrument": {
       "type": "FUT",
       "expiry": "MONTHLY",
-      "expiring": "NEXT",
+      "expiring": "NEXT1",
       "instrument_key": "NSE_FO|64103",
       "exchange": "NSE"
     }
