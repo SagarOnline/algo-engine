@@ -80,11 +80,12 @@ class BacktestEngineConfig:
 
 
 class Config:
-    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, trading_window_config: TradingWindowConfig, instrument_mapping_config: InstrumentMappingConfig):
+    def __init__(self, backtest_engine: BacktestEngineConfig, broker_api: dict, trading_window_config: TradingWindowConfig, instrument_mapping_config: InstrumentMappingConfig, logging_config: dict = None):
         self.backtest_engine = backtest_engine
         self.broker_api = broker_api
         self.trading_window_config = trading_window_config
         self.instrument_mapping_config = instrument_mapping_config
+        self.logging_config = logging_config or {}
 
     @staticmethod
     def from_dict(config_dict):
@@ -114,4 +115,13 @@ class Config:
             config_dir=instrument_mapping_dict.get("config_dir", "./config/instruments/")
         )
         
-        return Config(backtest_engine=backtest_engine, broker_api=broker_api_config, trading_window_config=trading_window_config, instrument_mapping_config=instrument_mapping_config)
+        # Load logging config (root-level)
+        logging_config = config_dict.get("logging", {})
+
+        return Config(
+            backtest_engine=backtest_engine,
+            broker_api=broker_api_config,
+            trading_window_config=trading_window_config,
+            instrument_mapping_config=instrument_mapping_config,
+            logging_config=logging_config,
+        )
