@@ -3,6 +3,9 @@ import json
 from algo.domain.config import Config
 import os
 
+# configure logging after config is loaded
+from algo.logging_setup import configure_logging
+
 _config = None
 _config_lock = threading.Lock()
 
@@ -27,4 +30,10 @@ def get_config():
             if _config is None:
                 load_config_path = os.getenv("CONFIG_JSON_PATH", "config/config.json")
                 _config = load_config(load_config_path)
+                # Configure structured logging from the loaded config
+                try:
+                    configure_logging(_config.logging_config)
+                except Exception:
+                    # Fail-safe: do not prevent app from starting if logging setup fails
+                    pass
     return _config

@@ -13,7 +13,15 @@
   },
   "broker_api":{
     "upstox":{
-        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OTJmNzc2NmViNTgwZDcyNDFjYjlhM2QiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2NDcxODQzOCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY0Nzk5MjAwfQ.ugi79y2OFt1_j_Nx9D_bkOtTQxIOZaqCkXdQFxCUGfo"
+        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OTRlOTA4YzQwMzJhZTUwNzllOGU2MTIiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2Njc1NjQ5MiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY2Nzg2NDAwfQ.wHYg6KSVDFRTRVcp4yrq-ujXIK1eGJgSNsUyXd_wJpI"
+    }
+  }
+  ,
+  "logging": {
+    "level": "INFO",
+    "service": "algo-api",
+    "console": {
+      "enabled": true
     }
   }
 }
