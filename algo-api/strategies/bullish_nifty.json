@@ -71,12 +71,89 @@
             "price": "close"
           }
         }
+      },
+      {
+        "operator": ">",
+        "left": {
+          "type": "rsi",
+          "params": {
+            "period": 14
+          }
+        },
+        "right": {
+          "type": "number",
+          "params": {
+            "value": 50
+          }
+        }
+      },
+      {
+        "operator": ">",
+        "left": {
+          "type": "adx",
+          "params": {
+            "period": 14
+          }
+        },
+        "right": {
+          "type": "number",
+          "params": {
+            "value": 20
+          }
+        }
+      },
+      {
+        "operator": ">",
+        "left": {
+          "type": "plus_di",
+          "params": {
+            "period": 14
+          }
+        },
+        "right": {
+          "type": "minus_di",
+          "params": {
+            "period": 14
+          }
+        }
       }
     ]
   },
   "exit_rules": {
     "logic": "OR",
     "conditions": [
+      {
+        "operator": "<",
+        "left": {
+          "type": "price",
+          "params": {
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 20,
+            "price": "close"
+          }
+        }
+      },
+      {
+        "operator": "<",
+        "left": {
+          "type": "price",
+          "params": {
+            "price": "close"
+          }
+        },
+        "right": {
+          "type": "ema",
+          "params": {
+            "period": 200,
+            "price": "close"
+          }
+        }
+      },
       {
         "operator": "<",
         "left": {
@@ -97,16 +174,45 @@
       {
         "operator": "<",
         "left": {
-          "type": "price",
+          "type": "rsi",
           "params": {
-            "price": "close"
+            "period": 14
           }
         },
         "right": {
-          "type": "ema",
+          "type": "number",
           "params": {
-            "period": 20,
-            "price": "close"
+            "value": 50
+          }
+        }
+      },
+      {
+        "operator": "<",
+        "left": {
+          "type": "adx",
+          "params": {
+            "period": 14
+          }
+        },
+        "right": {
+          "type": "number",
+          "params": {
+            "value": 20
+          }
+        }
+      },
+      {
+        "operator": "<",
+        "left": {
+          "type": "plus_di",
+          "params": {
+            "period": 14
+          }
+        },
+        "right": {
+          "type": "minus_di",
+          "params": {
+            "period": 14
           }
         }
       }

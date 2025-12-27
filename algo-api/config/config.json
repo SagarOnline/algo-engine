@@ -13,7 +13,7 @@
   },
   "broker_api":{
     "upstox":{
-        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OTRlOTA4YzQwMzJhZTUwNzllOGU2MTIiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2Njc1NjQ5MiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY2Nzg2NDAwfQ.wHYg6KSVDFRTRVcp4yrq-ujXIK1eGJgSNsUyXd_wJpI"
+        "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiIyNDU4MjAiLCJqdGkiOiI2OTRmYjc1MDQwMzJhZTUwNzllOGVmMTMiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2NjgzMTk1MiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY2ODcyODAwfQ.7pHKcLOGEaszUumedyATIARdI0MpFN9WRDY-mNTW2Ps"
     }
   }
   ,
