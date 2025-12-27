@@ -1,3 +1,5 @@
+import logging
+import time
 from datetime import date
 from algo.domain.backtest.historical_data_repository import HistoricalDataRepository
 from algo.domain.strategy.strategy import Strategy
@@ -7,6 +9,8 @@ from algo.domain.backtest.backtest_trade_executor import BackTestTradeExecutor
 from algo.domain.strategy.tradable_instrument import TradableInstrument
 from algo.domain.strategy.tradable_instrument_repository import TradableInstrumentRepository
 from algo.domain.timeframe import Timeframe
+
+logger = logging.getLogger(__name__)
 
 class BackTest:
 
@@ -62,6 +66,10 @@ class BackTest:
         )
         
         # Process each candle in the historical data
+        logger.debug(f"BackTest.run: Starting candle processing (total candles: {len(historical_data.data)})")
+        loop_start = time.perf_counter()
+        candles_processed = 0
+        
         for i, candle in enumerate(historical_data.data):
             candle_date = candle['timestamp'].date()
             
@@ -72,13 +80,19 @@ class BackTest:
             # Skip candles after the backtest end date
             if candle_date > self.end_date:
                 break
-                
+            
+            candles_processed += 1
+            
             # Evaluate strategy to generate trade signals
             trade_signals = strategy_evaluator.evaluate(candle)
+            
             
             # Execute each trade signal
             for trade_signal in trade_signals:
                 trade_executor.execute(trade_signal)
+        
+        loop_elapsed = time.perf_counter() - loop_start
+        logger.debug(f"BackTest.run: Candle processing completed in {loop_elapsed:.3f}s (candles processed: {candles_processed})")
         
         # Get the final state of the tradable instrument (it should exist since we created it at the start)
         tradables = self.tradable_instrument_repository.get_tradable_instruments(self.strategy.get_name())
